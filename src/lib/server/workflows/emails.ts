@@ -2,7 +2,7 @@ import type { Email, Booking } from "$lib/entities/models";
 import * as emailService from "$lib/server/external_services/email";
 import * as bookingWorkflows from "$lib/server/workflows/bookings";
 import {error} from "@sveltejs/kit";
-import {QRCode, Ticket} from "$lib/entities/models";
+import type { QRCode, Ticket } from "$lib/entities/models";
 
 // Send an email
 export async function Send(email: Email): Promise<void> {
@@ -163,11 +163,17 @@ export async function SendPaymentReminder(booking_reference_no: string): Promise
     // retrieve booking
     const aBooking: Booking | null = await bookingWorkflows.GetByID(booking_reference_no)
 
+
     if (!aBooking){
         throw error(404, "booking not found")
     }
 
     const booking = aBooking
+    const paypalBaseUrl = "https://paypal.me/TheFeastNorway";
+    const amount = booking.amount_total;
+    const reference = booking.reference_no;
+    const paypalUrl = `${paypalBaseUrl}/${amount}?country.x=NO&locale.x=en_US&item_name=${reference}`;
+
 
     // send the email
     const email: Email = {
@@ -179,43 +185,44 @@ export async function SendPaymentReminder(booking_reference_no: string): Promise
                 <head>
                     <style>
                         body {
-                            font-family: "Tahoma", sans-serif;
-                            line-height: 1.6;
-                        }
-                        h1, h2 {
-                            color: #333;
-                            font-family: "Tahoma", sans-serif;
-                        }
-                        p {
-                            margin: 0.5em 0;
-                            font-family: "Tahoma", sans-serif;
-                        }
-                        ul {
-                            list-style-type: none;
-                            padding: 0;
-                            margin-left: 20px; /* Indent the list */
-                        }
-                        ul li {
-                            margin: 0.5em 0;
-                            font-family: "Tahoma", sans-serif;
-                        }
-                        .highlight {
-                            font-weight: bold;
-                            color: #000;
-                            font-family: "Tahoma", sans-serif;
+                        font-family: Tahoma, sans-serif;
+                        background-color: #b1c1c7;
+                        margin: 0;
+                        padding: 0;
                         }
                         .container {
-                            background-color: #f7f5ed;
-                            padding: 20px;
-                            max-width: 650px;
-                            margin: 0 auto;
+                        background-color: #f7f5ed;
+                        padding: 20px;
+                        max-width: 650px;
+                        margin: 20px auto;
                         }
-                        .image img {
-                            display: block;
-                            width: 100%;
-                            user-select: none;
-                            pointer-events: none;
-                            -webkit-user-drag: none;
+                        h1, h2, h3 {
+                        color: #333;
+                        }
+                        p {
+                        margin: 0.5em 0;
+                        }
+                        .highlight {
+                        font-weight: bold;
+                        color: #000;
+                        }
+                        ul {
+                        list-style: none;
+                        padding-left: 20px;
+                        }
+                        ul li {
+                        margin: 0.5em 0;
+                        }
+                        .paypal-button {
+                        background-color: #0070ba;
+                        color: #ffffff !important;
+                        padding: 14px 28px;
+                        text-decoration: none;
+                        font-weight: bold;
+                        border-radius: 6px;
+                        display: inline-block;
+                        font-family: Tahoma, sans-serif;
+                        font-size: 16px;
                         }
                     </style>
                 </head>
@@ -235,11 +242,23 @@ export async function SendPaymentReminder(booking_reference_no: string): Promise
                                     <br>
                                     <p>
                                         In this email you will find the instructions on how to pay for your ticket reservation. 
-                                        Please transfer your payment to the following account within <span class="highlight">24H</span>, 
-                                        stating the purpose <span class="highlight">${booking.reference_no}</span>.
+                                        Please make your payment within <span class="highlight">24H</span>, and remember to state 
+                                        your booking reference number <span class="highlight">${booking.reference_no}</span>.
                                     </p>
-                                    
+                                     <p>
+                                        Choose one of the following ways:
+                                     </p>
+
+                                    <h2>Option 1: Pay via PayPal</h2>
+                                     <div style="text-align: center; margin: 20px 0;">
+                                       <a href="${paypalUrl}" 
+                                        style="background-color: #0070ba; color: white; font-weight: bold; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-family: Tahoma, sans-serif;">
+                                        Pay Now via PayPal
+                                        </a>
+                                    </div>
+
                                     <br>
+                                    <h2>Option 2: Or by Bank Transfer</h2>
                                     <ul>
                                         <li>Recipient: <span class="highlight">Light of Jesus Family (The Feast Norway)</span></li>
                                         <li>Bank Details: <span class="highlight">NO2215202093202</span></li>
@@ -261,7 +280,7 @@ export async function SendPaymentReminder(booking_reference_no: string): Promise
 
                                     <p>
                                         If you need help with your booking, please contact us at 
-                                        <span class="highlight">support@grandfeast.eu</span>
+                                        <span class="highlight">help@grandfeast.eu</span>
                                     </p> 
                                     <br>
                                     <p>
@@ -270,7 +289,7 @@ export async function SendPaymentReminder(booking_reference_no: string): Promise
                                     <br>
                                     <br>
                                     <p>Best regards,</p>
-                                    <p><span class="highlight">The Feast EU and UK Team</span></p>
+                                    <p><span class="highlight">Grand Feast EU and UK Team</span></p>
                                     
                                     <br>
                                     <hr>
@@ -304,6 +323,10 @@ export async function SendPaymentReminder(booking_reference_no: string): Promise
 
 
 export async function SendBookingConfirmation(booking: Booking): Promise<void> {
+    const paypalBaseUrl = "https://paypal.me/TheFeastNorway";
+    const amount = booking.amount_total;
+    const reference = booking.reference_no;
+    const paypalUrl = `${paypalBaseUrl}/${amount}?country.x=NO&locale.x=en_US&item_name=${reference}`;
     const email: Email = {
         from: "",
         to: booking.email,
@@ -315,6 +338,7 @@ export async function SendBookingConfirmation(booking: Booking): Promise<void> {
                         body {
                             font-family: "Tahoma", sans-serif;
                             line-height: 1.6;
+                            background-color: #b1c1c7;
                         }
                         h1, h2 {
                             color: #333;
@@ -351,6 +375,16 @@ export async function SendBookingConfirmation(booking: Booking): Promise<void> {
                             pointer-events: none;
                             -webkit-user-drag: none;
                         }
+                        .paypal-button {
+                        background-color: #0070ba;
+                        color: #ffffff !important;
+                        padding: 14px 28px;
+                        text-decoration: none;
+                        font-weight: bold;
+                        border-radius: 6px;
+                        display: inline-block;
+                        font-family: Tahoma, sans-serif;
+                        font-size: 16px;
                     </style>
                 </head>
                 <body style="padding: 0; margin: 0;">
@@ -367,8 +401,21 @@ export async function SendBookingConfirmation(booking: Booking): Promise<void> {
                                         Please transfer your payment to the following account within <span class="highlight">24H</span>, 
                                         stating the purpose <span class="highlight">${booking.reference_no}</span>.
                                     </p>
-                                    
+                                     <p>
+                                        Choose one of the following ways:
+                                     </p>
+
+                                    <h2>Option 1: Pay via PayPal</h2>
+                                     <div style="text-align: center; margin: 20px 0;">
+                                       <a href="${paypalUrl}" 
+                                        style="background-color: #0070ba; color: white; font-weight: bold; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-family: Tahoma, sans-serif;">
+                                        Pay Now via PayPal
+                                        </a>
+                                    </div>
+
                                     <br>
+                                    <h2>Option 2: Or by Bank Transfer</h2>
+                        
                                     <ul>
                                         <li>Recipient: <span class="highlight">Light of Jesus Family (The Feast Norway)</span></li>
                                         <li>Bank Details: <span class="highlight">NO2215202093202</span></li>
@@ -390,7 +437,7 @@ export async function SendBookingConfirmation(booking: Booking): Promise<void> {
 
                                     <p>
                                         If you need help with your booking, please contact us at 
-                                        <span class="highlight">support@grandfeast.eu</span>
+                                        <span class="highlight">help@grandfeast.eu</span>
                                     </p> 
                                     <br>
                                     <p>

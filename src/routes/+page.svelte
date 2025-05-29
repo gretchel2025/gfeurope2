@@ -52,16 +52,17 @@
 </script>
 
 <!-- Aurora Background -->
-<div class="aurora-bg">
+<!-- <div class="aurora-bg">
   <div class="stars" bind:this={starContainer}></div>
   <div class="aurora aurora-1"></div>
   <div class="aurora aurora-2"></div>
   <div class="aurora aurora-3"></div>
   <div class="aurora aurora-4"></div>
-</div>
+</div> -->
 
 <!-- HERO Section with Countdown and Single Register Button -->
 <section class="relative z-10 py-16 sm:py-20 px-4 text-center">
+
   <div class="max-w-5xl mx-auto">
     <p class="text-center italic text-lg sm:text-xl text-blue-200 mb-6 px-4">
       “Now to him who is able to do immeasurably more than all we ask or imagine, 
@@ -106,6 +107,7 @@
     </button>
 </section>
 
+
 <section id="speakers" class="py-20 bg-[#0c0f1d] text-white">
   <div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
     <!-- Speaker Image -->
@@ -114,16 +116,42 @@
     </div>
 
     <!-- Speaker Message -->
-    <div class="md:w-1/2 w-full">
-      <h3 class="text-3xl sm:text-4xl font-bold text-yellow-400 mb-4">"Called To More"</h3>
+   <div class="md:w-1/2 w-full">
       <p class="italic text-blue-200 mb-6">
-        “Now to him who is able to do immeasurably more than all we ask or imagine, according to his power that is at work within us.” — <span class="font-bold text-yellow-300">Ephesians 3:20</span>
+        “Now to him who is able to do immeasurably more than all we ask or imagine, 
+        according to his power that is at work within us.” — 
+        <span class="font-bold text-yellow-300">Ephesians 3:20</span>
       </p>
-      <p class="text-blue-100 leading-relaxed">
-        Join us at the Grand Feast EU and UK 2025 as we gather in faith and inspiration. <span class="text-white font-semibold">Bo Sanchez</span>, a best-selling author and founder of The Feast, invites you to step into a deeper calling. Through powerful storytelling and spiritual reflection, you'll be reminded that you are called to a life beyond limits—filled with hope, love, and God's abundant grace.
-      </p>
+
+      <h3 class="text-3xl sm:text-4xl font-bold text-yellow-400 mb-4">Called To More</h3>
+
+      <div class="space-y-4 text-blue-100 leading-relaxed">
+        <p>
+          Have you ever felt that there’s something greater waiting for you—beyond the daily grind, 
+          beyond your comfort zone, beyond your doubts? That feeling is not an accident. It’s a calling.
+        </p>
+
+        <p>
+          "Called to More" is not just a theme—it’s a reminder that God is not done with you. 
+          No matter where you are in life, He is calling you to a deeper purpose, stronger faith, 
+          and bigger love. You were made for more than just survival. You were made to shine, to grow, 
+          and to lead others closer to Him.
+        </p>
+
+        <p>
+          This September 20, join us for a special event as we welcome 
+          <span class="text-white font-semibold">Bro. Bo Sanchez</span>, founder of Light of Jesus (The Feast), 
+          to Norway. Together, let’s rediscover our God-given calling and say yes to the more He has prepared for us. 
+          This is your time. This is your calling. You are Called to More.
+        </p>
+
+        <div class="pt-6 text-sm text-blue-300">
+          <p class="font-semibold text-white">Dindo Manuel</p>
+          <p>Feast Norway Planter</p>
+        </div>
+      </div>
     </div>
-  </div>
+
 </section>
 
 

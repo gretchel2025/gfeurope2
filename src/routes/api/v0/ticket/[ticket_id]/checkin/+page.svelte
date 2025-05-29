@@ -1,54 +1,49 @@
 <script lang="ts">
-    import type {ServerData} from "./+page.server";
-    import {BookingPaymentStatus, TicketCanCheckIn, TicketCanCheckOut, TicketStatus} from "$lib/entities/values";
+    import type { ServerData } from "./+page.server";
+    import { BookingPaymentStatus, TicketCanCheckIn, TicketCanCheckOut, TicketStatus } from "$lib/entities/values";
 
-    // data is the object received from the server
-    export let data: ServerData
+    export let data: ServerData;
 
-    // const isPaid = data.aBooking.payment_status === BookingPaymentStatus.PAID
-    // const isCheckedIn = data.aTicket.status === TicketStatus.CHECKED_IN
-    // const canCheckIn = isPaid && !isCheckedIn
-    const canDoCheckIn = TicketCanCheckIn(data.aBooking, data.aTicket)
-    // const canDoCheckOut = isPaid && isCheckedIn
-    const canDoCheckOut = TicketCanCheckOut(data.aBooking, data.aTicket)
+    const canDoCheckIn = TicketCanCheckIn(data.aBooking, data.aTicket);
+    const canDoCheckOut = TicketCanCheckOut(data.aBooking, data.aTicket);
 </script>
 
-<main class="container">
-    {#if data.aTicket}
-    <article>
-        <h1>Ticket Check-In</h1>
-        ticket_id: <a href="details">{data.aTicket.ticket_id}</a> <br>
-        booking_reference_no: <a href="/api/v0/booking/{data.aTicket.booking_reference_no}/details">{data.aTicket.booking_reference_no}</a><br>
-        name: {data.aTicket.name} <br>
-        ticket_type: {data.aTicket.ticket_type} <br>
-        status: {data.aTicket.status} <br>
-        <!--        description: {data.aTicket.description} <br>-->
+<main class="min-h-screen px-4 py-8 bg-gradient-to-br from-slate-800 to-slate-900 text-white">
+  {#if data.aTicket}
+    <article class="max-w-xl mx-auto bg-white text-gray-900 rounded-lg shadow-md p-6 dark:bg-slate-800 dark:text-white">
+      <h1 class="text-2xl font-bold text-yellow-400 mb-4">Ticket Check-In</h1>
 
-<!--        <h2>Checkin QR Code</h2>-->
-<!--        <div>-->
-<!--            <img src="{data.checkin.imageData}" alt="QR Code"/>-->
-<!--        </div>-->
+      <div class="space-y-2 text-sm">
+        <p><strong>Ticket ID:</strong> <a class="text-blue-600 underline" href="details">{data.aTicket.ticket_id}</a></p>
+        <p><strong>Booking Ref:</strong> <a class="text-blue-600 underline" href="/api/v0/booking/{data.aTicket.booking_reference_no}/details">{data.aTicket.booking_reference_no}</a></p>
+        <p><strong>Name:</strong> {data.aTicket.name}</p>
+        <p><strong>Ticket Type:</strong> {data.aTicket.ticket_type}</p>
+        <p><strong>Status:</strong> {data.aTicket.status}</p>
+      </div>
 
-<!--        <p>QR code target: <strong>{data.checkin.targetURL}</strong></p>-->
-
-        <br>
-
+      <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:justify-start">
         <form action="?/checkIn" method="POST">
-            <button type="submit" disabled={!canDoCheckIn}>Check-In</button>
+          <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-md font-semibold bg-green-600 hover:bg-green-700 disabled:opacity-40" disabled={!canDoCheckIn}>
+            ✅ Check-In
+          </button>
         </form>
 
         <form action="?/checkOut" method="POST">
-            <button type="submit" disabled={!canDoCheckOut}>Check-Out</button>
-            DEBUG only, to test check-in/out process
+          <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-md font-semibold bg-red-600 hover:bg-red-700 disabled:opacity-40" disabled={!canDoCheckOut}>
+            🔄 Check-Out
+          </button>
         </form>
+      </div>
 
-        <br>
-        <br>
-        <a href="/api/v0/ticket/list">list tickets</a>
+      <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">DEBUG only, to test check-in/out process</p>
 
+      <div class="mt-6 text-sm">
+        <a href="/api/v0/ticket/list" class="text-blue-400 hover:underline">Back to Tickets List</a>
+      </div>
     </article>
-    {/if}
+  {/if}
 
-    <a href="/api">admin home</a>
+  <div class="text-center mt-6 text-sm">
+    <a href="/api" class="text-blue-400 hover:underline">Admin Home</a>
+  </div>
 </main>
-

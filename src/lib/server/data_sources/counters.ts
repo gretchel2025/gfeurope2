@@ -1,4 +1,5 @@
-import * as mongoose from "mongoose";
+// import * as mongoose from "mongoose";
+import mongoose from "mongoose";
 import type {TicketCounter} from "$lib/entities/models";
 import * as errors from "$lib/entities/errors";
 import type {Query} from "mongoose";
@@ -12,7 +13,8 @@ const counterSchema = new mongoose.Schema(
     }
 );
 
-const counterCollection = await mongoose.model('counters', counterSchema);
+// const counterCollection = await mongoose.model('counters', counterSchema);
+const counterCollection = mongoose.models.counters || mongoose.model('counters', counterSchema);
 
 // this was used one time to create an initial record
 export async function Create (counterID: string): Promise<void> {

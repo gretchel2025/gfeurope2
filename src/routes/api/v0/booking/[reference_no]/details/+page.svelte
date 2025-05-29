@@ -1,90 +1,89 @@
 <script lang="ts">
-    import {BookingPaymentStatus} from "$lib/entities/values";
-    import * as values from "$lib/entities/values";
-    import type {Booking} from "$lib/entities/models";
+  import { BookingPaymentStatus } from "$lib/entities/values";
+  import * as values from "$lib/entities/values";
+  import type { Booking } from "$lib/entities/models";
 
-    // data is the object received from the server
-    export let data: {
-        aRecord: Booking
-    }
+  export let data: { aRecord: Booking };
 
-    const booking = data.aRecord
-    // flags for enabling buttons
-    const canMarkAsPaid = values.BookingCanBeMarkedAsPaid(booking)
-    const canGenerateTickets = values.BookingCanGenerateTickets(booking)
-    const canCancel = values.BookingCanBeCancelled(booking)
+  const booking = data.aRecord;
+  const canMarkAsPaid = values.BookingCanBeMarkedAsPaid(booking);
+  const canGenerateTickets = values.BookingCanGenerateTickets(booking);
+  const canCancel = values.BookingCanBeCancelled(booking);
 
-    const isPaid = booking.payment_status === BookingPaymentStatus.PAID
-    const allTicketsGenerated = booking.ticket_ids.length >= booking.guests.length
-    const canViewSummary = isPaid && allTicketsGenerated
-    const canSendTicketsEmail = canViewSummary
+  const isPaid = booking.payment_status === BookingPaymentStatus.PAID;
+  const allTicketsGenerated = booking.ticket_ids.length >= booking.guests.length;
+  const canViewSummary = isPaid && allTicketsGenerated;
+  const canSendTicketsEmail = canViewSummary;
 
-    const isUnpaid = booking.payment_status === BookingPaymentStatus.UNPAID
-    const canSendPaymentReminderEmail = isUnpaid
-    const truncatedBookDate = String(booking.book_date).substring(0, 21);
-
+  const isUnpaid = booking.payment_status === BookingPaymentStatus.UNPAID;
+  const canSendPaymentReminderEmail = isUnpaid;
+  const truncatedBookDate = String(booking.book_date).substring(0, 21);
 </script>
 
-<main class="container">
+<main class="min-h-screen bg-gradient-to-b from-[#0f172a]/80 to-[#1e293b]/80 text-white p-6">
+  <article class="max-w-3xl mx-auto bg-black/60 backdrop-blur-md p-6 rounded-xl shadow-md">
+    <h1 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4">Booking Details</h1>
 
-    <article>
-        <h1>Booking Details</h1>
+    <div class="space-y-2 text-white text-sm">
+      <p><strong>Reference No:</strong> {booking.reference_no}</p>
+      <p><strong>Name:</strong> {booking.name} ({booking.email})</p>
+      <p><strong>City:</strong> {booking.city}</p>
+      <p><strong>Book Date:</strong> {truncatedBookDate}</p>
+      <p><strong>Payment Status:</strong> {booking.payment_status}</p>
+      <p><strong>Amount Total:</strong> €{booking.amount_total}</p>
+      <p><strong>Guests:</strong> {booking.guests.join(", ")}</p>
+      <p><strong>Ticket IDs:</strong></p>
+      <ul class="list-disc list-inside text-blue-100">
+        {#each booking.ticket_ids as ticket_id}
+          <li>
+            <a href="/api/v0/ticket/{ticket_id}/details" class="text-blue-300 hover:underline">{ticket_id}</a>
+          </li>
+        {/each}
+      </ul>
+    </div>
 
-        reference_no: {booking.reference_no} <br>
-        name: {booking.name} -- ({booking.email}) <br>
-        city: {booking.city} <br>
-        <!-- book_date: {booking.book_date} <br> -->
-        book_date: {truncatedBookDate} <br>
-        payment_status: {booking.payment_status} <br>
-        amount_total: {booking.amount_total} <br>
-        guests: {booking.guests} <br>
-        ticket_ids: <br>
-        <ul>
-            {#each booking.ticket_ids as ticket_id}
-                <li>
-                    <a href="/api/v0/ticket/{ticket_id}/details">{ticket_id}</a>
-                </li>
-            {/each}
-        </ul>
-
-        {#if canSendPaymentReminderEmail}
-            <form action="?/sendPaymentReminderEmail" method="POST">
-                <button>Send Payment Reminder Email</button>
-            </form>
-        {/if}
-
-        <form action="?/markPaid" method="POST">
-            <button type="submit" disabled={!canMarkAsPaid}>Mark Paid</button>
+    <div class="mt-6 space-y-4">
+      {#if canSendPaymentReminderEmail}
+        <form action="?/sendPaymentReminderEmail" method="POST">
+          <button class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md">Send Payment Reminder Email</button>
         </form>
+      {/if}
 
-        {#if canGenerateTickets}
-            <form action="?/generateTickets" method="POST">
-                <button type="submit">Generate Tickets</button>
-            </form>
-        {/if}
+      <form action="?/markPaid" method="POST">
+        <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md" disabled={!canMarkAsPaid}>Mark Paid</button>
+      </form>
 
-        {#if canSendTicketsEmail}
-            <form action="?/sendTicketsEmail" method="POST">
-                <button>Email Tickets</button>
-            </form>
-        {/if}
+      {#if canGenerateTickets}
+        <form action="?/generateTickets" method="POST">
+          <button type="submit" class="w-full px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-md">Generate Tickets</button>
+        </form>
+      {/if}
 
-        {#if canCancel}
-            <form action="/api/v0/booking/{booking.reference_no}/cancel">
-                <button>Cancel Reservation</button>
-            </form>
-        {/if}
+      {#if canSendTicketsEmail}
+        <form action="?/sendTicketsEmail" method="POST">
+          <button class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md">Email Tickets</button>
+        </form>
+      {/if}
 
-        {#if canViewSummary}
-            <a href="/api/v0/booking/{booking.reference_no}/summary">View Booking Summary</a><br>
-            <br>
-        {/if}
+      {#if canCancel}
+        <form action="/api/v0/booking/{booking.reference_no}/cancel">
+          <button class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-md">Cancel Reservation</button>
+        </form>
+      {/if}
 
-        <a href="/api/v0/booking/list">list bookings</a> |
-        <a href="/api/v0/booking/search">search</a>
+      {#if canViewSummary}
+        <a href="/api/v0/booking/{booking.reference_no}/summary" class="block text-center text-cyan-300 hover:underline">View Booking Summary</a>
+      {/if}
+    </div>
 
-    </article>
+    <div class="mt-6 text-center space-x-4">
+      <a href="/api/v0/booking/list" class="text-blue-300 hover:underline">List Bookings</a>
+      <span class="text-gray-400">|</span>
+      <a href="/api/v0/booking/search" class="text-blue-300 hover:underline">Search</a>
+    </div>
 
-    <a href="/api">admin home</a>
+    <div class="mt-4 text-center">
+      <a href="/api" class="text-blue-400 hover:underline">Admin Home</a>
+    </div>
+  </article>
 </main>
-

@@ -21,6 +21,7 @@
     const youthTicketCounter = data.youthTicketCounter;
 
     let canReserve = true;
+    let hasAgreed = false;
 
     let ticketAvailabilityMessage = '';
     let quantityMessage = '';
@@ -133,186 +134,135 @@
 </script>
 
 <style>
-    .grid {
-        display: flex;
-        flex-direction: column;
-    }
 
-    .grid > div,
-    .grid > label,
-    .grid > input,
-    .grid > select,
-    .grid > button {
-        margin-bottom: 1rem; /* Adds space between fields */
-    }
+  input,
+  select,
+  button {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 
-    .total-amount {
-        display: flex;
-        align-items: center;
-        font-weight: 900;
-    }
 
-    .total-amount label {
-        margin-right: 1rem;
-        font-weight: 900;
-    }
+  .guest-fields {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 
-    .guest-fields {
-        margin-top: 1rem;
-    }
+  .guest-fields > div {
+    display: flex;
+    flex-direction: column;
+  }
 
-    .guest-fields > div {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.5rem;
-    }
 
-    .guest-fields label {
-        margin-right: 1rem;
-    }
+  hgroup h1,
+  hgroup h2 {
+    margin: 0;
+    text-align: center;
+  }
 
-    .warning {
-        color: red; /* Set font color to white */
-        text-align: center; /* Optional: Center the text */
-    }
+  hgroup h1 {
+    color: white;
+    font-size: 1.75rem;
+  }
 
-    /* Style for the hgroup */
-    hgroup h1 {
-        color: white; /* Set font color to white */
-        text-align: center; /* Optional: Center the text */
-    }
+  hgroup h2 {
+    color: #fae6c8;
+    font-size: 1.25rem;
+  }
 
-    hgroup h2,
-    h4 {
-        color: #fae6c8; /* Set font color to white */
-        text-align: center; /* Optional: Center the text */
-    }
-    hgroup h1,
-    hgroup h2,
-    hgroup h4 {
-        margin: 0; /* Optional: Remove default margin */
-    }
-
-    .book-now-button {
-        background-color: #1b2c2d; /* Primary blue */
-        color: white; /* Text color */
-        padding: 10px 20px; /* Padding */
-        text-decoration: none; /* Remove underline */
-        display: inline-block; /* Make it a block element */
-        border-radius: 4px; /* Rounded corners */
-    }
-
-    .book-now-button:hover {
-        background-color: #083c40; /* Darker blue on hover */
-        color: #fae6c8; /* Keep text white on hover */
-    }
 </style>
 
-<main class="container">
-    <hgroup>
-        <br />
-        <h1>BOOK YOUR TICKETS NOW!</h1>
-        <br />
-        <h2>2025 EU and UK Grand Feast in Oslo</h2>
-        <h4>Lambertseter kirke - September 20, 2025 (Registration starts at 1:00 PM)</h4>
-    </hgroup>
+<main class="container mx-auto px-4 py-8">
+  <hgroup class="text-center mb-8 space-y-2">
+    <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight drop-shadow-lg">
+      🎟️ Book Your Tickets Now!
+    </h1>
 
-    <article>
-        <!-- Remove the handleSubmit function from form submission -->
-        <form method="POST">
-            <div class="grid">
-                <label for="name">Name*:</label>
-                <input type="text" id="name" name="name" placeholder="First and Surname" required />
+    <h2 class="text-2xl sm:text-3xl font-semibold text-yellow-200 tracking-wide">
+      Grand Feast 2025 — Oslo
+    </h2>
 
-                <div class="mb-3">
-                    <label for="email">Email address*:</label>
-                    <input
-                        type="email"
-                        class="form-control"
-                        id="email"
-                        name="email"
-                        placeholder="name@gmail.com"
-                        bind:value={email}
-                        on:input={doValidateEmail} 
-                        required
-                    />
-                    {#if emailValidationMessage}
-                        <Alert color="danger">{emailValidationMessage}</Alert>
-                    {/if}
-                </div>
+    <p class="text-md sm:text-lg text-blue-100 font-light">
+      📍 Lambertseter Kirke — Sept 20, 2025 <br class="hidden sm:inline" />
+      (Registration starts at 1:00 PM)
+    </p>
 
-                <label for="city">Are you attending or serving in a Feast? If yes, indicate which city?</label>
-                <input type="text" id="city" name="city" placeholder="City name" required />
+    <div class="h-1 w-20 bg-gradient-to-r from-yellow-300 via-teal-300 to-blue-400 rounded-full mx-auto mt-3"></div>
+  </hgroup>
 
-                <label for="ticket_type">Ticket Type*:</label>
-                <select
-                    id="ticket_type"
-                    bind:value={ticketType}
-                    name="ticket_type"
-                    on:change={updateTotal}
-                    required
-                >
-                    <option value="">Select Ticket Type</option>
-                    <!-- No default selected option -->
-                    <option value="standard">Standard - 30€</option>
-                    <option value="vip">Premium - 50€</option>
-                    <!-- <option value="youth">Youth (12 to 17 years) - 17€</option> -->
-                </select>
+  <form method="POST" class="mt-8 bg-white/10 p-6 rounded-xl shadow-md backdrop-blur-md">
+    <div class="flex flex-col gap-4">
+            <label for="name" class="font-medium text-white">Name*:</label>
+            <input id="name" name="name" type="text" placeholder="First and Surname" required class="w-full px-4 py-2 rounded-md bg-white text-gray-900" />
 
-                <label for="quantity">Quantity*:</label>
-                {#if ticketAvailabilityMessage !== ''}
-                    <Alert color="danger">{ticketAvailabilityMessage}</Alert>
-                {/if}
+            <label for="email" class="font-medium text-white">Email address*:</label>
+            <input id="email" name="email" type="email" placeholder="name@gmail.com" bind:value={email} on:input={doValidateEmail} required class="w-full px-4 py-2 rounded-md bg-white text-gray-900" />
+            {#if emailValidationMessage}
+              <Alert color="danger">{emailValidationMessage}</Alert>
+            {/if}
 
-                {#if quantity < 1}
-                    <Alert color="warning">{quantityMessage}</Alert>
-                {/if}
+            <label for="city" class="font-medium text-white">Feast City (if applicable):</label>
+            <input id="city" name="city" type="text" placeholder="City name" required class="w-full px-4 py-2 rounded-md bg-white text-gray-900" />
 
-                <select
-                    id="quantity"
-                    bind:value={quantity}
-                    name="quantity"
-                    on:change={updateTotal}
-                    required
-                >
-                    <!-- Create dropdown options from 0 to 10 -->
-                    {#each Array(11).fill(0).map((_, i) => i) as number}
-                        <option value={number}>{number}</option>
-                    {/each}
-                </select>
+            <label for="ticket_type" class="font-medium text-white">Ticket Type*:</label>
+            <select id="ticket_type" name="ticket_type" bind:value={ticketType} on:change={updateTotal} required class="w-full px-4 py-2 rounded-md bg-white text-gray-900">
+              <option value="">Select Ticket Type</option>
+              <option value="standard">Standard - 30€</option>
+              <option value="vip">Premium - 50€</option>
+            </select>
 
-                {#if quantity > 0}
-                    <div class="guest-fields">
-                        {#each guests as guest, index}
-                            <div>
-                                <label for="guest_{index + 1}">Guest {index + 1}:</label>
-                                <input
-                                    type="text"
-                                    name="guest_{index + 1}"
-                                    bind:value={guests[index]}
-                                    placeholder="Guest {index + 1} - Full Name"
-                                    required
-                                />
-                            </div>
-                        {/each}
-                    </div>
-                {/if}
+            <label for="quantity" class="font-medium text-white">Quantity*:</label>
+            {#if ticketAvailabilityMessage}
+              <Alert color="danger">{ticketAvailabilityMessage}</Alert>
+            {/if}
+            {#if quantity < 1}
+              <Alert color="warning">{quantityMessage}</Alert>
+            {/if}
+            <select id="quantity" name="quantity" bind:value={quantity} on:change={updateTotal} required class="w-full px-4 py-2 rounded-md bg-white text-gray-900">
+              {#each Array(11).fill(0).map((_, i) => i) as number}
+                <option value={number}>{number}</option>
+              {/each}
+            </select>
 
-                <p>Payment Method: Bank Transfer</p>
+            {#if quantity > 0}
+              <div class="guest-fields space-y-2">
+                {#each guests as guest, index}
+                  <div class="flex flex-col">
+                    <label for={`guest_${index + 1}`} class="font-medium text-white">Guest {index + 1}:</label>
+                    <input id={`guest_${index + 1}`} name={`guest_${index + 1}`} type="text" bind:value={guests[index]} placeholder={`Guest ${index + 1} - Full Name`} required class="w-full px-4 py-2 rounded-md bg-white text-gray-900" />
+                  </div>
+                {/each}
+              </div>
+            {/if}
 
-                <div class="total-amount" aria-labelledby="total-amount-label">
-                    <!-- svelte-ignore a11y-label-has-associated-control -->
-                    <label id="total-amount-label">Total Amount Payable:</label>
-                    <span>{totalAmount}€</span>
-                </div>
+            <p class="text-white">Payment Method: Bank Transfer</p>
 
-                <!-- Update disabled condition to include email validation -->
-                <button class="book-now-button" type="submit" disabled={!canReserve || !isValidEmail}>
-                    RESERVE NOW
-                </button>
-                <p class="warning">*** By clicking Reserve Now you agree that tickets sold are Non-refundable ***</p>
+            <div class="flex flex-col text-white font-semibold">
+              <label for="total-amount" class="mb-1">Total Amount Payable:</label>
+              <span id="total-amount">{totalAmount}€</span>
             </div>
-        </form>
-        <a href="/">back to home</a>
-    </article>
+
+            <button
+              type="submit"
+              class="bg-gradient-to-r from-blue-600 to-teal-400 px-10 py-4 rounded-full text-white text-base sm:text-lg font-bold uppercase tracking-wider shadow-lg hover:scale-105 transition-transform duration-200"
+              disabled={!canReserve || !isValidEmail}
+            >
+              RESERVE NOW
+            </button>
+
+     
+
+            <p class="bg-white text-red-600 px-6 py-4 rounded-md text-lg mt-4 text-center font-bold shadow-md">
+              *** By clicking  - RESERVE NOW - you agree that tickets sold are Non-refundable ***
+            </p>
+    </div>
+  </form>
+
+  <div class="text-center mt-4">
+    <a href="/" class="text-blue-400 underline">Back to Home</a>
+  </div>
 </main>
+

@@ -1,44 +1,44 @@
 <script lang="ts">
-    import type {ServerData} from "./+page.server";
+    import type { ServerData } from "./+page.server";
 
-    // data is the object received from the server
-    export let data: ServerData
-
-
+    export let data: ServerData;
 </script>
 
-<main class="container">
-    {#if data.aTicket}
-    <article>
-        <h1>Ticket Details</h1>
-        ticket_id: {data.aTicket.ticket_id} <br>
-        booking_reference_no: <a href="/api/v0/booking/{data.aTicket.booking_reference_no}/details">{data.aTicket.booking_reference_no}</a> <br>
-        name: {data.aTicket.name} <br>
-        ticket_type: {data.aTicket.ticket_type} <br>
-        status: {data.aTicket.status} <br>
-<!--        description: {data.aTicket.description} <br>-->
-        <br>
+<main class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white px-4 py-8">
+  {#if data.aTicket}
+    <article class="max-w-xl mx-auto bg-black/60 backdrop-blur-md rounded-lg shadow-md p-6 space-y-6">
+      <header class="text-center space-y-1">
+        <h1 class="text-3xl font-bold text-yellow-400">Ticket Details</h1>
+      </header>
 
-        <h2>Checkin QR Code</h2>
-        <div>
-            <img src="{data.checkin.imageData}" alt="QR Code"/>
-        </div>
+      <div class="text-blue-100 text-sm space-y-1">
+        <p><strong>Ticket ID:</strong> {data.aTicket.ticket_id}</p>
+        <p><strong>Booking Ref:</strong>
+          <a href="/api/v0/booking/{data.aTicket.booking_reference_no}/details" class="text-cyan-400 hover:underline">
+            {data.aTicket.booking_reference_no}
+          </a>
+        </p>
+        <p><strong>Name:</strong> {data.aTicket.name}</p>
+        <p><strong>Type:</strong> {data.aTicket.ticket_type}</p>
+        <p><strong>Status:</strong> {data.aTicket.status}</p>
+      </div>
 
-        <p>QR code target: <strong>{data.checkin.targetURL}</strong></p>
+      <div class="space-y-2 text-center">
+        <h2 class="text-lg font-semibold text-yellow-300">Check-in QR Code</h2>
+        <img src="{data.checkin.imageData}" alt="QR Code" class="mx-auto w-48 h-48 rounded border border-white"/>
+        <p class="text-sm text-blue-200">QR code target: <strong class="text-white">{data.checkin.targetURL}</strong></p>
+      </div>
 
-<!--        <form action="./checkin" method="GET">-->
-<!--            <input type="submit" value="Check In"/>-->
-<!--        </form>-->
-        <a href="./checkin">View Check-In</a>
-
-
-        <br>
-        <br>
-        <a href="/api/v0/ticket/list">list tickets</a>
-
+      <div class="text-center space-x-4">
+        <a href="./checkin" class="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">
+          View Check-In
+        </a>
+        <a href="/api/v0/ticket/list" class="text-sm text-cyan-300 hover:underline">List Tickets</a>
+      </div>
     </article>
-    {/if}
+  {/if}
 
-    <a href="/api">admin home</a>
+  <div class="mt-8 text-center">
+    <a href="/api" class="text-blue-300 hover:underline text-sm">Admin Home</a>
+  </div>
 </main>
-

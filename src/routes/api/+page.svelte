@@ -1,87 +1,77 @@
 <script lang="ts">
-    import type {ServerData} from "./+page.server";
-
-    export let data: ServerData
+    import type { ServerData } from "./+page.server";
+    export let data: ServerData;
 </script>
 
+<main class="min-h-screen px-4 py-8 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+  <section class="max-w-4xl mx-auto space-y-8">
 
-<main class="container">
-    <!-- PAGE TITLE -->
-    <article>
-        <hgroup>
-            <h1>Admin Home</h1>
-            <h2>Welcome to the app admin homepage</h2>
-        </hgroup>
-    </article>
+    <header class="text-center">
+      <h1 class="text-3xl font-bold text-[#1b2c2d] dark:text-yellow-300 mb-2">Admin Dashboard</h1>
+      <p class="text-sm text-gray-600 dark:text-gray-400">Welcome to the app admin homepage</p>
+    </header>
 
-    <!-- BOOKINGS + TICKETS -->
-    <article>
-        Bookings
-        <ul>
-            <li>
-                <a href="/api/v0/booking/list">List</a>
-            </li>
-            <li>
-                <a href="/api/v0/booking/search">Search</a>
-            </li>
-            <li>
-                <a href="/newbooking">Create</a>
-            </li>
-        </ul>
+    <!-- BOOKINGS & TICKETS -->
+    <section>
+      <h2 class="text-xl font-semibold mb-2">Bookings</h2>
+      <ul class="space-y-2 list-disc list-inside text-blue-600 dark:text-blue-400">
+        <li><a href="/api/v0/booking/list" class="hover:underline">List</a></li>
+        <li><a href="/api/v0/booking/search" class="hover:underline">Search</a></li>
+        <li><a href="/newbooking" class="hover:underline">Create</a></li>
+      </ul>
+    </section>
 
-        Tickets
-        <ul>
-            <li>
-                <a href="/api/v0/ticket/list">List</a>
-            </li>
-        </ul>
+    <section>
+      <h2 class="text-xl font-semibold mb-2">Tickets</h2>
+      <ul class="space-y-2 list-disc list-inside text-blue-600 dark:text-blue-400">
+        <li><a href="/api/v0/ticket/list" class="hover:underline">List</a></li>
+      </ul>
+    </section>
 
-        Reports
-        <ul>
-            <li>
-                <a href="/api/reports">All Reports</a>
-            </li>
-        </ul>
-
-    </article>
+    <section>
+      <h2 class="text-xl font-semibold mb-2">Reports</h2>
+      <ul class="space-y-2 list-disc list-inside text-blue-600 dark:text-blue-400">
+        <li><a href="/api/reports" class="hover:underline">All Reports</a></li>
+      </ul>
+    </section>
 
     <!-- TICKET COUNTERS -->
-    <article>
-        Standard Tickets
-        <ul>
-            <li>{data.standardTicketCounter.available} available |
-                {data.standardTicketCounter.reserved} reserved |
-                {data.standardTicketCounter.sold} sold | <a href="/api/v0/ticket_counter/standard_tickets/details">update</a>
-            </li>
-        </ul>
+    <section>
+      <h2 class="text-xl font-semibold mb-4">Ticket Counters</h2>
+      <div class="grid gap-4 md:grid-cols-3">
+        <div class="p-4 border rounded-md bg-gray-50 dark:bg-gray-800">
+          <h3 class="font-semibold text-[#1b2c2d] dark:text-white">Standard Tickets</h3>
+          <p>{data.standardTicketCounter.available} available</p>
+          <p>{data.standardTicketCounter.reserved} reserved</p>
+          <p>{data.standardTicketCounter.sold} sold</p>
+          <a href="/api/v0/ticket_counter/standard_tickets/details" class="text-blue-600 dark:text-blue-400 hover:underline">Update</a>
+        </div>
 
-        VIP Tickets<br>
-        <ul>
-            <li>{data.vipTicketCounter.available} available |
-                {data.vipTicketCounter.reserved} reserved |
-                {data.vipTicketCounter.sold} sold | <a href="/api/v0/ticket_counter/vip_tickets/details">update</a>
-            </li>
-        </ul>
+        <div class="p-4 border rounded-md bg-gray-50 dark:bg-gray-800">
+          <h3 class="font-semibold text-[#1b2c2d] dark:text-white">VIP Tickets</h3>
+          <p>{data.vipTicketCounter.available} available</p>
+          <p>{data.vipTicketCounter.reserved} reserved</p>
+          <p>{data.vipTicketCounter.sold} sold</p>
+          <a href="/api/v0/ticket_counter/vip_tickets/details" class="text-blue-600 dark:text-blue-400 hover:underline">Update</a>
+        </div>
 
-        Youth Tickets<br>
-        <ul>
-            <li>{data.youthTicketCounter.available} available |
-                {data.youthTicketCounter.reserved} reserved |
-                {data.youthTicketCounter.sold} sold | <a href="/api/v0/ticket_counter/youth_tickets/details">update</a>
-            </li>
-        </ul>
-
-    </article>
-
+        <div class="p-4 border rounded-md bg-gray-50 dark:bg-gray-800">
+          <h3 class="font-semibold text-[#1b2c2d] dark:text-white">Youth Tickets</h3>
+          <p>{data.youthTicketCounter.available} available</p>
+          <p>{data.youthTicketCounter.reserved} reserved</p>
+          <p>{data.youthTicketCounter.sold} sold</p>
+          <a href="/api/v0/ticket_counter/youth_tickets/details" class="text-blue-600 dark:text-blue-400 hover:underline">Update</a>
+        </div>
+      </div>
+    </section>
 
     <!-- OTHERS -->
-    <article>
-        Others
-        <ul>
-            <li><a href="/testing/emailsender">Send an email</a></li>
-        </ul>
+    <section>
+      <h2 class="text-xl font-semibold mb-2">Others</h2>
+      <ul class="space-y-2 list-disc list-inside text-blue-600 dark:text-blue-400">
+        <li><a href="/testing/emailsender" class="hover:underline">Send an email</a></li>
+      </ul>
+    </section>
 
-    </article>
-
+  </section>
 </main>
-

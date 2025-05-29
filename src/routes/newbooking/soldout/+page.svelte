@@ -39,7 +39,7 @@
 
             <Fade toggler="#toggler2">
                 <Card body>
-                    Send us an email at support@grandfeast.eu
+                    Send us an email at help@grandfeast.eu
                 </Card>
             </Fade> -->
 

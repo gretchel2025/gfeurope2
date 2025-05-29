@@ -12,7 +12,7 @@
         <form method="POST">
             <label>
                 from*
-                <input type="text" name="to" value="support@grandfeast.eu" disabled/>
+                <input type="text" name="to" value="help@grandfeast.eu" disabled/>
             </label>
             <label>
                 to*
