@@ -11,9 +11,9 @@ Live demo (beta): [link](https://main--grand-feast-uk-x-europe.netlify.app/)
 git checkout prod
 ```
 
-2. Merge `develop` to `prod`, and push
+2. Merge `dev` to `prod`, and push
 ```bash
-make pull-develop
+make pull-dev
 git push
 ```
 

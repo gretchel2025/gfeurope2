@@ -16,18 +16,18 @@ run:
 lint:
 	eslint
 
-pull-develop:
-	# update the current branch with the latest from remote develop
-	git pull && git pull --rebase origin develop
+pull-dev:
+	# update the current branch with the latest from remote dev
+	git pull && git pull --rebase origin dev
 
-pull-local-develop:
-	# update the current branch with the latest from local develop
-	git pull --rebase . develop
+pull-local-dev:
+	# update the current branch with the latest from local dev
+	git pull --rebase . dev
 
 reset-prod:
 	# force the current branch to EXACTLY match the remote prod branch
 	git reset --hard origin/prod
 
-reset-develop:
-	# force the current branch to EXACTLY match the remote develop branch
-	git reset --hard origin/develop
+reset-dev:
+	# force the current branch to EXACTLY match the remote dev branch
+	git reset --hard origin/dev
