@@ -54,7 +54,7 @@
 
  <header class="relative z-10 py-6 px-4 md:px-8">
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
-      <a href="/"><h1 class="text-2xl font-bold text-white tracking-wider">Feast EU UK</h1></a> 
+      <a href="/"><h1 class="text-2xl font-bold text-white tracking-wider">Grand Feast EU UK</h1></a> 
       <nav class="mt-4 md:mt-0">
         <ul class="flex space-x-6 {`nav-links ${isMenuOpen ? 'show' : ''}`}>">
           <!-- <button class="close-button" on:click={closeMenu}>&times;</button> -->
@@ -62,7 +62,7 @@
           <li><a href="/#speakers" class="text-blue-200 hover:text-white transition">Speakers</a></li>
           <li><a href="/#details" class="text-blue-200 hover:text-white transition">Details</a></li>
           <li><a href="/newbooking" on:click={closeMenu}>Buy Tickets</a></li>
-          <li><a href="/api" on:click={closeMenu}>Organizers</a></li>
+          <!-- <li><a href="/api" on:click={closeMenu}>Organizers</a></li> -->
         </ul>
       </nav>
     </div>

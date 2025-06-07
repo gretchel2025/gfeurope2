@@ -1,6 +1,7 @@
 <script lang="ts">
   import { signIn, signOut } from "@auth/sveltekit/client";
   import { page } from "$app/stores";
+  import { goto } from '$app/navigation';
 </script>
 
 <main class="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-[#0f172a]/80 to-[#1e293b]/80 text-white">
@@ -16,7 +17,14 @@
         >
           Sign Out
         </button>
-        <a href="/api" class="text-blue-400 hover:underline">Go to Admin Page</a>
+
+        <button
+          on:click={() => goto('/api')}
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+        Go to Admin Page
+        </button>
+
       </div>
     {:else}
       <div class="space-y-4">

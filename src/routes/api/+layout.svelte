@@ -6,7 +6,7 @@
 
 
 
-<nav class="container-fluid">
+<!-- <nav class="container-fluid">
     <ul>
         <li style="color: white;"><a href="/api">Admin Pages</a></li>
     </ul>
@@ -21,6 +21,6 @@
             <li><button on:click={()=>signIn('google')}>Sign in</button></li>
         {/if}
     </ul>
-</nav>
+</nav> -->
 
 <slot />

@@ -21,10 +21,10 @@
 </script>
 
 <main class="min-h-screen bg-gradient-to-b from-[#0f172a]/80 to-[#1e293b]/80 text-white p-6">
-  <article class="max-w-3xl mx-auto bg-black/60 backdrop-blur-md p-6 rounded-xl shadow-md">
-    <h1 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4">Booking Details</h1>
+  <article class="bg-white text-[#1e293b] rounded-lg p-5 shadow-md">
+    <h1 class="text-2xl sm:text-3xl font-bold text-black mb-4">Booking Details</h1>
 
-    <div class="space-y-2 text-white text-sm">
+    <div class="space-y-2 text-sm text-gray-800">
       <p><strong>Reference No:</strong> {booking.reference_no}</p>
       <p><strong>Name:</strong> {booking.name} ({booking.email})</p>
       <p><strong>City:</strong> {booking.city}</p>
@@ -33,10 +33,10 @@
       <p><strong>Amount Total:</strong> €{booking.amount_total}</p>
       <p><strong>Guests:</strong> {booking.guests.join(", ")}</p>
       <p><strong>Ticket IDs:</strong></p>
-      <ul class="list-disc list-inside text-blue-100">
+      <ul class="list-disc list-inside text-blue-800  pl-4 py-2">
         {#each booking.ticket_ids as ticket_id}
           <li>
-            <a href="/api/v0/ticket/{ticket_id}/details" class="text-blue-300 hover:underline">{ticket_id}</a>
+            <a href="/api/v0/ticket/{ticket_id}/details" class="text-blue-700 hover:underline">{ticket_id}</a>
           </li>
         {/each}
       </ul>
@@ -45,45 +45,61 @@
     <div class="mt-6 space-y-4">
       {#if canSendPaymentReminderEmail}
         <form action="?/sendPaymentReminderEmail" method="POST">
-          <button class="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md">Send Payment Reminder Email</button>
+          <button class="w-full px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-md">
+            Send Payment Reminder Email
+          </button>
         </form>
       {/if}
 
       <form action="?/markPaid" method="POST">
-        <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md" disabled={!canMarkAsPaid}>Mark Paid</button>
+        <button
+          type="submit"
+          class="w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:opacity-100 disabled:cursor-not-allowed"
+          disabled={!canMarkAsPaid}
+        >
+          Mark Paid
+        </button>
       </form>
 
       {#if canGenerateTickets}
         <form action="?/generateTickets" method="POST">
-          <button type="submit" class="w-full px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-md">Generate Tickets</button>
+          <button type="submit" class="w-full px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-md">
+            Generate Tickets
+          </button>
         </form>
       {/if}
 
       {#if canSendTicketsEmail}
         <form action="?/sendTicketsEmail" method="POST">
-          <button class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md">Email Tickets</button>
+          <button class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md">
+            Email Tickets
+          </button>
         </form>
       {/if}
 
       {#if canCancel}
         <form action="/api/v0/booking/{booking.reference_no}/cancel">
-          <button class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-md">Cancel Reservation</button>
+          <button class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md">
+            Cancel Reservation
+          </button>
         </form>
       {/if}
 
       {#if canViewSummary}
-        <a href="/api/v0/booking/{booking.reference_no}/summary" class="block text-center text-cyan-300 hover:underline">View Booking Summary</a>
+        <a href="/api/v0/booking/{booking.reference_no}/summary" class="block text-center text-cyan-700 hover:underline">
+          View Booking Summary
+        </a>
       {/if}
     </div>
 
     <div class="mt-6 text-center space-x-4">
-      <a href="/api/v0/booking/list" class="text-blue-300 hover:underline">List Bookings</a>
-      <span class="text-gray-400">|</span>
-      <a href="/api/v0/booking/search" class="text-blue-300 hover:underline">Search</a>
+      <a href="/api/v0/booking/list" class="text-blue-700 hover:underline">List Bookings</a>
+      <span class="text-gray-500">|</span>
+      <a href="/api/v0/booking/search" class="text-blue-700 hover:underline">Search</a>
     </div>
 
     <div class="mt-4 text-center">
-      <a href="/api" class="text-blue-400 hover:underline">Admin Home</a>
+      <a href="/api" class="text-blue-700 hover:underline">Admin Home</a>
     </div>
   </article>
 </main>

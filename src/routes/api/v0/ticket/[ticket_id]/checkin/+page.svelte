@@ -11,7 +11,7 @@
 <main class="min-h-screen px-4 py-8 bg-gradient-to-br from-slate-800 to-slate-900 text-white">
   {#if data.aTicket}
     <article class="max-w-xl mx-auto bg-white text-gray-900 rounded-lg shadow-md p-6 dark:bg-slate-800 dark:text-white">
-      <h1 class="text-2xl font-bold text-yellow-400 mb-4">Ticket Check-In</h1>
+      <h1 class="text-2xl font-bold text-black-400 mb-4">Ticket Check-In</h1>
 
       <div class="space-y-2 text-sm">
         <p><strong>Ticket ID:</strong> <a class="text-blue-600 underline" href="details">{data.aTicket.ticket_id}</a></p>
@@ -35,15 +35,13 @@
         </form>
       </div>
 
-      <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">DEBUG only, to test check-in/out process</p>
-
       <div class="mt-6 text-sm">
-        <a href="/api/v0/ticket/list" class="text-blue-400 hover:underline">Back to Tickets List</a>
+        <a href="/api/v0/ticket/list" class="text-blue-800 hover:underline">Back to Tickets List</a>
       </div>
     </article>
   {/if}
 
   <div class="text-center mt-6 text-sm">
-    <a href="/api" class="text-blue-400 hover:underline">Admin Home</a>
+    <a href="/api" class="text-blue-300 hover:underline"> Back to Admin Home</a>
   </div>
 </main>

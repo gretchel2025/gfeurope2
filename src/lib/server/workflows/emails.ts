@@ -174,6 +174,9 @@ export async function SendPaymentReminder(booking_reference_no: string): Promise
     const reference = booking.reference_no;
     const paypalUrl = `${paypalBaseUrl}/${amount}?country.x=NO&locale.x=en_US&item_name=${reference}`;
 
+    const EXCHANGE_RATE_EUR_TO_NOK = 11.52;
+    const amountNOK = Math.round(amount * EXCHANGE_RATE_EUR_TO_NOK);
+
 
     // send the email
     const email: Email = {
@@ -266,12 +269,13 @@ export async function SendPaymentReminder(booking_reference_no: string): Promise
                                         <li>Bank Name: <span class="highlight">DNB Bank ASA</span></li>
                                         <li>Purpose: <span class="highlight">${booking.reference_no}</span></li>
                                         <li>Payable Amount: <span class="highlight">${booking.amount_total} €</span> (EURO)</li>
+                                        <li>Equivalent in NOK: <span class="highlight">${amountNOK} kr</span> (approx)</li>
                                     </ul>
                                     <br>
                                     
                                     <p>
                                         Remember to indicate the unique BOOKING REFERENCE number: <span class="highlight">${booking.reference_no}</span> 
-                                        as purpose so that we can allocate your payment.
+                                        in the message or as purpose. This will help to identify and allocate your payment.
                                         We want to inform you that it may take up to <span class="highlight">48H</span> 
                                         to verify your payment.
                                         Once payment has been verified, you will receive your eTickets.
@@ -327,6 +331,10 @@ export async function SendBookingConfirmation(booking: Booking): Promise<void> {
     const amount = booking.amount_total;
     const reference = booking.reference_no;
     const paypalUrl = `${paypalBaseUrl}/${amount}?country.x=NO&locale.x=en_US&item_name=${reference}`;
+
+    const EXCHANGE_RATE_EUR_TO_NOK = 11.52;
+    const amountNOK = Math.round(amount * EXCHANGE_RATE_EUR_TO_NOK);
+
     const email: Email = {
         from: "",
         to: booking.email,
@@ -423,12 +431,13 @@ export async function SendBookingConfirmation(booking: Booking): Promise<void> {
                                         <li>Bank Name: <span class="highlight">DNB Bank ASA</span></li>
                                         <li>Purpose: <span class="highlight">${booking.reference_no}</span></li>
                                         <li>Payable Amount: <span class="highlight">${booking.amount_total} €</span> (EURO)</li>
+                                        <li>Equivalent in NOK: <span class="highlight">${amountNOK} kr</span> (approx)</li>
                                     </ul>
                                     <br>
                                     
                                     <p>
                                         Remember to indicate the unique booking reference number: <span class="highlight">${booking.reference_no}</span> 
-                                        as purpose so that we can allocate your payment.
+                                        in the message or as purpose so that we can allocate your payment.
                                         We want to inform you that it may take up to <span class="highlight">48H</span> 
                                         to verify your payment.
                                         Once payment has been verified, you will receive your eTickets.
