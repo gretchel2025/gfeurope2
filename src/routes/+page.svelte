@@ -49,6 +49,19 @@
 
     return () => clearInterval(interval);
   });
+
+  const earlyBirdDeadline = new Date('2025-06-18T23:59:59');
+   
+  const now = new Date();
+    let earlyBirdActive = now < earlyBirdDeadline;
+
+    let countdown = '';
+    if (earlyBirdActive) {
+      const diff = earlyBirdDeadline.getTime() - now.getTime();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      countdown = `${days}d ${hours}h left`;
+    }
 </script>
 
 <!-- Aurora Background -->
@@ -274,14 +287,29 @@
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
 
-        <!-- Standard Ticket -->
+   <!-- Standard Ticket -->
     <div class="ticket-card rounded-2xl p-6 flex flex-col border border-blue-500/30 transition-transform transform hover:scale-105 duration-300 ease-in-out shadow hover:shadow-2xl">
-      <h3 class="text-2xl font-bold mb-4 text-white">Standard</h3>
-      <div class="text-3xl font-bold mb-6 text-teal-300">30 €</div>
+      <h3 class="text-2xl font-bold mb-2 text-white">Standard</h3>
+
+      {#if earlyBirdActive}
+
+        <div class="text-sm font-semibold text-yellow-400 bg-yellow-800/30 inline-block px-2 py-1 rounded-full mb-2">
+          🎉 Early Bird Discount! <span class="text-xs text-yellow-300 ml-2">{countdown}</span>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-2xl text-blue-200 line-through">35 €</div>
+          <div class="text-3xl font-bold text-teal-300">30 €</div>
+        </div>  
+      {:else}
+        <div class="text-3xl font-bold mb-6 text-teal-300">35 €</div>
+      {/if}
+
       <ul class="mb-8 flex-grow text-blue-100 space-y-3">
         <li class="flex items-center"><span class="text-teal-300 mr-2">✔</span>General admission</li>
         <li class="flex items-center"><span class="text-teal-300 mr-2">✔</span>Standard seating</li>
       </ul>
+
       <a
         href="/newbooking"
         class="inline-block text-center py-3 rounded-lg font-semibold bg-gradient-to-r from-blue-500 to-teal-400 text-white hover:brightness-110 transition"
@@ -295,8 +323,20 @@
       <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold text-yellow-100 bg-yellow-600 animate-pulse">
         LIMITED OFFER
       </div>
-      <h3 class="text-2xl font-bold mb-4 text-white">Premium</h3>
-      <div class="text-3xl font-bold mb-2 text-teal-300">50 €</div>
+      <h3 class="text-2xl font-bold mb-2 text-white">Premium</h3>
+
+      {#if earlyBirdActive}
+        <div class="text-sm font-semibold text-yellow-400 bg-yellow-800/30 inline-block px-2 py-1 rounded-full mb-2">
+          🎉 Early Bird Discount! <span class="text-xs text-yellow-300 ml-2">{countdown}</span>
+        </div>
+        <div class="mb-2">
+          <div class="text-2xl text-blue-200 line-through">55 €</div>
+          <div class="text-3xl font-bold text-teal-300">50 €</div>
+        </div>
+      {:else}
+        <div class="text-3xl font-bold mb-2 text-teal-300">55 €</div>
+      {/if}
+
       <p class="text-yellow-300 text-sm mb-4">Limited to 40 seats only</p>
       <ul class="mb-8 flex-grow text-blue-100 space-y-3">
         <li class="flex items-center"><span class="text-teal-300 mr-2">🎟</span>Premium seating area</li>
@@ -311,7 +351,6 @@
         Select
       </a>
     </div>
-
       <!-- Child Ticket -->
       <div class="ticket-card rounded-2xl p-6 flex flex-col border border-blue-500/10 transition-transform transform hover:scale-105 duration-300 ease-in-out shadow hover:shadow-2xl">
         <h3 class="text-2xl font-bold mb-4 text-white">Child</h3>

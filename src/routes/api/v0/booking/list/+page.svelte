@@ -36,7 +36,7 @@
             {booking.reference_no}
           </a>
           —
-          <span class="text-black">{booking.email}</span>
+          <span class="text-black">{booking.name}</span>
         </p>
 
         <p class="text-sm text-[#1e293b] mb-1">

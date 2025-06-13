@@ -210,8 +210,8 @@
             <label for="ticket_type" class="font-medium text-white">Ticket Type*:</label>
             <select id="ticket_type" name="ticket_type" bind:value={ticketType} on:change={updateTotal} required class="w-full px-4 py-2 rounded-md bg-white text-gray-900">
               <option value="">Select Ticket Type</option>
-              <option value="standard">Standard - 30€</option>
-              <option value="vip">Premium - 50€</option>
+              <option value="standard">Standard - 30€  🎉 early bird discount until June 18</option>
+              <option value="vip">Premium - 50€  🎉 early bird discount until June 18</option>
             </select>
 
             <label for="quantity" class="font-medium text-white">Quantity*:</label>
