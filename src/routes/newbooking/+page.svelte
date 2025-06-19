@@ -48,10 +48,10 @@
         // Determine the ticket price based on the ticket type
         switch (ticketType) {
             case 'standard':
-                ticketPrice = 30;
+                ticketPrice = 35;
                 break;
             case 'vip':
-                ticketPrice = 50;
+                ticketPrice = 55;
                 break;
             case 'youth':
                 ticketPrice = 15;
@@ -210,8 +210,8 @@
             <label for="ticket_type" class="font-medium text-white">Ticket Type*:</label>
             <select id="ticket_type" name="ticket_type" bind:value={ticketType} on:change={updateTotal} required class="w-full px-4 py-2 rounded-md bg-white text-gray-900">
               <option value="">Select Ticket Type</option>
-              <option value="standard">Standard - 30€  🎉 early bird discount until June 18</option>
-              <option value="vip">Premium - 50€  🎉 early bird discount until June 18</option>
+              <option value="standard">Standard - 35€</option>
+              <option value="vip">Premium - 55€</option>
             </select>
 
             <label for="quantity" class="font-medium text-white">Quantity*:</label>

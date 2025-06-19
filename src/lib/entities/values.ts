@@ -3,8 +3,8 @@ import type {Booking, Ticket} from "$lib/entities/models";
 import {error} from "@sveltejs/kit";
 
 export enum TicketPrice {
-    STANDARD= 30.0,
-    VIP= 50.0,
+    STANDARD= 35.0,
+    VIP= 55.0,
     YOUTH= 15.0
 }
 
