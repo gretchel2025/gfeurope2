@@ -143,7 +143,7 @@ export async function SendTicketsEmail(booking_reference_no: string): Promise<vo
                                     <br>
 
                                     Have a blessed day! <br>
-                                    The Feast EU and UK Team <br>
+                                    Grand Feast EU and UK Team <br>
                                     <br>
 
                                     <hr>
@@ -239,7 +239,7 @@ export async function SendPaymentReminder(booking_reference_no: string): Promise
                                     <h3>A gentle reminder that your ticket reservation is awaiting payment.</h3>
                 
                                     <p>
-                                        Please note that your reservation may be <span class="highlight">canceled</span> if payment is not received within three business days. 
+                                        Please note that your reservation may be <span class="highlight">canceled</span> if payment is not received within five business days. 
                                         If you have already completed your payment, kindly disregard this email.
                                     </p>
                                     <br>
@@ -402,7 +402,7 @@ export async function SendBookingConfirmation(booking: Booking): Promise<void> {
                                 <div class="container">
                                 
                                     <h1>Hello ${booking.name},</h1>
-                                    <h2>Greetings from The Feast EU and UK!</h2>
+                                    <h2>Greetings from the Grand Feast EU and UK!</h2>
 
                                     <p>
                                         In this email you will find the instructions on how to pay for your ticket reservation. 
@@ -455,7 +455,7 @@ export async function SendBookingConfirmation(booking: Booking): Promise<void> {
                                     <br>
                                     <br>
                                     <p>Best regards,</p>
-                                    <p><span class="highlight">The Feast EU and UK Team</span></p>
+                                    <p><span class="highlight">Grand Feast EU and UK Team</span></p>
 
                                     <br>
                                     <hr>
