@@ -56,6 +56,11 @@ Notes:
 - Postmark and Cloudinary keys are optional for local booting. Leave them empty unless you want those integrations to work locally.
 - Google auth values are only needed if you want to use the admin sign-in flow locally.
 - `AUTH_SECRET` still needs a value. For local development, any long random string is fine.
+- Local dev is pinned to `http://localhost:5173` so OAuth callback URLs stay stable.
+
+Google OAuth setup for local admin sign-in:
+- Authorized JavaScript origin: `http://localhost:5173`
+- Authorized redirect URI: `http://localhost:5173/auth/callback/google`
 
 Local admin access in development:
 - If Google OAuth is not configured locally, the `/signin` page will offer a local admin sign-in form.
