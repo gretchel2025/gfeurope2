@@ -1,9 +1,9 @@
-import {error} from '@sveltejs/kit';
-
-// Ticket defines the type/schema for a Ticket business object
-import type {Booking, TicketCounter} from "$lib/entities/models"
-import * as ticketCounterWorkflows from "$lib/server/workflows/ticket_counters";
-import {ERR_DB_TIMEOUT} from "$lib/entities/errors";
+import type { Actions } from './$types';
+import { NotFoundError } from "$lib/application/errors";
+import type {TicketCounter} from "$lib/domain/ticketCounter";
+import { rethrowAsKitError } from "$lib/server/http/appError";
+import { requireAdminRequest } from "$lib/server/http/guards";
+import { ticketCounterService } from "$lib/server/http/services";
 
 
 export type ServerData = {
@@ -11,28 +11,28 @@ export type ServerData = {
 }
 
 export async function load({ params }): Promise<ServerData> {
-    // get dynamic route param
-    const id = params._id
+    try {
+        const ticketCounter = await ticketCounterService.getById(params._id);
+        if (!ticketCounter) {
+            throw new NotFoundError("ticket counter does not exist");
+        }
 
-    // get ticket counter
-    const ticketCounter = await ticketCounterWorkflows.GetByID(id)
-
-    if (!ticketCounter) {
-        throw error(404, 'ticket counter does not exist')
-    }
-
-    // send page data
-    return {
-        ticketCounter: ticketCounter,
+        return {
+            ticketCounter,
+        };
+    } catch (caught) {
+        rethrowAsKitError(caught);
     }
 }
 
-// actions handle Form Actions
-export const actions = {
-    incrementAvailableCount: incrementAvailableCount,
-}
-
-async function incrementAvailableCount({ request, params }) {
-    const id = params._id
-    await ticketCounterWorkflows.IncrementTickets(id, {available: 10, reserved: 0, sold: 0})
-}
+export const actions: Actions = {
+    incrementAvailableCount: async (event) => {
+        try {
+            await requireAdminRequest(event);
+            const { params } = event;
+            await ticketCounterService.incrementTickets(params._id, { available: 10, reserved: 0, sold: 0 });
+        } catch (caught) {
+            rethrowAsKitError(caught);
+        }
+    },
+};

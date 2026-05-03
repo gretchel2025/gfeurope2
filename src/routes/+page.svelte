@@ -5,7 +5,7 @@
   let hoursEl: HTMLDivElement;
   let minutesEl: HTMLDivElement;
   let secondsEl: HTMLDivElement;
-  let starContainer: HTMLDivElement;
+  let starContainer: HTMLDivElement | undefined;
   let registerBtn: HTMLButtonElement;
   let ticketsSection: HTMLElement;
   let mapFrame: HTMLIFrameElement;

@@ -1,26 +1,17 @@
 import type { LayoutServerLoad } from "./$types"
-import {error, redirect} from "@sveltejs/kit";
-import * as userWorkflows from "$lib/server/workflows/users";
+import { rethrowAsKitError } from "$lib/server/http/appError";
+import { requireAdminSession } from "$lib/server/http/guards";
 
 export const load: LayoutServerLoad = async (event) => {
-  const session = await event.locals.auth();
+  try {
+    const session = await event.locals.auth();
+    const auth = await requireAdminSession(session);
 
-  const user = await userWorkflows.GetUserFromSession(session)
-  if (!user.wasFound) {
-    console.log("user not found")
-    redirect(303, '/signin')
-  }
-
-  // check if user is authorized
-  const aUser = await userWorkflows.GetByID(user._id)
-  if (!aUser) {
-    throw error(401, `user ${user._id} unauthorized`)
-  }
-
-  // TODO just handle all the user data here
-
-  return {
-    session,
-    my_user: user,
+    return {
+      session: auth.session,
+      my_user: auth.user,
+    }
+  } catch (caught) {
+    rethrowAsKitError(caught)
   }
 }

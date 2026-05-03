@@ -8,6 +8,10 @@
 
   let localAdminEmail = '';
 
+  async function signOutCurrentUser() {
+    await signOut();
+  }
+
   async function signInAsLocalAdmin() {
     await signIn('credentials', {
       email: localAdminEmail,
@@ -24,7 +28,7 @@
       <div class="space-y-4">
         <p class="text-blue-100">Signed in as <span class="font-semibold text-white">{$page.data.session.user.email}</span></p>
         <button
-          on:click={signOut}
+          on:click={signOutCurrentUser}
           class="w-full py-3 px-6 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition"
         >
           Sign Out

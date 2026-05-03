@@ -2,16 +2,6 @@
     import { Button, Card, Fade } from '@sveltestrap/sveltestrap'; 
 </script>
 
-<style>
-    .help-button {
-    display: flex;
-    justify-content: center; /* Center the buttons horizontally */
-    align-items: center;     /* Center the buttons vertically (if needed) */
-    gap: 1rem;               /* Add space between the buttons */
-    padding: 1rem;           /* Optional: add padding around the container */
-    }
-</style>
-
 <main class="container-fluid main-background">
     <article>
         <hgroup>

@@ -4,6 +4,10 @@
   export let data: ServerData;
   const booking = data.booking;
   const ticketsData = data.ticketsData;
+
+  function printPage() {
+    window.print();
+  }
 </script>
 
 <main class="min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-white px-4 py-8">
@@ -56,15 +60,17 @@
       </div>
 
       <div class="text-center mt-6">
-        <button onclick="window.print()" class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-md shadow">Print this page</button>
+        <button on:click={printPage} class="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-md shadow">Print this page</button>
       </div>
     </section>
   {/if}
 
-  <nav class="mt-10 text-center text-blue-500 space-x-4 text-sm">
-    <a href="/api/v0/booking/{booking.reference_no}/details" class="hover:underline">Back to Details</a>
-    <a href="/api/v0/booking/list" class="hover:underline">List Bookings</a>
-    <a href="/api/v0/booking/search" class="hover:underline">Search</a>
-    <a href="/api" class="hover:underline">Admin Home</a>
-  </nav>
+  {#if booking}
+    <nav class="mt-10 text-center text-blue-500 space-x-4 text-sm">
+      <a href="/api/v0/booking/{booking.reference_no}/details" class="hover:underline">Back to Details</a>
+      <a href="/api/v0/booking/list" class="hover:underline">List Bookings</a>
+      <a href="/api/v0/booking/search" class="hover:underline">Search</a>
+      <a href="/api" class="hover:underline">Admin Home</a>
+    </nav>
+  {/if}
 </main>

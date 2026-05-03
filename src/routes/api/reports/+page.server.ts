@@ -1,25 +1,13 @@
-
-import * as bookingWorkflows from "$lib/server/workflows/bookings";
-import type {Booking, CityStats} from "$lib/entities/models";
+import type {Booking, CityStats} from "$lib/domain/booking";
+import { bookingService, reportingService } from "$lib/server/http/services";
 
 export type ServerData = {
     topCities: CityStats[],
 }
 
 export async function load({}): Promise<ServerData> {
-    // get all bookings
-    const bookings: Booking[]  = await bookingWorkflows.List()
-    if (!bookings) {
-        return {
-            topCities: [],
-        }
-    }
-
-    // get top cities
-    const topCities: CityStats[] = bookingWorkflows.GetTopCitiesByCountOfTicketsBooked(bookings)
-
-    // respond
+    const bookings: Booking[] = await bookingService.list();
     return {
-        topCities: topCities,
+        topCities: reportingService.getTopCities(bookings),
     }
 }

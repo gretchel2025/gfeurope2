@@ -1,24 +1,20 @@
-import type { Booking } from "$lib/entities/models"
-import * as bookingWorkflows from "$lib/server/workflows/bookings";
+import type { Booking } from "$lib/domain/booking";
+import type { Actions } from "./$types";
+import { rethrowAsKitError } from "$lib/server/http/appError";
+import { requireAdminRequest } from "$lib/server/http/guards";
+import { bookingService } from "$lib/server/http/services";
 
 
 export const load = (async (event) => {
-    // get url from the query param
     const referenceNo = event.url.searchParams.get('reference_no')
     if (!referenceNo) {
-        // empty url? nothing to do (likely an initial page load)
-        console.log("[INFO] no reference_no received")
         return {
             bookings: [],
             noneFound: false, 
         }
     }
 
-    // TODO do search
-    const aBooking = await bookingWorkflows.GetByID(referenceNo)
-    console.log("[INFO] search completed")
-
-    // nothing found
+    const aBooking = await bookingService.getById(referenceNo)
     if (!aBooking){
         return {
             bookings: [],
@@ -36,22 +32,18 @@ export const load = (async (event) => {
 })
 
 // actions handle Form Actions
-export const actions = {
-    markPaid: markPaid
-}
+export const actions: Actions = {
+    markPaid: async (event) => {
+        try {
+            await requireAdminRequest(event);
+            const formData = await event.request.formData()
 
-async function markPaid({ request }) {
-    // get inputs
-    const formData = await request.formData()
-
-    const referenceNo = formData.get("reference_no")
-
-    // TODO bookingWorkflows.MarkAsPaid()
-    console.log("[INFO] marked as paid refNo", referenceNo)
-
-    // delete ticket
-    // await ticketWorkflows.DeleteByID(id)
-
-    // redirect client to the ticket list page
-    // throw redirect(303, '/api/v0/ticket');
-}
+            const referenceNo = formData.get("reference_no")
+            if (typeof referenceNo === "string" && referenceNo.trim()) {
+                await bookingService.markPaid(referenceNo.trim())
+            }
+        } catch (caught) {
+            rethrowAsKitError(caught);
+        }
+    },
+};

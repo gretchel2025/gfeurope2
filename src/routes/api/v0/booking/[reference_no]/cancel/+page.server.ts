@@ -1,38 +1,29 @@
-import {error, redirect} from '@sveltejs/kit';
-
-// Ticket defines the type/schema for a Ticket business object
-import type { Booking } from "$lib/entities/models"
-import * as bookingWorkflows from "$lib/server/workflows/bookings";
-import * as emailWorkflows from "$lib/server/workflows/emails";
-import {CancelBookingReservation} from "$lib/server/workflows/bookings";
+import { redirect } from '@sveltejs/kit';
+import type { Actions } from './$types';
+import type { Booking } from "$lib/domain/booking";
+import { rethrowAsKitError } from "$lib/server/http/appError";
+import { requireAdminRequest } from "$lib/server/http/guards";
+import { bookingService } from "$lib/server/http/services";
 
 export async function load({ params }): Promise<{aRecord: Booking | null}> {
-    // get dynamic route param
-    let reference_no = params.reference_no
-
-    // get booking
-    const aBooking: Booking | null = await bookingWorkflows.GetByID(reference_no)
-
-    if (!aBooking){
-        throw error(404, "booking not found")
-    }
-
-    // send page data
-    return {
-        aRecord: aBooking,
+    try {
+        return {
+            aRecord: await bookingService.getRequiredById(params.reference_no),
+        };
+    } catch (caught) {
+        rethrowAsKitError(caught);
     }
 }
 
-// actions handle Form Actions
-export const actions = {
-    cancelBooking: cancelBooking,
-}
-
-async function cancelBooking({ request, params }) {
-    const reference_no = params.reference_no
-
-    await bookingWorkflows.CancelBookingReservation(reference_no)
-
-    redirect(303, `/api/v0/booking/${reference_no}/cancel/cancel_success`)
-}
-
+export const actions: Actions = {
+    cancelBooking: async (event) => {
+        try {
+            await requireAdminRequest(event);
+            const { params } = event;
+            await bookingService.cancelBookingReservation(params.reference_no);
+            throw redirect(303, `/api/v0/booking/${params.reference_no}/cancel/cancel_success`);
+        } catch (caught) {
+            rethrowAsKitError(caught);
+        }
+    },
+};

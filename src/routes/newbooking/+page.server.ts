@@ -1,9 +1,10 @@
-import {error, redirect} from '@sveltejs/kit';
-
-import type { TicketCounter } from "$lib/entities/models"
-import * as workflows from "$lib/server/workflows/bookings";
-import * as ticketCounterWorkflows from "$lib/server/workflows/ticket_counters";
-import * as errors from "$lib/entities/errors"
+import { redirect } from '@sveltejs/kit';
+import type { Actions } from './$types';
+import { NotFoundError } from "$lib/application/errors";
+import type { TicketCounter } from "$lib/domain/ticketCounter";
+import { rethrowAsKitError } from "$lib/server/http/appError";
+import { parseCreateBookingForm } from "$lib/server/http/forms";
+import { bookingService, ticketCounterService } from "$lib/server/http/services";
 
 export type ServerData = {
     standardTicketCounter: TicketCounter,
@@ -11,98 +12,45 @@ export type ServerData = {
     youthTicketCounter: TicketCounter,
 }
 
-export async function load({ event, params }): Promise<ServerData> {
-    // get ticket counters
-    let standardTicketCounter: TicketCounter | null
-    let vipTicketCounter: TicketCounter | null
-    let youthTicketCounter: TicketCounter | null
-
+export async function load(): Promise<ServerData> {
     try {
-        standardTicketCounter = await ticketCounterWorkflows.GetStandardTickets()
-        vipTicketCounter = await ticketCounterWorkflows.GetVIPTickets()
-        youthTicketCounter = await ticketCounterWorkflows.GetYouthTickets()
-    } catch (e) {
-        if (e === errors.ERR_DB_TIMEOUT) {
-            throw error(503, "Server is busy. Please Refresh and try again.")
+        const [standardTicketCounter, vipTicketCounter, youthTicketCounter] = await Promise.all([
+            ticketCounterService.getStandardTickets(),
+            ticketCounterService.getVipTickets(),
+            ticketCounterService.getYouthTickets(),
+        ]);
+
+        if (!standardTicketCounter) throw new NotFoundError("standard ticket counter is missing");
+        if (!vipTicketCounter) throw new NotFoundError("vip ticket counter is missing");
+        if (!youthTicketCounter) throw new NotFoundError("youth ticket counter is missing");
+
+        if (
+            standardTicketCounter.available <= 0 &&
+            vipTicketCounter.available <= 0 &&
+            youthTicketCounter.available <= 0
+        ) {
+            throw redirect(303, "/newbooking/soldout");
         }
 
-        throw e
+        return {
+            standardTicketCounter,
+            vipTicketCounter,
+            youthTicketCounter,
+        };
+    } catch (caught) {
+        rethrowAsKitError(caught);
     }
-
-    // handle empty cases
-    if (!standardTicketCounter) {
-        throw error(404, 'standard ticket counter is missing')
-
-    }
-
-    if (!vipTicketCounter) {
-        throw error(404, 'vip ticket counter is missing')
-    }
-
-    if (!youthTicketCounter) {
-        throw error(404, 'youth ticket counter is missing')
-    }
-
-    // redirect to sold out page if no more tickets available
-    if (standardTicketCounter.available <= 0 &&
-        vipTicketCounter.available <= 0 &&
-        youthTicketCounter.available <= 0
-
-    ) {
-        throw redirect(303, "/newbooking/soldout")
-    }
-
-    // send page data
-    return {
-        standardTicketCounter: standardTicketCounter,
-        vipTicketCounter: vipTicketCounter,
-        youthTicketCounter: youthTicketCounter,
-    }}
-
-// actions handle Form Actions
-export const actions = {
-    // "default" handles form="submit" action
-    default: createBooking 
 }
 
-async function createBooking({ request, fetch }) {
-    // receive form data values
-    const formData = await request.formData()
-
-    const name = formData.get("name")
-    const email = formData.get("email")
-    const city = formData.get("city")
-    const ticket_type = formData.get("ticket_type")
-
-    const strQuantity = formData.get("quantity")
-    const intQuantity = parseInt(strQuantity)
-    if (isNaN(intQuantity)){
-        throw error(400, "quantity is not numeric")
+export const actions: Actions = {
+    default: async ({ request }) => {
+        try {
+            const formData = await request.formData();
+            const input = await parseCreateBookingForm(formData);
+            await bookingService.createNew(input);
+            throw redirect(303, "/newbooking/success");
+        } catch (caught) {
+            rethrowAsKitError(caught);
+        }
     }
-
-    // if (intQuantity < 1){
-    //     throw error(400, "select how many tickets")
-    // }
-
-
-    const guests = []
-    for (let i = 1; i <= intQuantity; i++){
-        const keyName = "guest_" + i
-        const guestData = formData.get(keyName)
-        guests.push(guestData)
-    }
-
-    // create booking
-    const details = {
-        name: name,
-        email: email,
-        city: city,
-        ticket_type: ticket_type,
-        quantity: intQuantity,
-        guests: guests,
-    }
-    await workflows.CreateNew(details)
-
-    // redirect to success page
-    throw redirect(303, '/newbooking/success');
-}
+};

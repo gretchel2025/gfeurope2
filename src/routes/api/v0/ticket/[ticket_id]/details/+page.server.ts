@@ -1,7 +1,6 @@
-// Ticket defines the type/schema for a Ticket business object
-import type { Ticket, QRCode } from "$lib/entities/models"
-import * as ticketWorkflows from "$lib/server/workflows/tickets";
-import {error} from "@sveltejs/kit";
+import type { Ticket, QRCode } from "$lib/domain/ticket";
+import { rethrowAsKitError } from "$lib/server/http/appError";
+import { ticketService } from "$lib/server/http/services";
 
 export type ServerData = {
     aTicket: Ticket,
@@ -9,22 +8,14 @@ export type ServerData = {
 }
 
 export async function load({ params }): Promise<ServerData> {
-    // get inputs
-    let ticket_id = params.ticket_id
-
-    // get ticket
-    const aTicket: Ticket | null = await ticketWorkflows.GetByID(ticket_id)
-
-    if (!aTicket){
-        throw error(404, "ticket not found")
-    }
-
-    // get related QR code used for checking
-    const qrCode: QRCode = await ticketWorkflows.GetCheckinQRCode(aTicket.ticket_id, aTicket.booking_reference_no)
-
-    // send page data
-    return {
-        aTicket: aTicket,
-        checkin: qrCode,
+    try {
+        const aTicket = await ticketService.getRequiredById(params.ticket_id);
+        const qrCode = await ticketService.getCheckinQRCode(aTicket.ticket_id, aTicket.booking_reference_no);
+        return {
+            aTicket,
+            checkin: qrCode,
+        };
+    } catch (caught) {
+        rethrowAsKitError(caught);
     }
 }

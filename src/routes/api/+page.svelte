@@ -4,6 +4,10 @@
     import '@picocss/pico'
     import { signIn, signOut } from "@auth/sveltekit/client"
     import { page } from "$app/stores"
+
+    async function signOutCurrentUser() {
+      await signOut();
+    }
 </script>
 
 <main class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -19,7 +23,7 @@
         </p>
         <div class="mt-4 flex justify-center">
           <button
-            on:click={signOut}
+            on:click={signOutCurrentUser}
             class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
           >
             Sign out
@@ -95,7 +99,7 @@
     <section>
       <h2 class="text-xl font-semibold mb-2">Others</h2>
       <ul class="space-y-2 list-disc list-inside text-blue-600 dark:text-blue-400">
-        <li><a href="/testing/emailsender" class="hover:underline">Send an email</a></li>
+        <li><a href="/api/system" class="hover:underline">System Settings</a></li>
       </ul>
    </section>
 </main>

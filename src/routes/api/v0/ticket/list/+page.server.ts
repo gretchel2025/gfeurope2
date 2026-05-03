@@ -1,21 +1,12 @@
-
-import * as ticketWorkflows from "$lib/server/workflows/tickets";
-import type { Ticket } from "$lib/entities/models";
+import type { Ticket } from "$lib/domain/ticket";
+import { ticketService } from "$lib/server/http/services";
 
 export type ServerData = {
     tickets: Ticket[],
 }
 
 export async function load({}) {
-    const tickets: Ticket[] = await ticketWorkflows.GetAll()
-
-    if (!tickets) {
-        return {
-            tickets: [],
-        }
-    }
-
     return {
-        tickets: tickets,
+        tickets: await ticketService.getAll(),
     }
 }

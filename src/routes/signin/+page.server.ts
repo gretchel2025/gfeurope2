@@ -1,5 +1,4 @@
-import { dev } from "$app/environment"
-import { GOOGLE_ID, GOOGLE_SECRET, LOCAL_ADMIN_EMAILS } from "$env/static/private"
+import { appConfig } from "$lib/infrastructure/config/env.server";
 
 export type ServerData = {
     hasGoogleAuth: boolean
@@ -8,18 +7,7 @@ export type ServerData = {
 
 export function load(): ServerData {
     return {
-        hasGoogleAuth: Boolean(GOOGLE_ID && GOOGLE_SECRET),
-        hasLocalDevAuth: dev && parseEmailList(LOCAL_ADMIN_EMAILS).length > 0,
+        hasGoogleAuth: Boolean(appConfig.googleClientId && appConfig.googleClientSecret),
+        hasLocalDevAuth: appConfig.dev && appConfig.localAdminEmails.length > 0,
     }
-}
-
-function parseEmailList(raw: string | undefined): string[] {
-    if (!raw) {
-        return []
-    }
-
-    return raw
-        .split(",")
-        .map((value) => value.trim())
-        .filter(Boolean)
 }

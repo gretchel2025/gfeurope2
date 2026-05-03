@@ -1,8 +1,9 @@
-// Ticket defines the type/schema for a Ticket business object
-import type {Ticket, QRCode, Booking} from "$lib/entities/models"
-import * as ticketWorkflows from "$lib/server/workflows/tickets";
-import * as bookingWorkflows from "$lib/server/workflows/bookings";
-import {error} from "@sveltejs/kit";
+import type {Ticket} from "$lib/domain/ticket";
+import type {Booking} from "$lib/domain/booking";
+import type { Actions } from './$types';
+import { rethrowAsKitError } from "$lib/server/http/appError";
+import { requireAdminRequest } from "$lib/server/http/guards";
+import { bookingService, ticketService } from "$lib/server/http/services";
 
 export type ServerData = {
     aTicket: Ticket,
@@ -10,41 +11,35 @@ export type ServerData = {
 }
 
 export async function load({ params }): Promise<ServerData> {
-    // get inputs
-    let ticket_id = params.ticket_id
-
-    // get ticket
-    const aTicket: Ticket | null = await ticketWorkflows.GetByID(ticket_id)
-
-    if (!aTicket){
-        throw error(404, "ticket not found")
-    }
-
-    // get booking
-    const aBooking: Booking | null = await bookingWorkflows.GetByID(aTicket.booking_reference_no)
-
-    if (!aBooking){
-        throw error(404, "booking not found")
-    }
-
-    // send page data
-    return {
-        aTicket: aTicket,
-        aBooking: aBooking,
+    try {
+        const aTicket = await ticketService.getRequiredById(params.ticket_id);
+        const aBooking = await bookingService.getRequiredById(aTicket.booking_reference_no);
+        return {
+            aTicket,
+            aBooking,
+        };
+    } catch (caught) {
+        rethrowAsKitError(caught);
     }
 }
 
-export const actions = {
-    checkIn: checkIn,
-    checkOut: checkOut,
-}
-
-async function checkIn({ params }) {
-    let ticket_id = params.ticket_id
-    await ticketWorkflows.CheckIn(ticket_id)
-}
-
-async function checkOut({ params }) {
-    let ticket_id = params.ticket_id
-    await ticketWorkflows.CheckOut(ticket_id)
-}
+export const actions: Actions = {
+    checkIn: async (event) => {
+        try {
+            await requireAdminRequest(event);
+            const { params } = event;
+            await ticketService.checkIn(params.ticket_id);
+        } catch (caught) {
+            rethrowAsKitError(caught);
+        }
+    },
+    checkOut: async (event) => {
+        try {
+            await requireAdminRequest(event);
+            const { params } = event;
+            await ticketService.checkOut(params.ticket_id);
+        } catch (caught) {
+            rethrowAsKitError(caught);
+        }
+    },
+};

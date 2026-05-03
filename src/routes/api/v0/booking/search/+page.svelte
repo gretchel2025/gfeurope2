@@ -2,7 +2,6 @@
     export let data
 
     let searchValue: string = ""
-    console.log("[INFO] UI received data:", data)
 </script>
 
 <main class="min-h-screen px-4 py-10 bg-white text-gray-900 dark:bg-gray-900 dark:text-white">

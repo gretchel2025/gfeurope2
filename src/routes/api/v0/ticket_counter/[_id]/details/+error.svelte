@@ -14,10 +14,9 @@
         </hgroup>
 
 <!--        <a href="javascript: location.reload()" role="button">Refresh</a>-->
-        <a href="#" on:click={refreshPage} role="button">Refresh</a>
+        <button type="button" on:click={refreshPage}>Refresh</button>
     </article>
 
     <a href="/api">admin home</a>
 
 </main>
-
