@@ -13,6 +13,20 @@ run:
 	# start the development server and open a new browser tab to the web app
 	npm run dev -- --open
 
+run-local:
+	# start local mongodb, then start the dev server
+	docker-compose up -d mongodb
+	npm run dev -- --open
+
+db-up:
+	docker-compose up -d mongodb
+
+db-down:
+	docker-compose down
+
+db-logs:
+	docker-compose logs -f mongodb
+
 lint:
 	eslint
 

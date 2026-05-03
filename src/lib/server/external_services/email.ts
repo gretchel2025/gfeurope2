@@ -10,6 +10,11 @@ const apiToken = env.MY_POSTMARK_API_KEY
 
 // Send sends an email. The "from" value will be overwritten by the required constant value.
 export async function Send(email: Email): Promise<any>{
+    if (!apiToken) {
+        console.warn(`[WARN] email svc: MY_POSTMARK_API_KEY is not configured, skipping email to ${email.to}`)
+        return { skipped: true }
+    }
+
     // convert from our email format to the service's format
     email.from = "Grand Feast EU and UK<help@grandfeast.eu>" // hard-coded, defined at the service
     const svcEmail = convertEmail(email)

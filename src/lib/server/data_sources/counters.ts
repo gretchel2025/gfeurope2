@@ -16,11 +16,20 @@ const counterSchema = new mongoose.Schema(
 // const counterCollection = await mongoose.model('counters', counterSchema);
 const counterCollection = mongoose.models.counters || mongoose.model('counters', counterSchema);
 
-// this was used one time to create an initial record
-export async function Create (counterID: string): Promise<void> {
-    await counterCollection.create(
-        { _id: counterID },
-    )
+export async function Create(
+    counterID: string,
+    values?: {
+        available: number,
+        reserved: number,
+        sold: number,
+    }
+): Promise<void> {
+    await counterCollection.create({
+        _id: counterID,
+        available: values?.available ?? 0,
+        reserved: values?.reserved ?? 0,
+        sold: values?.sold ?? 0,
+    })
 }
 
 export async function GetByID(id: string): Promise<TicketCounter | null> {

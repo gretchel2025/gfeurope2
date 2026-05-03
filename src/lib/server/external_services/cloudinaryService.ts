@@ -23,6 +23,11 @@ cloudinary.config(cloudinaryConfig);
 
 // UploadImage uploads the given image data and returns the URL of the uploaded image
 export async function UploadImage(imageData: string): Promise<string> {
+    if (!CLOUD_NAME || !API_KEY || !API_SECRET) {
+        console.warn('[WARN] Cloudinary is not configured, returning inline image data instead of uploaded URL');
+        return imageData;
+    }
+
     try {
         const response: UploadApiResponse = await cloudinary.uploader.upload(imageData, {
             upload_preset: 'ml_default', // Set your upload preset if you have one

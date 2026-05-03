@@ -1,4 +1,5 @@
 import {connectDB} from "$lib/server/data_sources/dbinit";
+import {ensureRequiredData} from "$lib/server/bootstrap";
 import * as ticketCounterWorkflows from "$lib/server/workflows/ticket_counters";
 import * as errors from "$lib/entities/errors";
 
@@ -6,7 +7,13 @@ import * as errors from "$lib/entities/errors";
 async function doInitStuff(){
     console.log("[INFO] doInitStuff() initializing app...")
 
-    await connectDB();
+    const isDBConnected = await connectDB();
+    if (!isDBConnected) {
+        console.warn("[WARN] skipping DB bootstrap because the database connection is unavailable")
+        return
+    }
+
+    await ensureRequiredData();
 
     // try to make at least 1 db call on startup. MAYBE this will 'warm up' the db connection
     try {
