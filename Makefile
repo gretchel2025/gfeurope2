@@ -4,10 +4,10 @@ install:
 	npm install
 
 build: install
-	echo TODO
+	npm run build
 
 test-unit:
-	echo TODO
+	npm run check
 
 run:
 	# start the development server and open a new browser tab to the web app
@@ -28,7 +28,7 @@ db-logs:
 	docker-compose logs -f mongodb
 
 lint:
-	eslint
+	npm run lint
 
 pull-dev:
 	# update the current branch with the latest from remote dev
