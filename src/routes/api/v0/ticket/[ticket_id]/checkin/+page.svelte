@@ -1,11 +1,11 @@
 <script lang="ts">
     import type { ServerData } from "./+page.server";
-    import { BookingPaymentStatus, TicketCanCheckIn, TicketCanCheckOut, TicketStatus } from "$lib/entities/values";
+    import { canCheckInTicket, canCheckOutTicket } from "$lib/domain/ticket";
 
     export let data: ServerData;
 
-    const canDoCheckIn = TicketCanCheckIn(data.aBooking, data.aTicket);
-    const canDoCheckOut = TicketCanCheckOut(data.aBooking, data.aTicket);
+    const canDoCheckIn = canCheckInTicket(data.aBooking, data.aTicket);
+    const canDoCheckOut = canCheckOutTicket(data.aBooking, data.aTicket);
 </script>
 
 <main class="min-h-screen px-4 py-8 bg-gradient-to-br from-slate-800 to-slate-900 text-white">

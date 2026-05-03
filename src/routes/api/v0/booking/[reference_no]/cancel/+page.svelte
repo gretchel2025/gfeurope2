@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Alert } from '@sveltestrap/sveltestrap';
-    import type {Booking} from "$lib/entities/models";
-    import * as values from "$lib/entities/values";
+    import type { Booking } from "$lib/domain/booking";
+    import { canCancelBooking } from "$lib/domain/booking";
 
     // data is the object received from the server
     export let data: {
@@ -14,7 +14,7 @@
     let userHasUnderstood = false
 
     // flags for disabling buttons
-    const bookingCanBeCancelled = values.BookingCanBeCancelled(booking)
+    const bookingCanBeCancelled = canCancelBooking(booking)
     $: canDoCancel = bookingCanBeCancelled && userHasConfirmed && userHasUnderstood
 </script>
 
@@ -66,4 +66,3 @@
 
     <a href="/api">admin home</a>
 </main>
-

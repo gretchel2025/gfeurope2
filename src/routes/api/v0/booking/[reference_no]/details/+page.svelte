@@ -1,14 +1,18 @@
 <script lang="ts">
-  import { BookingPaymentStatus } from "$lib/entities/values";
-  import * as values from "$lib/entities/values";
-  import type { Booking } from "$lib/entities/models";
+  import type { Booking } from "$lib/domain/booking";
+  import {
+    canCancelBooking,
+    canGenerateTickets,
+    canMarkBookingPaid
+  } from "$lib/domain/booking";
+  import { BookingPaymentStatus } from "$lib/domain/shared/enums";
 
   export let data: { aRecord: Booking };
 
   const booking = data.aRecord;
-  const canMarkAsPaid = values.BookingCanBeMarkedAsPaid(booking);
-  const canGenerateTickets = values.BookingCanGenerateTickets(booking);
-  const canCancel = values.BookingCanBeCancelled(booking);
+  const canMarkAsPaid = canMarkBookingPaid(booking);
+  const canGenerateTicketsAction = canGenerateTickets(booking);
+  const canCancel = canCancelBooking(booking);
 
   const isPaid = booking.payment_status === BookingPaymentStatus.PAID;
   const allTicketsGenerated = booking.ticket_ids.length >= booking.guests.length;
@@ -61,7 +65,7 @@
         </button>
       </form>
 
-      {#if canGenerateTickets}
+      {#if canGenerateTicketsAction}
         <form action="?/generateTickets" method="POST">
           <button type="submit" class="w-full px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-md">
             Generate Tickets

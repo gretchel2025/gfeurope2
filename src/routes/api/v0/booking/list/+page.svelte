@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Booking } from "$lib/entities/models";
   import type { ServerData } from "./+page.server";
 
   export let data: ServerData;
