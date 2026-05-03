@@ -1,0 +1,87 @@
+{
+  "output": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/grand-feast-refactor-showcase.pptx",
+  "outputBytes": 49385,
+  "slideCount": 7,
+  "slideSize": {
+    "width": 1280,
+    "height": 720
+  },
+  "previewDir": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/previews",
+  "previewPaths": [
+    "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/previews/slide-01.png",
+    "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/previews/slide-02.png",
+    "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/previews/slide-03.png",
+    "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/previews/slide-04.png",
+    "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/previews/slide-05.png",
+    "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/previews/slide-06.png",
+    "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/previews/slide-07.png"
+  ],
+  "layoutDir": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/layout",
+  "layoutResults": [
+    {
+      "layoutPath": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/layout/slide-01.layout.json"
+    },
+    {
+      "layoutPath": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/layout/slide-02.layout.json"
+    },
+    {
+      "layoutPath": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/layout/slide-03.layout.json"
+    },
+    {
+      "layoutPath": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/layout/slide-04.layout.json"
+    },
+    {
+      "layoutPath": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/layout/slide-05.layout.json"
+    },
+    {
+      "layoutPath": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/layout/slide-06.layout.json"
+    },
+    {
+      "layoutPath": "/Users/jonathan/Unity Projects 2024/gfeurope2/artifacts/refactor-showcase/layout/slide-07.layout.json"
+    }
+  ],
+  "slides": [
+    {
+      "index": 1,
+      "requestedSlideNumber": 1,
+      "modulePath": "/private/tmp/codex-presentations/manual-20260503-refactor-showcase/slides/slide-01.mjs",
+      "exportName": "slide01"
+    },
+    {
+      "index": 2,
+      "requestedSlideNumber": 2,
+      "modulePath": "/private/tmp/codex-presentations/manual-20260503-refactor-showcase/slides/slide-02.mjs",
+      "exportName": "slide02"
+    },
+    {
+      "index": 3,
+      "requestedSlideNumber": 3,
+      "modulePath": "/private/tmp/codex-presentations/manual-20260503-refactor-showcase/slides/slide-03.mjs",
+      "exportName": "slide03"
+    },
+    {
+      "index": 4,
+      "requestedSlideNumber": 4,
+      "modulePath": "/private/tmp/codex-presentations/manual-20260503-refactor-showcase/slides/slide-04.mjs",
+      "exportName": "slide04"
+    },
+    {
+      "index": 5,
+      "requestedSlideNumber": 5,
+      "modulePath": "/private/tmp/codex-presentations/manual-20260503-refactor-showcase/slides/slide-05.mjs",
+      "exportName": "slide05"
+    },
+    {
+      "index": 6,
+      "requestedSlideNumber": 6,
+      "modulePath": "/private/tmp/codex-presentations/manual-20260503-refactor-showcase/slides/slide-06.mjs",
+      "exportName": "slide06"
+    },
+    {
+      "index": 7,
+      "requestedSlideNumber": 7,
+      "modulePath": "/private/tmp/codex-presentations/manual-20260503-refactor-showcase/slides/slide-07.mjs",
+      "exportName": "slide07"
+    }
+  ]
+}
