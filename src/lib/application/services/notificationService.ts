@@ -1,7 +1,17 @@
+/**
+ * Purpose:
+ * This service builds and sends booking-related emails.
+ *
+ * Why this structure is good:
+ * Email composition is application behavior, but delivery is infrastructure.
+ * Splitting those concerns keeps templates near the use cases while still
+ * allowing the actual sending mechanism to be swapped out cleanly.
+ */
 import { NotFoundError } from "$lib/application/errors";
 import type { BookingRepository, EmailMessage, EmailSender, TicketRepository } from "$lib/application/ports";
 import type { Booking } from "$lib/domain/booking";
 
+/** Sends the user-facing emails associated with bookings and tickets. */
 export class NotificationService {
     constructor(
         private readonly bookingRepository: BookingRepository,
@@ -9,6 +19,7 @@ export class NotificationService {
         private readonly emailSender: EmailSender,
     ) {}
 
+    /** Sends the initial reservation email with payment instructions. */
     async sendBookingConfirmation(booking: Booking): Promise<void> {
         const paypalBaseUrl = "https://paypal.me/TheFeastNorway";
         const paypalUrl = `${paypalBaseUrl}/${booking.amount_total}?country.x=NO&locale.x=en_US&item_name=${booking.reference_no}`;
@@ -33,6 +44,7 @@ export class NotificationService {
         });
     }
 
+    /** Sends the final e-ticket email after tickets have been generated. */
     async sendTicketsEmail(bookingReferenceNo: string): Promise<void> {
         const booking = await this.bookingRepository.findByReferenceNo(bookingReferenceNo);
         if (!booking) {
@@ -71,6 +83,7 @@ export class NotificationService {
         });
     }
 
+    /** Sends a reminder for a booking that is still awaiting payment. */
     async sendPaymentReminder(bookingReferenceNo: string): Promise<void> {
         const booking = await this.bookingRepository.findByReferenceNo(bookingReferenceNo);
         if (!booking) {
@@ -97,6 +110,7 @@ export class NotificationService {
         });
     }
 
+    /** Loads all concrete ticket records for the given booking. */
     private async loadTickets(booking: Booking) {
         const tickets = await Promise.all(
             booking.ticket_ids.map(async (ticketId) => await this.ticketRepository.findByTicketId(ticketId))

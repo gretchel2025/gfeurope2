@@ -1,9 +1,18 @@
+/**
+ * Purpose:
+ * This file reads and normalizes server-side environment configuration.
+ *
+ * Why this structure is good:
+ * Centralized config keeps env parsing out of feature code and gives the rest
+ * of the app one typed source of truth for runtime settings.
+ */
 import { dev } from "$app/environment";
 import fs from "node:fs";
 import path from "node:path";
 
 const fileEnv = loadDotEnvFile(path.resolve(process.cwd(), ".env"));
 
+/** Typed runtime configuration used by infrastructure and service composition. */
 export type AppConfig = {
     dev: boolean;
     appBaseUrl: string;
@@ -26,6 +35,7 @@ export type AppConfig = {
     };
 };
 
+/** The single normalized configuration object for the server side of the app. */
 export const appConfig: AppConfig = {
     dev,
     appBaseUrl: readEnv("APP_BASE_URL") || "http://localhost:5173",
@@ -48,6 +58,7 @@ export const appConfig: AppConfig = {
     },
 };
 
+/** Parses a non-negative integer with a sensible fallback. */
 function parsePositiveInt(raw: string | undefined, fallback: number): number {
     if (!raw) {
         return fallback;
@@ -61,6 +72,7 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
     return parsed;
 }
 
+/** Parses the comma-separated local admin email list. */
 function parseEmailList(raw: string | undefined): string[] {
     if (!raw) {
         return [];
@@ -72,10 +84,12 @@ function parseEmailList(raw: string | undefined): string[] {
         .filter(Boolean);
 }
 
+/** Reads an env value from process.env first, then from the local .env file snapshot. */
 function readEnv(key: string): string | undefined {
     return process.env[key] ?? fileEnv[key];
 }
 
+/** Minimal .env parser used to support local development without extra runtime tooling. */
 function loadDotEnvFile(filePath: string): Record<string, string> {
     if (!fs.existsSync(filePath)) {
         return {};

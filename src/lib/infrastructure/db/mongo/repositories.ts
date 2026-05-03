@@ -1,3 +1,12 @@
+/**
+ * Purpose:
+ * This file contains the Mongo-backed repository implementations.
+ *
+ * Why this structure is good:
+ * Repositories isolate Mongoose schemas and query mechanics from application
+ * services. That lets the business layer talk in domain types and interfaces
+ * instead of raw persistence details.
+ */
 import mongoose from "mongoose";
 import type {
     BookingRepository,
@@ -12,6 +21,7 @@ import type { TicketCounter, TicketCounterDelta } from "$lib/domain/ticketCounte
 import type { User } from "$lib/domain/user";
 import { BookingPaymentStatus, TicketStatus, TicketType } from "$lib/domain/shared/enums";
 
+/** Mongoose schema for persisted bookings. */
 const bookingSchema = new mongoose.Schema({
     reference_no: { type: String, required: true },
     name: { type: String, required: true },
@@ -25,6 +35,7 @@ const bookingSchema = new mongoose.Schema({
     ticket_ids: [{ type: String, required: true }],
 });
 
+/** Mongoose schema for persisted tickets. */
 const ticketSchema = new mongoose.Schema({
     ticket_id: { type: String, required: true },
     name: { type: String, required: true },
@@ -36,6 +47,7 @@ const ticketSchema = new mongoose.Schema({
     checkin_qr_code_image_url: { type: String, required: true },
 });
 
+/** Mongoose schema for ticket inventory counters. */
 const counterSchema = new mongoose.Schema({
     _id: { type: String, required: true },
     available: { type: Number, default: 0 },
@@ -43,6 +55,7 @@ const counterSchema = new mongoose.Schema({
     sold: { type: Number, default: 0 },
 });
 
+/** Mongoose schema for persisted admin/user records. */
 const userSchema = new mongoose.Schema({
     _id: { type: String, required: true },
     roles: [{ type: String, required: true }],
@@ -53,7 +66,9 @@ const TicketModel = mongoose.models.Ticket || mongoose.model("Ticket", ticketSch
 const CounterModel = mongoose.models.Counter || mongoose.model("Counter", counterSchema);
 const UserModel = mongoose.models.User || mongoose.model("User", userSchema);
 
+/** Mongo implementation of the booking repository port. */
 export class MongoBookingRepository implements BookingRepository {
+    /** Inserts a new booking record. */
     async insert(booking: Booking): Promise<Booking> {
         await BookingModel.create({
             ...booking,
@@ -62,51 +77,63 @@ export class MongoBookingRepository implements BookingRepository {
         return booking;
     }
 
+    /** Loads a booking by its reference number. */
     async findByReferenceNo(referenceNo: string): Promise<Booking | null> {
         const record = await BookingModel.findOne({ reference_no: referenceNo });
         return record ? mapBooking(record) : null;
     }
 
+    /** Lists all bookings. */
     async list(): Promise<Booking[]> {
         const records = await BookingModel.find({});
         return records.map(mapBooking);
     }
 
+    /** Updates only the payment status field for a booking. */
     async updatePaymentStatus(referenceNo: string, value: BookingPaymentStatus): Promise<void> {
         await BookingModel.findOneAndUpdate({ reference_no: referenceNo }, { payment_status: value });
     }
 
+    /** Appends a newly created ticket id to the booking's ticket list. */
     async appendTicketId(referenceNo: string, ticketId: string): Promise<void> {
         await BookingModel.updateOne({ reference_no: referenceNo }, { $push: { ticket_ids: ticketId } });
     }
 }
 
+/** Mongo implementation of the ticket repository port. */
 export class MongoTicketRepository implements TicketRepository {
+    /** Inserts a new ticket record and returns its id. */
     async insert(ticket: Ticket): Promise<string> {
         await TicketModel.create(ticket);
         return ticket.ticket_id;
     }
 
+    /** Loads a ticket by its ticket id. */
     async findByTicketId(ticketId: string): Promise<Ticket | null> {
         const record = await TicketModel.findOne({ ticket_id: ticketId });
         return record ? mapTicket(record) : null;
     }
 
+    /** Lists all tickets. */
     async list(): Promise<Ticket[]> {
         const records = await TicketModel.find({});
         return records.map(mapTicket);
     }
 
+    /** Updates the lifecycle status of a ticket. */
     async updateStatus(ticketId: string, status: TicketStatus): Promise<void> {
         await TicketModel.findOneAndUpdate({ ticket_id: ticketId }, { status });
     }
 
+    /** Deletes a ticket by its ticket id. */
     async deleteByTicketId(ticketId: string): Promise<void> {
         await TicketModel.deleteOne({ ticket_id: ticketId });
     }
 }
 
+/** Mongo implementation of the ticket counter repository port. */
 export class MongoTicketCounterRepository implements TicketCounterRepository {
+    /** Creates a new counter record. */
     async create(counterId: string, values?: TicketCounterDelta): Promise<void> {
         await CounterModel.create({
             _id: counterId,
@@ -116,6 +143,7 @@ export class MongoTicketCounterRepository implements TicketCounterRepository {
         });
     }
 
+    /** Loads a counter by id and wraps persistence failures in an infrastructure error. */
     async findById(id: string): Promise<TicketCounter | null> {
         try {
             const record = await CounterModel.findOne({ _id: id });
@@ -125,6 +153,7 @@ export class MongoTicketCounterRepository implements TicketCounterRepository {
         }
     }
 
+    /** Replaces selected counter fields with absolute values. */
     async set(id: string, values: TicketCounterDelta): Promise<void> {
         await CounterModel.findOneAndUpdate(
             { _id: id },
@@ -132,6 +161,7 @@ export class MongoTicketCounterRepository implements TicketCounterRepository {
         );
     }
 
+    /** Applies an increment/decrement delta to the counter fields. */
     async increment(id: string, values: TicketCounterDelta): Promise<void> {
         try {
             await CounterModel.findOneAndUpdate({ _id: id }, { $inc: values });
@@ -141,17 +171,21 @@ export class MongoTicketCounterRepository implements TicketCounterRepository {
     }
 }
 
+/** Mongo implementation of the user repository port. */
 export class MongoUserRepository implements UserRepository {
+    /** Inserts a user/admin record. */
     async insert(user: User): Promise<void> {
         await UserModel.create(user);
     }
 
+    /** Loads a user/admin record by id. */
     async findById(id: string): Promise<User | null> {
         const record = await UserModel.findOne({ _id: id });
         return record ? mapUser(record) : null;
     }
 }
 
+/** Maps a Mongoose booking document into the canonical domain shape. */
 function mapBooking(record: Record<string, unknown>): Booking {
     return {
         reference_no: String(record.reference_no),
@@ -167,6 +201,7 @@ function mapBooking(record: Record<string, unknown>): Booking {
     };
 }
 
+/** Maps a Mongoose ticket document into the canonical domain shape. */
 function mapTicket(record: Record<string, unknown>): Ticket {
     return {
         ticket_id: String(record.ticket_id),
@@ -180,6 +215,7 @@ function mapTicket(record: Record<string, unknown>): Ticket {
     };
 }
 
+/** Maps a Mongoose counter document into the canonical domain shape. */
 function mapTicketCounter(record: Record<string, unknown>): TicketCounter {
     return {
         _id: String(record._id),
@@ -189,6 +225,7 @@ function mapTicketCounter(record: Record<string, unknown>): TicketCounter {
     };
 }
 
+/** Maps a Mongoose user document into the canonical domain shape. */
 function mapUser(record: Record<string, unknown>): User {
     return {
         _id: String(record._id),

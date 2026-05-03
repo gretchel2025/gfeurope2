@@ -1,3 +1,12 @@
+/**
+ * Purpose:
+ * This service owns ticket creation and check-in/check-out behavior.
+ *
+ * Why this structure is good:
+ * Ticket workflows combine domain rules, persistence, QR generation, storage,
+ * and logging. Keeping that orchestration in one application service makes the
+ * route layer thinner and keeps infrastructure details out of domain code.
+ */
 import { NotFoundError, ValidationError } from "$lib/application/errors";
 import type {
     BookingRepository,
@@ -10,6 +19,7 @@ import type { CreateTicketInput, QRCode, Ticket } from "$lib/domain/ticket";
 import { canCheckInTicket, canCheckOutTicket, normalizeTicketType } from "$lib/domain/ticket";
 import { TicketStatus } from "$lib/domain/shared/enums";
 
+/** Coordinates ticket lifecycle use cases and related side effects. */
 export class TicketService {
     constructor(
         private readonly bookingRepository: BookingRepository,
@@ -21,6 +31,7 @@ export class TicketService {
         private readonly randomIdGenerator: (size: number) => string,
     ) {}
 
+    /** Creates a ticket, generates its QR code, and stores its check-in asset. */
     async createNew(input: CreateTicketInput): Promise<Ticket> {
         const ticketType = normalizeTicketType(input.ticket_type);
         const ticketId = this.generateTicketId();
@@ -48,10 +59,12 @@ export class TicketService {
         return ticket;
     }
 
+    /** Loads a ticket when callers can handle a missing result. */
     async getById(ticketId: string): Promise<Ticket | null> {
         return await this.ticketRepository.findByTicketId(ticketId);
     }
 
+    /** Loads a ticket and throws when the id must be valid. */
     async getRequiredById(ticketId: string): Promise<Ticket> {
         const ticket = await this.getById(ticketId);
         if (!ticket) {
@@ -60,14 +73,17 @@ export class TicketService {
         return ticket;
     }
 
+    /** Returns all tickets for admin screens and reporting. */
     async getAll(): Promise<Ticket[]> {
         return await this.ticketRepository.list();
     }
 
+    /** Deletes a ticket by id. */
     async deleteById(ticketId: string): Promise<void> {
         await this.ticketRepository.deleteByTicketId(ticketId);
     }
 
+    /** Checks in a ticket if the booking and ticket state allow it. */
     async checkIn(ticketId: string): Promise<void> {
         const { ticket, booking } = await this.getTicketAndBooking(ticketId);
         if (!canCheckInTicket(booking, ticket)) {
@@ -82,6 +98,7 @@ export class TicketService {
         });
     }
 
+    /** Checks out a previously checked-in ticket when allowed by state. */
     async checkOut(ticketId: string): Promise<void> {
         const { ticket, booking } = await this.getTicketAndBooking(ticketId);
         if (!canCheckOutTicket(booking, ticket)) {
@@ -96,6 +113,7 @@ export class TicketService {
         });
     }
 
+    /** Builds the app URL and QR payload used for ticket check-in. */
     async getCheckinQRCode(ticketId: string, bookingReferenceNo: string): Promise<QRCode> {
         const encodedToken = Buffer.from(`${bookingReferenceNo}:${ticketId}`).toString("base64");
         const url = `${this.appBaseUrl}/api/v0/ticket/${ticketId}/checkin?token=${encodedToken}`;
@@ -107,6 +125,7 @@ export class TicketService {
         };
     }
 
+    /** Loads the ticket together with its parent booking for state validation. */
     private async getTicketAndBooking(ticketId: string) {
         const ticket = await this.getRequiredById(ticketId);
         const booking = await this.bookingRepository.findByReferenceNo(ticket.booking_reference_no);
@@ -116,6 +135,7 @@ export class TicketService {
         return { ticket, booking };
     }
 
+    /** Generates the user-visible ticket id format. */
     private generateTicketId(): string {
         const part1 = this.randomIdGenerator(3);
         const part2 = this.randomIdGenerator(4);

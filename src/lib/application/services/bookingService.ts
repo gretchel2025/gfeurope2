@@ -1,3 +1,12 @@
+/**
+ * Purpose:
+ * This service owns the booking lifecycle: create, pay, cancel, and ticket generation.
+ *
+ * Why this structure is good:
+ * Booking orchestration lives in one application service instead of being split
+ * across routes, database modules, and UI handlers. That makes business flows
+ * easier to follow and gives routes a thin adapter role.
+ */
 import { NotFoundError, ValidationError } from "$lib/application/errors";
 import type { BookingRepository, EventLogger } from "$lib/application/ports";
 import type {
@@ -19,6 +28,7 @@ import type { TicketCounterService } from "$lib/application/services/ticketCount
 import type { TicketService } from "$lib/application/services/ticketService";
 import type { NotificationService } from "$lib/application/services/notificationService";
 
+/** Coordinates booking-related use cases across repositories and other services. */
 export class BookingService {
     constructor(
         private readonly bookingRepository: BookingRepository,
@@ -29,6 +39,7 @@ export class BookingService {
         private readonly randomIdGenerator: (size: number) => string,
     ) {}
 
+    /** Creates a new booking and updates inventory in the same application flow. */
     async createNew(input: CreateBookingInput): Promise<Booking> {
         if (input.quantity < 1 || input.quantity > 10) {
             throw new ValidationError("validation failed: quantity must be between 1 and 10");
@@ -77,10 +88,12 @@ export class BookingService {
         return createdBooking;
     }
 
+    /** Loads a booking by reference number when callers can handle a missing result. */
     async getById(referenceNo: string): Promise<Booking | null> {
         return await this.bookingRepository.findByReferenceNo(referenceNo);
     }
 
+    /** Loads a booking by reference number and fails loudly when it must exist. */
     async getRequiredById(referenceNo: string): Promise<Booking> {
         const booking = await this.getById(referenceNo);
         if (!booking) {
@@ -89,10 +102,12 @@ export class BookingService {
         return booking;
     }
 
+    /** Returns all stored bookings for admin and reporting screens. */
     async list(): Promise<Booking[]> {
         return await this.bookingRepository.list();
     }
 
+    /** Marks an unpaid booking as paid and moves reserved inventory into sold inventory. */
     async markPaid(referenceNo: string): Promise<void> {
         const booking = await this.getRequiredById(referenceNo);
         if (!canMarkBookingPaid(booking)) {
@@ -113,6 +128,7 @@ export class BookingService {
         });
     }
 
+    /** Creates any missing tickets for a paid booking without duplicating existing ones. */
     async generateRelatedTickets(referenceNo: string): Promise<string[]> {
         const booking = await this.getRequiredById(referenceNo);
         if (!canGenerateTickets(booking)) {
@@ -147,6 +163,7 @@ export class BookingService {
         return ticketIds;
     }
 
+    /** Resolves all tickets referenced by a booking. */
     async getRelatedTickets(referenceNo: string): Promise<Ticket[]> {
         const booking = await this.getRequiredById(referenceNo);
         const tickets = await Promise.all(
@@ -155,6 +172,7 @@ export class BookingService {
         return tickets.filter((ticket): ticket is Ticket => Boolean(ticket));
     }
 
+    /** Enriches booking tickets with QR code payloads for email or detail screens. */
     async getRelatedTicketsWithCheckinQRCode(referenceNo: string): Promise<TicketWithQRCode[]> {
         const tickets = await this.getRelatedTickets(referenceNo);
         return await Promise.all(
@@ -165,6 +183,7 @@ export class BookingService {
         );
     }
 
+    /** Cancels an unpaid reservation and returns its reserved inventory to availability. */
     async cancelBookingReservation(referenceNo: string): Promise<void> {
         const booking = await this.getRequiredById(referenceNo);
         if (!canCancelBooking(booking)) {
@@ -189,10 +208,12 @@ export class BookingService {
         });
     }
 
+    /** Delegates city aggregation to the domain so reporting logic stays reusable. */
     getTopCitiesByCountOfTicketsBooked(bookings: Booking[]) {
         return getTopCitiesByCountOfTicketsBooked(bookings);
     }
 
+    /** Generates the booking reference format used throughout the app. */
     private generateBookingReferenceNo(): string {
         const part1 = this.randomIdGenerator(3);
         const part2 = this.randomIdGenerator(4);

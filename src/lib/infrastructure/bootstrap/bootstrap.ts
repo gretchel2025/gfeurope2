@@ -1,9 +1,20 @@
+/**
+ * Purpose:
+ * This file bootstraps runtime prerequisites such as Mongo connectivity,
+ * inventory counters, and local admin users.
+ *
+ * Why this structure is good:
+ * Startup behavior is centralized here instead of being spread across hooks and
+ * repositories. That makes local setup, empty-database handling, and future
+ * initialization logic easier to reason about.
+ */
 import type { User } from "$lib/domain/user";
 import { appConfig } from "$lib/infrastructure/config/env.server";
 import { connectMongo } from "$lib/infrastructure/db/mongo/client";
 import { logger } from "$lib/infrastructure/logging/logger";
 import { ticketCounterService, userService } from "$lib/server/http/services";
 
+/** Initializes runtime infrastructure that the app expects to exist. */
 export async function bootstrapApplication(): Promise<void> {
     logger.info("[INFO] bootstrapApplication() initializing app...");
 
@@ -19,6 +30,7 @@ export async function bootstrapApplication(): Promise<void> {
     logger.info("[INFO] bootstrapApplication() initialization done");
 }
 
+/** Ensures ticket counters exist so the app can run against an empty database. */
 async function ensureCounters(): Promise<void> {
     const counters = [
         {
@@ -50,6 +62,7 @@ async function ensureCounters(): Promise<void> {
     }
 }
 
+/** Seeds local admin users from configuration when running in local development. */
 async function ensureLocalAdminUsers(): Promise<void> {
     for (const email of appConfig.localAdminEmails) {
         const existing = await userService.getById(email);

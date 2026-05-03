@@ -1,6 +1,16 @@
+/**
+ * Purpose:
+ * This file defines booking-centric domain types and rules.
+ *
+ * Why this structure is good:
+ * The domain layer is where business vocabulary should live. Keeping booking
+ * rules here makes them reusable across routes, services, and future tests
+ * without pulling in framework or persistence concerns.
+ */
 import type { QRCode, Ticket } from "$lib/domain/ticket";
 import { BookingPaymentStatus, TicketPrice, TicketType } from "$lib/domain/shared/enums";
 
+/** Canonical booking shape used by the application layer. */
 export type Booking = {
     reference_no: string;
     name: string;
@@ -14,6 +24,7 @@ export type Booking = {
     ticket_ids: string[];
 };
 
+/** Input required to create a booking before defaults and ids are added. */
 export type CreateBookingInput = {
     name: string;
     email: string;
@@ -23,11 +34,13 @@ export type CreateBookingInput = {
     guests: string[];
 };
 
+/** Helper shape for admin/email views that need both ticket data and QR code data. */
 export type TicketWithQRCode = {
     ticket: Ticket;
     qrCodeData: QRCode;
 };
 
+/** Reporting aggregate describing booking volume for a city. */
 export type CityStats = {
     cityName: string;
     totalBookings: number;
@@ -37,14 +50,17 @@ export type CityStats = {
     percentOfThisCitysBookingsOverAllBookings: number;
 };
 
+/** Whether an unpaid booking may still be cancelled. */
 export function canCancelBooking(booking: Booking): boolean {
     return booking.payment_status === BookingPaymentStatus.UNPAID;
 }
 
+/** Whether a booking is allowed to transition into the paid state. */
 export function canMarkBookingPaid(booking: Booking): boolean {
     return booking.payment_status === BookingPaymentStatus.UNPAID;
 }
 
+/** Whether a paid booking still needs tickets generated for its guests. */
 export function canGenerateTickets(booking: Booking): boolean {
     const isPaid = booking.payment_status === BookingPaymentStatus.PAID;
     const allTicketsGenerated = booking.ticket_ids.length >= booking.guests.length;
@@ -52,6 +68,7 @@ export function canGenerateTickets(booking: Booking): boolean {
     return isPaid && !allTicketsGenerated;
 }
 
+/** Computes total price from ticket class and quantity. */
 export function computeTotalAmountDue(ticketType: TicketType, quantity: number): number {
     switch (ticketType) {
         case TicketType.VIP:
@@ -64,10 +81,15 @@ export function computeTotalAmountDue(ticketType: TicketType, quantity: number):
     }
 }
 
+/** Sort helper used by admin screens to show newest bookings first. */
 export function sortBookingsByDateDescending(a: Booking, b: Booking): number {
     return Date.parse(b.book_date) - Date.parse(a.book_date);
 }
 
+/**
+ * Aggregates bookings into per-city statistics.
+ * The small normalization rules here capture existing business cleanup for city names.
+ */
 export function getTopCitiesByCountOfTicketsBooked(bookings: Booking[]): CityStats[] {
     const cities: CityStats[] = bookings.reduce((accum: CityStats[], booking: Booking) => {
         let cityName = booking.city.toLowerCase();

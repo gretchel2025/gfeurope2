@@ -1,9 +1,20 @@
+/**
+ * Purpose:
+ * This file provides the Postmark-backed email sender implementation.
+ *
+ * Why this structure is good:
+ * Delivery details stay in infrastructure while the application layer only
+ * depends on the EmailSender port. That makes email easier to disable locally
+ * and easier to replace later.
+ */
 import { AppError } from "$lib/application/errors";
 import type { EmailMessage, EmailSender } from "$lib/application/ports";
 import { appConfig } from "$lib/infrastructure/config/env.server";
 import { logger } from "$lib/infrastructure/logging/logger";
 
+/** Sends emails through Postmark when credentials are configured. */
 export class PostmarkEmailSender implements EmailSender {
+    /** Sends one outbound email message or skips cleanly in local development. */
     async send(message: EmailMessage): Promise<void> {
         if (!appConfig.integrations.postmarkApiKey) {
             logger.warn(`[WARN] email svc: MY_POSTMARK_API_KEY is not configured, skipping email to ${message.to}`);
