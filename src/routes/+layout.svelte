@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import '../app.css';
 	import AuroraBackground from '$lib/components/public/AuroraBackground.svelte';
 
@@ -64,3 +65,32 @@
 </header>
 
 <slot />
+
+{#if !$page.url.pathname.startsWith('/api')}
+	<footer
+		class="relative z-10 border-t border-blue-500/10 bg-gradient-to-b from-[#0c0f1d] to-[#080d17] px-4 py-12"
+	>
+		<div class="mx-auto max-w-4xl text-center">
+			<p class="mb-6 text-blue-300">© 2025 Grand Feast Europe and UK. All rights reserved.</p>
+			<div class="flex flex-wrap justify-center gap-x-6 gap-y-3">
+				<a href="/conditions" class="text-blue-200 transition hover:underline hover:text-white">
+					&gt; Terms &amp; Conditions
+				</a>
+				<a href="/privacy" class="text-blue-200 transition hover:underline hover:text-white">
+					&gt; Privacy Policy
+				</a>
+				<a href="/faq" class="text-blue-200 transition hover:underline hover:text-white">
+					&gt; FAQ
+				</a>
+				<a
+					href="/api"
+					target="_self"
+					rel="noopener"
+					class="text-blue-200 transition hover:underline hover:text-white"
+				>
+					&gt; Organizers
+				</a>
+			</div>
+		</div>
+	</footer>
+{/if}
