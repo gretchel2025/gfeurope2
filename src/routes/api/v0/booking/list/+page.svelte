@@ -2,6 +2,7 @@
 	import AdminButton from '$lib/components/admin/AdminButton.svelte';
 	import AdminCard from '$lib/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;
@@ -9,7 +10,7 @@
 </script>
 
 <AdminPage title="Bookings" subtitle={`Count: ${bookings.length}`}>
-	<AdminButton slot="actions" href="/api/v0/booking/search" variant="secondary"
+	<AdminButton slot="actions" href={adminRoutes.booking.search()} variant="secondary"
 		>Search bookings</AdminButton
 	>
 
@@ -31,7 +32,7 @@
 							<div class="mt-3 flex flex-wrap gap-2 text-sm">
 								{#each booking.ticket_ids as ticketId}
 									<a
-										href={`/api/v0/ticket/${ticketId}/details`}
+										href={adminRoutes.ticket.details(ticketId)}
 										class="font-semibold text-blue-700 hover:underline"
 									>
 										{ticketId}
@@ -41,7 +42,7 @@
 						{/if}
 					</div>
 
-					<AdminButton href={`/api/v0/booking/${booking.reference_no}/details`} variant="secondary"
+					<AdminButton href={adminRoutes.booking.details(booking.reference_no)} variant="secondary"
 						>Details</AdminButton
 					>
 				</div>

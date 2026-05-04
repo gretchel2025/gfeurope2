@@ -4,6 +4,7 @@
 	import AdminPage from '$lib/components/admin/AdminPage.svelte';
 	import BackLinks from '$lib/components/admin/BackLinks.svelte';
 	import DetailRow from '$lib/components/admin/DetailRow.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;
@@ -12,7 +13,7 @@
 <AdminPage
 	title="Ticket Details"
 	subtitle={`Ticket ${data.aTicket.ticket_id}`}
-	backHref="/api/v0/ticket/list"
+	backHref={adminRoutes.ticket.list}
 	backLabel="Back to ticket list"
 >
 	<div class="grid gap-6 lg:grid-cols-[1fr_18rem]">
@@ -21,7 +22,7 @@
 				<DetailRow label="Ticket ID" value={data.aTicket.ticket_id} />
 				<DetailRow label="Booking Ref">
 					<a
-						href={`/api/v0/booking/${data.aTicket.booking_reference_no}/details`}
+						href={adminRoutes.booking.details(data.aTicket.booking_reference_no)}
 						class="font-semibold text-blue-700 hover:underline"
 					>
 						{data.aTicket.booking_reference_no}
@@ -48,8 +49,8 @@
 
 	<BackLinks
 		links={[
-			{ href: '/api/v0/ticket/list', label: 'List tickets' },
-			{ href: '/api', label: 'Admin home' }
+			{ href: adminRoutes.ticket.list, label: 'List tickets' },
+			{ href: adminRoutes.home, label: 'Admin home' }
 		]}
 	/>
 </AdminPage>

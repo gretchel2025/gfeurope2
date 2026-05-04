@@ -2,6 +2,7 @@
 	import AdminButton from '$lib/components/admin/AdminButton.svelte';
 	import AdminCard from '$lib/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;
@@ -11,7 +12,11 @@
 
 <AdminPage title="Search Bookings" subtitle="Find a booking by reference number.">
 	<AdminCard>
-		<form method="GET" action="/api/v0/booking/search" class="flex flex-col gap-3 sm:flex-row">
+		<form
+			method="GET"
+			action={adminRoutes.booking.search()}
+			class="flex flex-col gap-3 sm:flex-row"
+		>
 			<label class="sr-only" for="reference_no">Booking reference number</label>
 			<input
 				id="reference_no"
@@ -42,7 +47,7 @@
 						<p class="mt-1 text-sm text-slate-600">{booking.name} - {booking.payment_status}</p>
 						<div class="mt-3">
 							<AdminButton
-								href={`/api/v0/booking/${booking.reference_no}/details`}
+								href={adminRoutes.booking.details(booking.reference_no)}
 								variant="secondary"
 							>
 								View details

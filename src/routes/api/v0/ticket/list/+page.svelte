@@ -2,6 +2,7 @@
 	import AdminButton from '$lib/components/admin/AdminButton.svelte';
 	import AdminCard from '$lib/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;
@@ -23,7 +24,7 @@
 						<p class="mt-1 text-sm text-slate-600">
 							Booking Ref:
 							<a
-								href={`/api/v0/booking/${ticket.booking_reference_no}/details`}
+								href={adminRoutes.booking.details(ticket.booking_reference_no)}
 								class="font-semibold text-blue-700 hover:underline"
 							>
 								{ticket.booking_reference_no}
@@ -31,7 +32,7 @@
 						</p>
 					</div>
 
-					<AdminButton href={`/api/v0/ticket/${ticket.ticket_id}/details`} variant="secondary"
+					<AdminButton href={adminRoutes.ticket.details(ticket.ticket_id)} variant="secondary"
 						>Details</AdminButton
 					>
 				</div>

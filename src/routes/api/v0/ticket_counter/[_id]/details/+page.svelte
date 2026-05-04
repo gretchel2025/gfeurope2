@@ -3,6 +3,7 @@
 	import AdminCard from '$lib/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/components/admin/AdminPage.svelte';
 	import DetailRow from '$lib/components/admin/DetailRow.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;
@@ -11,7 +12,7 @@
 <AdminPage
 	title="Ticket Counter"
 	subtitle={`Inventory for ${data.ticketCounter._id}`}
-	backHref="/api"
+	backHref={adminRoutes.home}
 	backLabel="Back to dashboard"
 >
 	<AdminCard

@@ -1,29 +1,22 @@
 import { redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
-import type { Booking } from "$lib/domain/booking";
-import { rethrowAsKitError } from "$lib/server/http/appError";
-import { requireAdminRequest } from "$lib/server/http/guards";
-import { bookingService } from "$lib/server/http/services";
+import type { Actions, PageServerLoad } from './$types';
+import type { Booking } from '$lib/domain/booking';
+import { adminRoutes } from '$lib/navigation/adminRoutes';
+import { adminAction, requireRouteParam, withKitErrors } from '$lib/server/http/handlers';
+import { bookingService } from '$lib/server/http/services';
 
-export async function load({ params }): Promise<{aRecord: Booking | null}> {
-    try {
-        return {
-            aRecord: await bookingService.getRequiredById(params.reference_no),
-        };
-    } catch (caught) {
-        rethrowAsKitError(caught);
-    }
-}
+export const load: PageServerLoad = withKitErrors(
+	async ({ params }: Parameters<PageServerLoad>[0]): Promise<{ aRecord: Booking | null }> => {
+		return {
+			aRecord: await bookingService.getRequiredById(params.reference_no)
+		};
+	}
+);
 
 export const actions: Actions = {
-    cancelBooking: async (event) => {
-        try {
-            await requireAdminRequest(event);
-            const { params } = event;
-            await bookingService.cancelBookingReservation(params.reference_no);
-            throw redirect(303, `/api/v0/booking/${params.reference_no}/cancel/cancel_success`);
-        } catch (caught) {
-            rethrowAsKitError(caught);
-        }
-    },
+	cancelBooking: adminAction(async ({ params }) => {
+		const referenceNo = requireRouteParam(params, 'reference_no');
+		await bookingService.cancelBookingReservation(referenceNo);
+		throw redirect(303, adminRoutes.booking.cancelSuccess(referenceNo));
+	})
 };

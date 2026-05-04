@@ -1,21 +1,22 @@
-import type {Booking, TicketWithQRCode} from "$lib/domain/booking";
-import { rethrowAsKitError } from "$lib/server/http/appError";
-import { bookingService } from "$lib/server/http/services";
+import type { PageServerLoad } from './$types';
+import type { Booking, TicketWithQRCode } from '$lib/domain/booking';
+import { withKitErrors } from '$lib/server/http/handlers';
+import { bookingService } from '$lib/server/http/services';
 
 export type ServerData = {
-    booking: Booking | null,
-    ticketsData: TicketWithQRCode[]
-}
+	booking: Booking | null;
+	ticketsData: TicketWithQRCode[];
+};
 
-export async function load({ params }): Promise<ServerData> {
-    try {
-        const booking = await bookingService.getRequiredById(params.reference_no);
-        const ticketsData = await bookingService.getRelatedTicketsWithCheckinQRCode(params.reference_no);
-        return {
-            booking,
-            ticketsData,
-        };
-    } catch (caught) {
-        rethrowAsKitError(caught);
-    }
-}
+export const load: PageServerLoad = withKitErrors(
+	async ({ params }: Parameters<PageServerLoad>[0]): Promise<ServerData> => {
+		const booking = await bookingService.getRequiredById(params.reference_no);
+		const ticketsData = await bookingService.getRelatedTicketsWithCheckinQRCode(
+			params.reference_no
+		);
+		return {
+			booking,
+			ticketsData
+		};
+	}
+);

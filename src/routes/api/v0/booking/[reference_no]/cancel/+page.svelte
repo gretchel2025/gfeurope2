@@ -7,6 +7,7 @@
 	import DetailRow from '$lib/components/admin/DetailRow.svelte';
 	import type { Booking } from '$lib/domain/booking';
 	import { canCancelBooking } from '$lib/domain/booking';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 
 	export let data: {
 		aRecord: Booking;
@@ -24,7 +25,7 @@
 <AdminPage
 	title="Cancel Booking"
 	subtitle="Returns reserved tickets to available inventory."
-	backHref={`/api/v0/booking/${booking.reference_no}/details`}
+	backHref={adminRoutes.booking.details(booking.reference_no)}
 	backLabel="Back to booking details"
 >
 	<div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
@@ -40,7 +41,7 @@
 						<div class="flex flex-wrap gap-2">
 							{#each booking.ticket_ids as ticketId}
 								<a
-									href={`/api/v0/ticket/${ticketId}/details`}
+									href={adminRoutes.ticket.details(ticketId)}
 									class="font-semibold text-blue-700 hover:underline"
 								>
 									{ticketId}
@@ -70,7 +71,7 @@
 				</form>
 
 				<AdminButton
-					href={`/api/v0/booking/${booking.reference_no}/details`}
+					href={adminRoutes.booking.details(booking.reference_no)}
 					variant="secondary"
 					fullWidth
 				>
@@ -82,10 +83,10 @@
 
 	<BackLinks
 		links={[
-			{ href: `/api/v0/booking/${booking.reference_no}/details`, label: 'Booking details' },
-			{ href: '/api/v0/booking/list', label: 'List bookings' },
-			{ href: '/api/v0/booking/search', label: 'Search' },
-			{ href: '/api', label: 'Admin home' }
+			{ href: adminRoutes.booking.details(booking.reference_no), label: 'Booking details' },
+			{ href: adminRoutes.booking.list, label: 'List bookings' },
+			{ href: adminRoutes.booking.search(), label: 'Search' },
+			{ href: adminRoutes.home, label: 'Admin home' }
 		]}
 	/>
 </AdminPage>

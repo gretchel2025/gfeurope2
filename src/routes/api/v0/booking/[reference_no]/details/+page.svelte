@@ -7,6 +7,7 @@
 	import type { Booking } from '$lib/domain/booking';
 	import { canCancelBooking, canGenerateTickets, canMarkBookingPaid } from '$lib/domain/booking';
 	import { BookingPaymentStatus } from '$lib/domain/shared/enums';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 
 	export let data: { aRecord: Booking };
 
@@ -28,12 +29,12 @@
 <AdminPage
 	title="Booking Details"
 	subtitle={`Reference ${booking.reference_no}`}
-	backHref="/api/v0/booking/list"
+	backHref={adminRoutes.booking.list}
 	backLabel="Back to booking list"
 >
 	<AdminButton
 		slot="actions"
-		href={`/api/v0/booking/${booking.reference_no}/summary`}
+		href={adminRoutes.booking.summary(booking.reference_no)}
 		disabled={!canViewSummary}
 	>
 		View summary
@@ -54,7 +55,7 @@
 						<div class="flex flex-wrap gap-2">
 							{#each booking.ticket_ids as ticketId}
 								<a
-									href={`/api/v0/ticket/${ticketId}/details`}
+									href={adminRoutes.ticket.details(ticketId)}
 									class="font-semibold text-blue-700 hover:underline"
 								>
 									{ticketId}
@@ -98,7 +99,7 @@
 
 				{#if canCancel}
 					<AdminButton
-						href={`/api/v0/booking/${booking.reference_no}/cancel`}
+						href={adminRoutes.booking.cancel(booking.reference_no)}
 						variant="danger"
 						fullWidth
 					>
@@ -111,9 +112,9 @@
 
 	<BackLinks
 		links={[
-			{ href: '/api/v0/booking/list', label: 'List bookings' },
-			{ href: '/api/v0/booking/search', label: 'Search' },
-			{ href: '/api', label: 'Admin home' }
+			{ href: adminRoutes.booking.list, label: 'List bookings' },
+			{ href: adminRoutes.booking.search(), label: 'Search' },
+			{ href: adminRoutes.home, label: 'Admin home' }
 		]}
 	/>
 </AdminPage>

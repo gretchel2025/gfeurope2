@@ -1,7 +1,6 @@
 import type { Booking } from '$lib/domain/booking';
 import type { Actions } from './$types';
-import { rethrowAsKitError } from '$lib/server/http/appError';
-import { requireAdminRequest } from '$lib/server/http/guards';
+import { adminAction } from '$lib/server/http/handlers';
 import { bookingService } from '$lib/server/http/services';
 
 export type ServerData = {
@@ -37,17 +36,12 @@ export const load = async (event): Promise<ServerData> => {
 
 // actions handle Form Actions
 export const actions: Actions = {
-	markPaid: async (event) => {
-		try {
-			await requireAdminRequest(event);
-			const formData = await event.request.formData();
+	markPaid: adminAction(async (event) => {
+		const formData = await event.request.formData();
 
-			const referenceNo = formData.get('reference_no');
-			if (typeof referenceNo === 'string' && referenceNo.trim()) {
-				await bookingService.markPaid(referenceNo.trim());
-			}
-		} catch (caught) {
-			rethrowAsKitError(caught);
+		const referenceNo = formData.get('reference_no');
+		if (typeof referenceNo === 'string' && referenceNo.trim()) {
+			await bookingService.markPaid(referenceNo.trim());
 		}
-	}
+	})
 };
