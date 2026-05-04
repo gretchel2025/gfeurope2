@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2200" viewBox="0 0 1600 2200">
+  <defs>
+    <linearGradient id="pageBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f3ee"/>
+      <stop offset="52%" stop-color="#eef4f1"/>
+      <stop offset="100%" stop-color="#e7eef7"/>
+    </linearGradient>
+    <linearGradient id="darkBand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#17242b"/>
+      <stop offset="100%" stop-color="#263d44"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#17242b" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .title { font: 800 62px Arial, sans-serif; fill: #17242b; }
+      .subtitle { font: 400 31px Arial, sans-serif; fill: #52636b; }
+      .eyebrow { font: 800 24px Arial, sans-serif; fill: #a84f2a; letter-spacing: 3px; }
+      .h2 { font: 800 38px Arial, sans-serif; fill: #17242b; }
+      .h3 { font: 800 30px Arial, sans-serif; fill: #17242b; }
+      .body { font: 400 25px Arial, sans-serif; fill: #52636b; }
+      .small { font: 400 21px Arial, sans-serif; fill: #52636b; }
+      .mono { font: 700 23px Menlo, Consolas, monospace; fill: #17242b; }
+      .whiteTitle { font: 800 36px Arial, sans-serif; fill: #ffffff; }
+      .whiteBody { font: 400 24px Arial, sans-serif; fill: #d9e8e9; }
+      .pillText { font: 800 22px Arial, sans-serif; fill: #ffffff; }
+      .label { font: 800 22px Arial, sans-serif; fill: #17242b; }
+      .mutedLabel { font: 700 20px Arial, sans-serif; fill: #69767d; }
+    </style>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M 0 0 L 14 7 L 0 14 z" fill="#2f6f73"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="2200" fill="url(#pageBg)"/>
+  <circle cx="1370" cy="150" r="230" fill="#d8efe8" opacity="0.75"/>
+  <circle cx="160" cy="2050" r="280" fill="#f0d9c7" opacity="0.65"/>
+
+  <text x="110" y="135" class="eyebrow">UI REFACTOR, PAGE 1 OF 2</text>
+  <text x="110" y="230" class="title">From one-off pages to reusable UI structure</text>
+  <text x="110" y="292" class="subtitle">The goal was not just prettier screens. It was making future feature work easier for people and Codex.</text>
+
+  <g filter="url(#softShadow)">
+    <rect x="100" y="370" width="660" height="670" rx="34" fill="#fffdf9" stroke="#ded6ca" stroke-width="2"/>
+    <rect x="840" y="370" width="660" height="670" rx="34" fill="#fffdf9" stroke="#ccdcd5" stroke-width="2"/>
+  </g>
+
+  <rect x="140" y="420" width="180" height="48" rx="24" fill="#c75d4b"/>
+  <text x="168" y="453" class="pillText">BEFORE</text>
+  <text x="140" y="525" class="h2">UI work had too many local dialects</text>
+  <text x="140" y="590" class="body">Each route carried its own layout choices,</text>
+  <text x="140" y="625" class="body">button styles, form behavior, and state patterns.</text>
+
+  <g transform="translate(140 700)">
+    <rect x="0" y="0" width="560" height="70" rx="16" fill="#fbe3dd" stroke="#c75d4b"/>
+    <text x="24" y="45" class="label">Manual DOM updates and querySelector logic</text>
+    <rect x="0" y="92" width="560" height="70" rx="16" fill="#f7eadb" stroke="#d89a62"/>
+    <text x="24" y="137" class="label">Pico, Sveltestrap, Tailwind, raw markup mixed</text>
+    <rect x="0" y="184" width="560" height="70" rx="16" fill="#f5eee6" stroke="#d6c4ad"/>
+    <text x="24" y="229" class="label">Admin pages each invented their own layout</text>
+  </g>
+
+  <rect x="880" y="420" width="150" height="48" rx="24" fill="#4b7f6a"/>
+  <text x="910" y="453" class="pillText">AFTER</text>
+  <text x="880" y="525" class="h2">A small UI vocabulary Codex can copy</text>
+  <text x="880" y="590" class="body">Routes now compose shared components and</text>
+  <text x="880" y="625" class="body">keep local page logic easier to scan.</text>
+
+  <g transform="translate(880 700)">
+    <rect x="0" y="0" width="560" height="70" rx="16" fill="#e5f2ea" stroke="#4b7f6a"/>
+    <text x="24" y="45" class="label">AdminPage, AdminCard, AdminButton</text>
+    <rect x="0" y="92" width="560" height="70" rx="16" fill="#dcefee" stroke="#2f6f73"/>
+    <text x="24" y="137" class="label">DetailRow, BackLinks, DangerConfirmation</text>
+    <rect x="0" y="184" width="560" height="70" rx="16" fill="#e7edf8" stroke="#4e6fae"/>
+    <text x="24" y="229" class="label">AuroraBackground and CountdownTimer</text>
+  </g>
+
+  <line x1="760" y1="705" x2="840" y2="705" stroke="#2f6f73" stroke-width="7" marker-end="url(#arrow)"/>
+
+  <g filter="url(#softShadow)">
+    <rect x="100" y="1120" width="1400" height="720" rx="38" fill="#17242b"/>
+  </g>
+  <text x="150" y="1192" class="whiteTitle">New mental model for UI routes</text>
+  <text x="150" y="1242" class="whiteBody">A page should mostly choose the right shared pieces, pass typed data, and wire forms/actions.</text>
+
+  <g transform="translate(170 1335)">
+    <rect x="0" y="0" width="260" height="130" rx="22" fill="#f6f3ee"/>
+    <text x="40" y="52" class="h3">Route Page</text>
+    <text x="40" y="91" class="small">thin Svelte file</text>
+
+    <rect x="365" y="0" width="300" height="130" rx="22" fill="#e5f2ea"/>
+    <text x="405" y="52" class="h3">Admin UI</text>
+    <text x="405" y="91" class="small">shared components</text>
+
+    <rect x="790" y="0" width="300" height="130" rx="22" fill="#e7edf8"/>
+    <text x="830" y="52" class="h3">Server Action</text>
+    <text x="830" y="91" class="small">SvelteKit form handler</text>
+
+    <rect x="0" y="250" width="300" height="130" rx="22" fill="#f5eee6"/>
+    <text x="40" y="302" class="h3">Domain Rules</text>
+    <text x="40" y="341" class="small">canCancel, canCheckIn</text>
+
+    <rect x="395" y="250" width="300" height="130" rx="22" fill="#dcefee"/>
+    <text x="435" y="302" class="h3">Application</text>
+    <text x="435" y="341" class="small">services and workflows</text>
+
+    <rect x="790" y="250" width="300" height="130" rx="22" fill="#eadfd8"/>
+    <text x="830" y="302" class="h3">Infrastructure</text>
+    <text x="830" y="341" class="small">Mongo, email, auth</text>
+
+    <line x1="260" y1="65" x2="365" y2="65" stroke="#8bb2a4" stroke-width="6" marker-end="url(#arrow)"/>
+    <line x1="665" y1="65" x2="790" y2="65" stroke="#8bb2a4" stroke-width="6" marker-end="url(#arrow)"/>
+    <line x1="940" y1="130" x2="940" y2="250" stroke="#8bb2a4" stroke-width="6" marker-end="url(#arrow)"/>
+    <line x1="790" y1="315" x2="695" y2="315" stroke="#8bb2a4" stroke-width="6" marker-end="url(#arrow)"/>
+    <line x1="395" y1="315" x2="300" y2="315" stroke="#8bb2a4" stroke-width="6" marker-end="url(#arrow)"/>
+  </g>
+
+  <g transform="translate(110 1910)">
+    <rect x="0" y="0" width="1380" height="170" rx="28" fill="#fffdf9" stroke="#ded6ca"/>
+    <text x="40" y="58" class="h3">The practical win</text>
+    <text x="40" y="105" class="body">When a new admin feature is added, Codex now has obvious patterns to reuse instead of</text>
+    <text x="40" y="143" class="body">reverse-engineering each page from scratch.</text>
+  </g>
+</svg>
