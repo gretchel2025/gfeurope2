@@ -1,40 +1,14 @@
-<script lang="ts">
-    import { Button, Card, Fade } from '@sveltestrap/sveltestrap'; 
-</script>
+<main
+	class="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#0f172a]/80 to-[#1e293b]/80 px-4 py-10 text-white"
+>
+	<article
+		class="w-full max-w-lg rounded-xl bg-black/60 p-6 text-center shadow-md backdrop-blur-md"
+	>
+		<h1 class="text-3xl font-bold text-yellow-400 sm:text-4xl">Sold Out</h1>
+		<p class="mt-3 text-lg text-blue-100">We're all sold out. See you next year!</p>
 
-<main class="container-fluid main-background">
-    <article>
-        <hgroup>
-            <h1>Sold Out</h1>
-            <h2>We're all sold out. See you next year!</h2>
-        </hgroup>
-    
-    
-        <!-- <div class="help-button">
-            <Button outline color="danger" id="toggler">
-                Didn't get our email?
-            </Button>
-
-
-            <Button outline color="info" id="toggler2">
-                Need help with your booking?
-            </Button>
-        </div>
-
-            <Fade toggler="#toggler">
-                <Card body>
-                    Check your spam or junk folder.
-                </Card>
-            </Fade>
-
-            <Fade toggler="#toggler2">
-                <Card body>
-                    Send us an email at help@grandfeast.eu
-                </Card>
-            </Fade> -->
-
-        <!-- <a href="/newbooking">book another</a> | -->
-        <a href="/">home</a>
-
-    </article>
+		<div class="mt-6">
+			<a href="/" class="text-blue-400 hover:underline">Home</a>
+		</div>
+	</article>
 </main>

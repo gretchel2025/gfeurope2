@@ -39,8 +39,6 @@
 		"@auth/firebase-adapter": "^2.4.1",
 		"@auth/sveltekit": "^1.4.1",
 		"@cloudinary/url-gen": "^1.19.0",
-		"@picocss/pico": "^1.5.10",
-		"@sveltestrap/sveltestrap": "^6.2.7",
 		"base-64": "^1.0.0",
 		"cloudinary": "^2.3.0",
 		"express": "^4.19.2",
