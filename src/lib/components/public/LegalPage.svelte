@@ -5,6 +5,7 @@
 	export let introSecondary: string | undefined = undefined;
 	export let companionHref: string;
 	export let companionLabel: string;
+	export let eyebrow: string = 'Legal';
 </script>
 
 <section class="relative z-10 px-4 py-10 sm:py-14">
@@ -22,8 +23,8 @@
 			</a>
 		</div>
 
-		<header class="rounded-3xl border border-white/10 bg-white/8 px-6 py-8 shadow-xl backdrop-blur-md sm:px-10">
-			<p class="text-sm font-semibold uppercase tracking-[0.3em] text-teal-200">Legal</p>
+			<header class="rounded-3xl border border-white/10 bg-white/8 px-6 py-8 shadow-xl backdrop-blur-md sm:px-10">
+				<p class="text-sm font-semibold uppercase tracking-[0.3em] text-teal-200">{eyebrow}</p>
 			<h1 class="mt-3 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">{title}</h1>
 			<p class="mt-4 text-sm font-medium text-yellow-200">Last updated: {lastUpdated}</p>
 			<div class="mt-6 h-1 w-24 rounded-full bg-gradient-to-r from-yellow-300 via-teal-300 to-blue-400"></div>

@@ -9,6 +9,7 @@
 	introSecondary="This page is provided as general attendee guidance for our event and ticket sales. Specific event updates shared on the website or in booking communications will take precedence if details change."
 	companionHref="/newbooking"
 	companionLabel="Buy Tickets"
+	eyebrow="Attendee Guide"
 >
 	<h2>Buying Tickets</h2>
 	<h3>How do I buy a ticket?</h3>
