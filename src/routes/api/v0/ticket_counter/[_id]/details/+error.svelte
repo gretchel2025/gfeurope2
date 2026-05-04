@@ -13,7 +13,6 @@
             <h2>Refresh and Retry</h2>
         </hgroup>
 
-<!--        <a href="javascript: location.reload()" role="button">Refresh</a>-->
         <button type="button" on:click={refreshPage}>Refresh</button>
     </article>
 
