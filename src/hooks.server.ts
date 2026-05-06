@@ -1,5 +1,5 @@
 import { bootstrapApplication } from "$lib/infrastructure/bootstrap/bootstrap";
 
-bootstrapApplication();
+await bootstrapApplication();
 
 export { handle } from "./auth";
