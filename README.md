@@ -5,7 +5,10 @@ SvelteKit app for the Grand Feast EU and UK ticketing and admin site.
 The checked-in public pages are currently configured for the 2025 EU and UK Grand Feast
 in Oslo, Norway.
 
-Main site: [grandfeast.eu](https://www.grandfeast.eu/)
+Production site: [grandfeast.eu](https://www.grandfeast.eu/)
+
+Development preview:
+[dev--grand-feast-uk-x-europe.netlify.app](https://dev--grand-feast-uk-x-europe.netlify.app/)
 
 Production branch deploy:
 [prod--grand-feast-uk-x-europe.netlify.app](https://prod--grand-feast-uk-x-europe.netlify.app/)
@@ -138,10 +141,17 @@ Create a production build:
 npm run build
 ```
 
-## Deploy To Production
+## Deployment
 
-Netlify is connected to the `prod` branch. Merging or pushing changes to `prod`
-triggers a production deploy to [grandfeast.eu](https://www.grandfeast.eu/).
+Netlify is connected to this GitHub repository and tracks two long-lived branches:
+
+- `dev` is the official development branch. Merging or pushing changes to `dev`
+  triggers the long-lived preview at
+  [dev--grand-feast-uk-x-europe.netlify.app](https://dev--grand-feast-uk-x-europe.netlify.app/).
+- `prod` is the production branch. Merging or pushing changes to `prod` triggers
+  a production deploy to [grandfeast.eu](https://www.grandfeast.eu/).
+
+To deploy to production:
 
 ```bash
 git checkout prod
