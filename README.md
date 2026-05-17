@@ -10,6 +10,8 @@ Production site: [grandfeast.eu](https://www.grandfeast.eu/)
 Development preview:
 [dev--grand-feast-uk-x-europe.netlify.app](https://dev--grand-feast-uk-x-europe.netlify.app/)
 
+Deploy preview test branches can be used to validate Netlify preview auth flows before release.
+
 Production branch deploy:
 [prod--grand-feast-uk-x-europe.netlify.app](https://prod--grand-feast-uk-x-europe.netlify.app/)
 
