@@ -1,1 +1,1 @@
-export { handle } from "$lib/infrastructure/auth/authConfig";
+export { auth } from '$lib/infrastructure/auth/authConfig';

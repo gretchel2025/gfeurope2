@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { signOut } from '@auth/sveltekit/client';
+	import { goto } from '$app/navigation';
+	import { authClient } from '$lib/infrastructure/auth/authClient';
 	import { page } from '$app/stores';
 	import { adminRoutes, publicRoutes } from '$lib/navigation/adminRoutes';
 
 	async function signOutCurrentUser() {
-		await signOut();
+		await authClient.signOut();
+		await goto(publicRoutes.signin);
 	}
 </script>
 
