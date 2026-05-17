@@ -1,116 +1,156 @@
 # grandfeast-1a
 
-Web app project for Grand Feast UK x Europe 2024
+SvelteKit app for the Grand Feast EU and UK ticketing and admin site.
 
-Live demo (beta): [link](https://main--grand-feast-uk-x-europe.netlify.app/)
+The checked-in public pages are currently configured for the 2025 EU and UK Grand Feast
+in Oslo, Norway.
 
-## To deploy to production
+Main site: [grandfeast.eu](https://www.grandfeast.eu/)
 
-1. Checkout `prod` branch
-```bash
-git checkout prod
-```
+Live demo: [main--grand-feast-uk-x-europe.netlify.app](https://main--grand-feast-uk-x-europe.netlify.app/)
 
-2. Merge `dev` to `prod`, and push
-```bash
-make pull-dev
-git push
-```
+## Project Structure
 
-## To run
+- `src/routes/` contains SvelteKit routes.
+- `src/lib/components/` contains shared UI components.
+- `src/lib/domain/` contains framework-light domain models and business rules.
+- `src/lib/application/` contains application services and ports.
+- `src/lib/infrastructure/` contains adapters for auth, bootstrap, config, MongoDB, email,
+  logging, media, and system settings.
+- `src/lib/server/http/` contains server-side HTTP service composition.
+- `src/lib/navigation/` contains navigation metadata.
+- `static/` contains static assets.
 
-1. install dependencies
+## Requirements
+
+- Node.js and npm
+- Docker, if you want to run MongoDB locally with `compose.yaml`
+
+## Setup
+
+Install dependencies:
+
 ```bash
 make install
 ```
 
-2. setup a .env file to store config/secrets for the app, then enter the real values
+Create a local env file:
+
 ```bash
 cp .env.example .env
 ```
 
-3. run the development server
+Review `.env` and fill in any values needed for your environment.
+
+## Run The App
+
+Start the Vite development server:
+
 ```bash
 make run
 ```
 
-## Running Locally With A Local MongoDB
+The local app expects `http://localhost:5173`, including for OAuth callback URLs.
 
-If the shared remote MongoDB is unavailable, you can run the app against a local MongoDB instance instead.
+## Run With Local MongoDB
 
-1. Copy the example env file
-```bash
-cp .env.example .env
-```
+Use this when the shared or deployed MongoDB is unavailable, or when you want a disposable
+local database.
 
-2. Review `.env` and set any values you need
+Make sure `.env` includes local values like:
+
 ```bash
 MONGO_URI=mongodb://127.0.0.1:27017/grandfeast
 APP_BASE_URL=http://localhost:5173
+AUTH_SECRET=local-dev-auth-secret
 LOCAL_ADMIN_EMAILS=alice@example.com,bob@example.com,charlie@example.com
 ```
 
-Notes:
-- `LOCAL_ADMIN_EMAILS` is optional and supports a comma-separated list, so you can seed the whole team at once.
-- Example: `LOCAL_ADMIN_EMAILS=alice@example.com,bob@example.com,charlie@example.com`
-- Postmark and Cloudinary keys are optional for local booting. Leave them empty unless you want those integrations to work locally.
-- Google auth values are only needed if you want to use the admin sign-in flow locally.
-- `AUTH_SECRET` still needs a value. For local development, any long random string is fine.
-- Local dev is pinned to `http://localhost:5173` so OAuth callback URLs stay stable.
+Start MongoDB and the app:
 
-Google OAuth setup for local admin sign-in:
-- Authorized JavaScript origin: `http://localhost:5173`
-- Authorized redirect URI: `http://localhost:5173/auth/callback/google`
-
-Local admin access in development:
-- If Google OAuth is not configured locally, the `/signin` page will offer a local admin sign-in form.
-- Enter any email from `LOCAL_ADMIN_EMAILS` to create a local session and access `/api`.
-
-3. Start MongoDB locally with Docker
-```bash
-make db-up
-```
-
-4. Start the app
 ```bash
 make run-local
 ```
 
-Useful commands:
+Useful MongoDB commands:
+
 ```bash
+make db-up
 make db-logs
 make db-down
 ```
 
-What happens on startup:
-- the app connects to the MongoDB defined in `MONGO_URI`
-- if the database is empty, it automatically creates the required ticket counter records
-- if `LOCAL_ADMIN_EMAILS` is set, those users are also inserted into the local `users` collection if missing
+On startup, the app:
 
-This makes a brand-new local database usable immediately instead of failing because required records do not exist yet.
+- connects to the MongoDB defined in `MONGO_URI`
+- creates missing ticket counter records for standard, VIP, and youth tickets
+- inserts users from `LOCAL_ADMIN_EMAILS` if they do not already exist
 
+## Local Admin Sign-In
 
-## Notes to self
-Below were the steps I've taken to get fresh SvelteKit skeleton project up and running:
+Google OAuth is enabled when `GOOGLE_ID` and `GOOGLE_SECRET` are set.
+
+For local development without Google OAuth, set `LOCAL_ADMIN_EMAILS`. The `/signin` page
+will show a local admin sign-in form, and any configured email can create a local admin
+session.
+
+Google OAuth setup for local admin sign-in:
+
+- Authorized JavaScript origin: `http://localhost:5173`
+- Authorized redirect URI: `http://localhost:5173/auth/callback/google`
+
+## Optional Integrations
+
+Postmark and Cloudinary credentials can be left empty for local booting. Fill them in only
+when local email sending or QR image uploads need to work.
+
+Relevant env vars:
+
+- `MY_POSTMARK_API_KEY`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+## Checks
+
+Run Svelte and TypeScript validation:
+
+```bash
+npm run check
 ```
-npm create svelte@latest
-brew update node
-npm install
-npm run dev -- --open
+
+Run unit tests:
+
+```bash
+npm run test
 ```
 
-After this, I've copied the files from the original test project.
+Run formatting and lint checks:
 
-On google auth setup:
-* followed this guide: https://www.youtube.com/watch?v=X3Apuu_aezI&ab_channel=Rifik:
+```bash
+npm run lint
+```
 
-Setting up custom domain from squarespace to netlify
-* https://connkat.medium.com/using-squarespace-domains-with-netlify-to-host-react-apps-with-custom-url-4f891ce754c6
+Create a production build:
 
-Fixing "UntrustedHost" error in AuthJS 
-* TL;DR: set {trustHost: true}
-* https://github.com/nextauthjs/next-auth/issues/6113#issuecomment-1883231690
-* https://authjs.dev/reference/sveltekit#lazy-initialization
+```bash
+npm run build
+```
 
-Fixing .idea/workspace.xml in .gitignore NOT being ignored
-* https://stackoverflow.com/questions/19973506/cannot-ignore-idea-workspace-xml-keeps-popping-up
+## Deploy To Production
+
+The production deployment flow in this repository uses the `prod` branch.
+
+```bash
+git checkout prod
+make pull-dev
+git push
+```
+
+Netlify is configured with:
+
+```toml
+[build]
+command = "npm run build"
+publish = "build"
+```
