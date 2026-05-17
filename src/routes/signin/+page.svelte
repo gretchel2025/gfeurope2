@@ -1,84 +1,94 @@
 <script lang="ts">
-  import { signIn, signOut } from "@auth/sveltekit/client";
-  import { page } from "$app/stores";
-  import { goto } from '$app/navigation';
-  import type { ServerData } from "./+page.server";
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { authClient } from '$lib/infrastructure/auth/authClient';
+	import type { ServerData } from './+page.server';
 
-  export let data: ServerData;
+	export let data: ServerData;
 
-  let localAdminEmail = '';
+	let localAdminEmail = '';
 
-  async function signOutCurrentUser() {
-    await signOut();
-  }
+	async function signOutCurrentUser() {
+		await authClient.signOut();
+		await goto('/signin');
+	}
 
-  async function signInAsLocalAdmin() {
-    await signIn('credentials', {
-      email: localAdminEmail,
-      callbackUrl: '/api'
-    });
-  }
+	async function signInWithGoogle() {
+		await authClient.signIn.social({
+			provider: 'google',
+			callbackURL: '/api'
+		});
+	}
 </script>
 
-<main class="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-[#0f172a]/80 to-[#1e293b]/80 text-white">
-  <article class="w-full max-w-md bg-black/70 rounded-xl shadow-lg p-8 text-center space-y-6">
-    <h1 class="text-3xl font-bold text-yellow-400">Log In</h1>
+<main
+	class="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-[#0f172a]/80 to-[#1e293b]/80 text-white"
+>
+	<article class="w-full max-w-md bg-black/70 rounded-xl shadow-lg p-8 text-center space-y-6">
+		<h1 class="text-3xl font-bold text-yellow-400">Log In</h1>
 
-    {#if $page.data.session?.user}
-      <div class="space-y-4">
-        <p class="text-blue-100">Signed in as <span class="font-semibold text-white">{$page.data.session.user.email}</span></p>
-        <button
-          on:click={signOutCurrentUser}
-          class="w-full py-3 px-6 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition"
-        >
-          Sign Out
-        </button>
+		{#if $page.data.session?.user}
+			<div class="space-y-4">
+				<p class="text-blue-100">
+					Signed in as <span class="font-semibold text-white">{$page.data.session.user.email}</span>
+				</p>
+				<button
+					on:click={signOutCurrentUser}
+					class="w-full py-3 px-6 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition"
+				>
+					Sign Out
+				</button>
 
-        <button
-          on:click={() => goto('/api')}
-          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-        Go to Admin Page
-        </button>
+				<button
+					on:click={() => goto('/api')}
+					class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+				>
+					Go to Admin Page
+				</button>
+			</div>
+		{:else}
+			<div class="space-y-4">
+				<p class="text-blue-100">Not signed in</p>
 
-      </div>
-    {:else}
-      <div class="space-y-4">
-        <p class="text-blue-100">Not signed in</p>
+				{#if data.hasGoogleAuth}
+					<button
+						on:click={signInWithGoogle}
+						class="w-full py-3 px-6 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 transition"
+					>
+						Sign in with Google
+					</button>
+				{/if}
 
-        {#if data.hasGoogleAuth}
-          <button
-            on:click={() => signIn('google')}
-            class="w-full py-3 px-6 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 transition"
-          >
-            Sign in with Google
-          </button>
-        {/if}
+				{#if data.hasLocalDevAuth}
+					<form
+						method="POST"
+						action="?/localAdminSignIn"
+						class="space-y-3 border border-white/10 rounded-lg p-4 bg-white/5"
+					>
+						<p class="text-sm text-blue-100">Local development admin sign-in</p>
+						<input
+							bind:value={localAdminEmail}
+							name="email"
+							type="email"
+							placeholder="Enter a seeded admin email"
+							class="w-full py-3 px-4 rounded-md bg-white text-black"
+						/>
+						<button
+							type="submit"
+							class="w-full py-3 px-6 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition"
+						>
+							Sign in as Local Admin
+						</button>
+					</form>
+				{/if}
 
-        {#if data.hasLocalDevAuth}
-          <div class="space-y-3 border border-white/10 rounded-lg p-4 bg-white/5">
-            <p class="text-sm text-blue-100">Local development admin sign-in</p>
-            <input
-              bind:value={localAdminEmail}
-              type="email"
-              placeholder="Enter a seeded admin email"
-              class="w-full py-3 px-4 rounded-md bg-white text-black"
-            />
-            <button
-              on:click={signInAsLocalAdmin}
-              class="w-full py-3 px-6 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition"
-            >
-              Sign in as Local Admin
-            </button>
-          </div>
-        {/if}
-
-        {#if !data.hasGoogleAuth && !data.hasLocalDevAuth}
-          <p class="text-sm text-red-200">
-            No auth provider is configured for this environment. Configure Google OAuth or set `LOCAL_ADMIN_EMAILS` for local development.
-          </p>
-        {/if}
-      </div>
-    {/if}
-  </article>
+				{#if !data.hasGoogleAuth && !data.hasLocalDevAuth}
+					<p class="text-sm text-red-200">
+						No auth provider is configured for this environment. Configure Google OAuth or set
+						`LOCAL_ADMIN_EMAILS` for local development.
+					</p>
+				{/if}
+			</div>
+		{/if}
+	</article>
 </main>

@@ -101,7 +101,17 @@ session.
 Google OAuth setup for local admin sign-in:
 
 - Authorized JavaScript origin: `http://localhost:5173`
-- Authorized redirect URI: `http://localhost:5173/auth/callback/google`
+- Authorized redirect URI: `http://localhost:5173/api/auth/callback/google`
+
+The app uses Better Auth. Netlify deploy previews proxy Google OAuth through the
+long-lived dev preview, so the Google OAuth client should also authorize:
+
+- `https://dev--grand-feast-uk-x-europe.netlify.app/api/auth/callback/google`
+- `https://www.grandfeast.eu/api/auth/callback/google`
+
+Set `BETTER_AUTH_PROXY_URL` to `https://dev--grand-feast-uk-x-europe.netlify.app`
+for Netlify deploy previews and the `dev` branch. Set it to `https://www.grandfeast.eu`
+for production.
 
 ## Optional Integrations
 
