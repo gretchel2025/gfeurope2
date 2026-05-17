@@ -4,7 +4,8 @@ import { appConfig } from '$lib/infrastructure/config/env.server';
 import {
 	auth,
 	betterAuthUserExists,
-	localAdminAuthPassword
+	localAdminAuthPassword,
+	markBetterAuthUserEmailVerified
 } from '$lib/infrastructure/auth/authConfig';
 
 export type ServerData = {
@@ -45,6 +46,8 @@ export const actions: Actions = {
 				}
 			});
 		}
+
+		await markBetterAuthUserEmailVerified(email);
 
 		await auth.api.signInEmail({
 			body: {

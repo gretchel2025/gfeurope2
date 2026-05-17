@@ -48,6 +48,22 @@ export async function betterAuthUserExists(email: string): Promise<boolean> {
 	return Boolean(user);
 }
 
+export async function markBetterAuthUserEmailVerified(email: string): Promise<void> {
+	if (!authDatabase) {
+		return;
+	}
+
+	await authDatabase.collection('user').updateOne(
+		{ email },
+		{
+			$set: {
+				emailVerified: true,
+				updatedAt: new Date()
+			}
+		}
+	);
+}
+
 /** Exposes the Better Auth instance used by the SvelteKit request handler and server helpers. */
 export const auth = betterAuth({
 	baseURL: appConfig.dev
@@ -74,6 +90,12 @@ export const auth = betterAuth({
 		enabled: appConfig.dev && appConfig.localAdminEmails.length > 0,
 		requireEmailVerification: false,
 		minPasswordLength: 8
+	},
+	account: {
+		accountLinking: {
+			enabled: true,
+			trustedProviders: ['email-password', 'google']
+		}
 	},
 	socialProviders,
 	trustedOrigins: [
