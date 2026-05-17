@@ -94,22 +94,32 @@ On startup, the app:
 
 ## Local Admin Sign-In
 
-Google OAuth is enabled when `GOOGLE_ID` and `GOOGLE_SECRET` are set.
+The app uses Better Auth for admin sessions. Google OAuth is enabled when `GOOGLE_ID`
+and `GOOGLE_SECRET` are set.
 
 For local development without Google OAuth, set `LOCAL_ADMIN_EMAILS`. The `/signin` page
 will show a local admin sign-in form, and any configured email can create a local admin
-session.
+session. These local development email-password accounts are marked as verified so a
+later Google sign-in with the same email can link to the same Better Auth user instead of
+failing with `account_not_linked`.
 
 Google OAuth setup for local admin sign-in:
 
 - Authorized JavaScript origin: `http://localhost:5173`
 - Authorized redirect URI: `http://localhost:5173/api/auth/callback/google`
 
-The app uses Better Auth. Netlify deploy previews proxy Google OAuth through the
-long-lived dev preview, so the Google OAuth client should also authorize:
+Google OAuth setup for Netlify:
 
-- `https://dev--grand-feast-uk-x-europe.netlify.app/api/auth/callback/google`
-- `https://www.grandfeast.eu/api/auth/callback/google`
+- Authorized JavaScript origins use origins only, with no path and no wildcard:
+  `https://dev--grand-feast-uk-x-europe.netlify.app` and `https://www.grandfeast.eu`
+- Authorized redirect URIs use the full Better Auth callback URLs:
+  `https://dev--grand-feast-uk-x-europe.netlify.app/api/auth/callback/google` and
+  `https://www.grandfeast.eu/api/auth/callback/google`
+
+Netlify deploy previews proxy Google OAuth through the long-lived dev preview. Do not add
+`https://deploy-preview-*--grand-feast-uk-x-europe.netlify.app` to Google OAuth settings;
+Google does not allow wildcard origins, and deploy previews should use the dev callback
+through Better Auth's OAuth proxy.
 
 Set `BETTER_AUTH_PROXY_URL` to `https://dev--grand-feast-uk-x-europe.netlify.app`
 for Netlify deploy previews and the `dev` branch. Set it to `https://www.grandfeast.eu`

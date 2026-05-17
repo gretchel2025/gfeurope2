@@ -39,12 +39,9 @@
 					Sign Out
 				</button>
 
-				<button
-					on:click={() => goto('/api')}
-					class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-				>
+				<a href="/api" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
 					Go to Admin Page
-				</button>
+				</a>
 			</div>
 		{:else}
 			<div class="space-y-4">
