@@ -1,12 +1,15 @@
 <script lang="ts">
-// Some text
+	import LegalPage from '$lib/components/public/LegalPage.svelte';
 </script>
 
-<main class="container">
-    <article>
-        <h2>Terms and Conditions</h2>
-        <p>Last updated: May 31, 2025</p>
-        <p>Please read these terms and conditions carefully before using Our Service.</p>
+<LegalPage
+	title="Terms and Conditions"
+	lastUpdated="May 31, 2025"
+	intro="Please read these Terms and Conditions carefully before using our service."
+	introSecondary="These terms explain the agreement between you and Grand Feast Europe and UK regarding access to and use of this website."
+	companionHref="/privacy"
+	companionLabel="View Privacy Policy"
+>
         <h2>Interpretation and Definitions</h2>
         <h3>Interpretation</h3>
         <p>The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear in singular or in plural.</p>
@@ -20,16 +23,16 @@
         <p><strong>Service</strong> refers to the Website.</p>
         </li>
         <li>
-        <p><strong>Terms and Conditions</strong> (also referred as &quot;Terms&quot;) mean these Terms and Conditions that form the entire agreement between You and the Company regarding the use of the Service.</p>
+        <p><strong>Terms and Conditions</strong> (also referred to as &quot;Terms&quot;) mean these Terms and Conditions that form the entire agreement between You and the Company regarding the use of the Service.</p>
         </li>
         <li>
         <p><strong>Third-party Social Media Service</strong> means any services or content (including data, information, products or services) provided by a third-party that may be displayed, included or made available by the Service.</p>
         </li>
         <li>
-            <p><strong>Country</strong> refers to:  Norway</p>
+            <p><strong>Country</strong> refers to Norway.</p>
             </li>
         <li>
-        <p><strong>Website</strong> refers to The Feast Europe and UK (referred to as either &quot;We&quot;, &quot;Us&quot;, &quot;Our&quot, or &quot;Company&quot; in this Agreement), accessible from <a href="http://www.grandfeast.eu" rel="external nofollow noopener" target="_blank">http://www.grandfeast.eu</a></p>
+        <p><strong>Website</strong> refers to The Feast Europe and UK (referred to as either &quot;We&quot;, &quot;Us&quot;, &quot;Our&quot;, or &quot;Company&quot; in this Agreement), accessible from <a href="https://www.grandfeast.eu" rel="external nofollow noopener" target="_blank">grandfeast.eu</a></p>
         </li>
         <li>
         <p><strong>You</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.</p>
@@ -40,7 +43,7 @@
         <p>Your access to and use of the Service is conditioned on Your acceptance of and compliance with these Terms and Conditions. These Terms and Conditions apply to all visitors, users and others who access or use the Service.</p>
         <p>By accessing or using the Service You agree to be bound by these Terms and Conditions. If You disagree with any part of these Terms and Conditions then You may not access the Service.</p>
         <p>You represent that you are over the age of 18. The Company does not permit those under 18 to use the Service.</p>
-        <p>Your access to and use of the Service is also conditioned on Your acceptance of and compliance with the Privacy Policy of the Company. Our Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your personal information when You use the Application or the Website and tells You about Your privacy rights and how the law protects You. Please read Our Privacy Policy carefully before using Our Service.</p>
+        <p>Your access to and use of the Service is also conditioned on Your acceptance of and compliance with the <a href="/privacy">Privacy Policy</a> of the Company. Our Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your personal information when You use the Application or the Website and tells You about Your privacy rights and how the law protects You. Please read our Privacy Policy carefully before using Our Service.</p>
         <h2>Links to Other Websites</h2>
         <p>Our Service may contain links to third-party web sites or services that are not owned or controlled by the Company.</p>
         <p>The Company has no control over, and assumes no responsibility for, the content, privacy policies, or practices of any third party web sites or services. You further acknowledge and agree that the Company shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with the use of or reliance on any such content, goods or services available on or through any such web sites or services.</p>
@@ -78,8 +81,12 @@
         <h2>Contact Us</h2>
         <p>If you have any questions about these Terms and Conditions, You can contact us:</p>
         <ul>
-        <li>By visiting this page on our website: <a href="http://grandfeast.eu/contact" rel="external nofollow noopener" target="_blank">http://grandfeast.eu/contact</a></li>
+        <li>By visiting our contact page: <a href="https://grandfeast.eu/contact" rel="external nofollow noopener" target="_blank">grandfeast.eu/contact</a></li>
         </ul>
-    </article>
-</main>
-
+	<div class="mt-10 border-t border-white/10 pt-6 text-sm text-blue-200">
+		<p>
+			Need more detail about how we use data? Review our
+			<a href="/privacy">Privacy Policy</a>.
+		</p>
+	</div>
+</LegalPage>

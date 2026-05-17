@@ -1,49 +1,22 @@
-import {error, redirect} from '@sveltejs/kit';
-
-import type {Booking, QRCode, Ticket} from "$lib/entities/models"
-import * as bookingWorkflows from "$lib/server/workflows/bookings";
+import type { PageServerLoad } from './$types';
+import type { Booking, TicketWithQRCode } from '$lib/domain/booking';
+import { withKitErrors } from '$lib/server/http/handlers';
+import { bookingService } from '$lib/server/http/services';
 
 export type ServerData = {
-    booking: Booking | null,
-    ticketsData: {
-        ticket: Ticket,
-        qrCodeData: QRCode,
-    }[]
-}
+	booking: Booking | null;
+	ticketsData: TicketWithQRCode[];
+};
 
-export async function load({ params }): Promise<ServerData> {
-    // get dynamic route param
-    let reference_no = params.reference_no
-
-    // get booking
-    const aBooking: Booking | null = await bookingWorkflows.GetByID(reference_no)
-
-    if (!aBooking){
-        throw error(404, "booking not found")
-    }
-
-    // get tickets + their QR Codes
-    const ticketsData  = await bookingWorkflows.GetRelatedTicketsWithCheckinQRCode(reference_no)
-
-    // send page data
-    return {
-        booking: aBooking,
-        ticketsData: ticketsData,
-    }
-}
-
-// actions handle Form Actions
-// export const actions = {
-//     markPaid: markPaid,
-//     generateTickets: generateTickets
-// }
-
-// async function markPaid({ request, params }) {
-//     const referenceNo = params.reference_no
-//     await bookingWorkflows.MarkPaid(referenceNo)
-// }
-
-// async function generateTickets({ params }) {
-//     const referenceNo = params.reference_no
-//     await bookingWorkflows.GenerateRelatedTickets(referenceNo)
-// }
+export const load: PageServerLoad = withKitErrors(
+	async ({ params }: Parameters<PageServerLoad>[0]): Promise<ServerData> => {
+		const booking = await bookingService.getRequiredById(params.reference_no);
+		const ticketsData = await bookingService.getRelatedTicketsWithCheckinQRCode(
+			params.reference_no
+		);
+		return {
+			booking,
+			ticketsData
+		};
+	}
+);

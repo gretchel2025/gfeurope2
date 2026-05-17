@@ -1,62 +1,167 @@
 # grandfeast-1a
 
-Web app project for Grand Feast UK x Europe 2024
+SvelteKit app for the Grand Feast EU and UK ticketing and admin site.
 
-Live demo (beta): [link](https://main--grand-feast-uk-x-europe.netlify.app/)
+The checked-in public pages are currently configured for the 2025 EU and UK Grand Feast
+in Oslo, Norway.
 
-## To deploy to production
+Production site: [grandfeast.eu](https://www.grandfeast.eu/)
 
-1. Checkout `prod` branch
-```bash
-git checkout prod
-```
+Development preview:
+[dev--grand-feast-uk-x-europe.netlify.app](https://dev--grand-feast-uk-x-europe.netlify.app/)
 
-2. Merge `dev` to `prod`, and push
-```bash
-make pull-dev
-git push
-```
+Production branch deploy:
+[prod--grand-feast-uk-x-europe.netlify.app](https://prod--grand-feast-uk-x-europe.netlify.app/)
 
-## To run
+## Project Structure
 
-1. install dependencies
+- `src/routes/` contains SvelteKit routes.
+- `src/lib/components/` contains shared UI components.
+- `src/lib/domain/` contains framework-light domain models and business rules.
+- `src/lib/application/` contains application services and ports.
+- `src/lib/infrastructure/` contains adapters for auth, bootstrap, config, MongoDB, email,
+  logging, media, and system settings.
+- `src/lib/server/http/` contains server-side HTTP service composition.
+- `src/lib/navigation/` contains navigation metadata.
+- `static/` contains static assets.
+
+## Requirements
+
+- Node.js and npm
+- Docker, if you want to run MongoDB locally with `compose.yaml`
+
+## Setup
+
+Install dependencies:
+
 ```bash
 make install
 ```
 
-2. setup a .env file to store config/secrets for the app, then enter the real values
+Create a local env file:
+
 ```bash
-cp example.env .env
+cp .env.example .env
 ```
 
-3. run the development server
+Review `.env` and fill in any values needed for your environment.
+
+## Run The App
+
+Start the Vite development server:
+
 ```bash
 make run
 ```
 
+The local app expects `http://localhost:5173`, including for OAuth callback URLs.
 
-## Notes to self
-Below were the steps I've taken to get fresh SvelteKit skeleton project up and running:
+## Run With Local MongoDB
+
+Use this when the shared or deployed MongoDB is unavailable, or when you want a disposable
+local database.
+
+Make sure `.env` includes local values like:
+
+```bash
+MONGO_URI=mongodb://127.0.0.1:27017/grandfeast
+APP_BASE_URL=http://localhost:5173
+AUTH_SECRET=local-dev-auth-secret
+LOCAL_ADMIN_EMAILS=alice@example.com,bob@example.com,charlie@example.com
 ```
-npm create svelte@latest
-brew update node
-npm install
-npm run dev -- --open
+
+Start MongoDB and the app:
+
+```bash
+make run-local
 ```
 
-After this, I've copied the files from the original test project.
+Useful MongoDB commands:
 
-On google auth setup:
-* followed this guide: https://www.youtube.com/watch?v=X3Apuu_aezI&ab_channel=Rifik:
+```bash
+make db-up
+make db-logs
+make db-down
+```
 
-Setting up custom domain from squarespace to netlify
-* https://connkat.medium.com/using-squarespace-domains-with-netlify-to-host-react-apps-with-custom-url-4f891ce754c6
+On startup, the app:
 
-Fixing "UntrustedHost" error in AuthJS 
-* TL;DR: set {trustHost: true}
-* https://github.com/nextauthjs/next-auth/issues/6113#issuecomment-1883231690
-* https://authjs.dev/reference/sveltekit#lazy-initialization
+- connects to the MongoDB defined in `MONGO_URI`
+- creates missing ticket counter records for standard, VIP, and youth tickets
+- inserts users from `LOCAL_ADMIN_EMAILS` if they do not already exist
 
-Fixing .idea/workspace.xml in .gitignore NOT being ignored
-* https://stackoverflow.com/questions/19973506/cannot-ignore-idea-workspace-xml-keeps-popping-up
+## Local Admin Sign-In
 
+Google OAuth is enabled when `GOOGLE_ID` and `GOOGLE_SECRET` are set.
+
+For local development without Google OAuth, set `LOCAL_ADMIN_EMAILS`. The `/signin` page
+will show a local admin sign-in form, and any configured email can create a local admin
+session.
+
+Google OAuth setup for local admin sign-in:
+
+- Authorized JavaScript origin: `http://localhost:5173`
+- Authorized redirect URI: `http://localhost:5173/auth/callback/google`
+
+## Optional Integrations
+
+Postmark and Cloudinary credentials can be left empty for local booting. Fill them in only
+when local email sending or QR image uploads need to work.
+
+Relevant env vars:
+
+- `MY_POSTMARK_API_KEY`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+## Checks
+
+Run Svelte and TypeScript validation:
+
+```bash
+npm run check
+```
+
+Run unit tests:
+
+```bash
+npm run test
+```
+
+Run formatting and lint checks:
+
+```bash
+npm run lint
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+## Deployment
+
+Netlify is connected to this GitHub repository and tracks two long-lived branches:
+
+- `dev` is the official development branch. Merging or pushing changes to `dev`
+  triggers the long-lived preview at
+  [dev--grand-feast-uk-x-europe.netlify.app](https://dev--grand-feast-uk-x-europe.netlify.app/).
+- `prod` is the production branch. Merging or pushing changes to `prod` triggers
+  a production deploy to [grandfeast.eu](https://www.grandfeast.eu/).
+
+To deploy to production:
+
+```bash
+git checkout prod
+git push
+```
+
+Netlify is configured with:
+
+```toml
+[build]
+command = "npm run build"
+publish = "build"
+```

@@ -1,69 +1,92 @@
 <script lang="ts">
-    import { Alert } from '@sveltestrap/sveltestrap';
-    import type {Booking} from "$lib/entities/models";
-    import * as values from "$lib/entities/values";
+	import AdminButton from '$lib/components/admin/AdminButton.svelte';
+	import AdminCard from '$lib/components/admin/AdminCard.svelte';
+	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import BackLinks from '$lib/components/admin/BackLinks.svelte';
+	import DangerConfirmation from '$lib/components/admin/DangerConfirmation.svelte';
+	import DetailRow from '$lib/components/admin/DetailRow.svelte';
+	import type { Booking } from '$lib/domain/booking';
+	import { canCancelBooking } from '$lib/domain/booking';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 
-    // data is the object received from the server
-    export let data: {
-        aRecord: Booking
-    }
+	export let data: {
+		aRecord: Booking;
+	};
 
-    const booking = data.aRecord
+	const booking = data.aRecord;
+	const bookingCanBeCancelled = canCancelBooking(booking);
 
-    let userHasConfirmed = false
-    let userHasUnderstood = false
+	let userHasConfirmed = false;
+	let userHasUnderstood = false;
 
-    // flags for disabling buttons
-    const bookingCanBeCancelled = values.BookingCanBeCancelled(booking)
-    $: canDoCancel = bookingCanBeCancelled && userHasConfirmed && userHasUnderstood
+	$: canDoCancel = bookingCanBeCancelled && userHasConfirmed && userHasUnderstood;
 </script>
 
-<main class="container">
+<AdminPage
+	title="Cancel Booking"
+	subtitle="Returns reserved tickets to available inventory."
+	backHref={adminRoutes.booking.details(booking.reference_no)}
+	backLabel="Back to booking details"
+>
+	<div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+		<AdminCard title="Reservation">
+			<dl>
+				<DetailRow label="Reference No" value={booking.reference_no} />
+				<DetailRow label="Name">{booking.name} ({booking.email})</DetailRow>
+				<DetailRow label="Payment Status" value={booking.payment_status} />
+				<DetailRow label="Amount Total" value={`EUR ${booking.amount_total}`} />
+				<DetailRow label="Guests">{booking.guests.join(', ')}</DetailRow>
+				<DetailRow label="Ticket IDs">
+					{#if booking.ticket_ids.length > 0}
+						<div class="flex flex-wrap gap-2">
+							{#each booking.ticket_ids as ticketId}
+								<a
+									href={adminRoutes.ticket.details(ticketId)}
+									class="font-semibold text-blue-700 hover:underline"
+								>
+									{ticketId}
+								</a>
+							{/each}
+						</div>
+					{:else}
+						<span class="text-slate-500">No tickets generated yet</span>
+					{/if}
+				</DetailRow>
+			</dl>
+		</AdminCard>
 
-    <article>
-        <hgroup>
-            <h1>Cancel Booking Reservation</h1>
-            <h2>Permanently cancels the booking reservation.<br>Returns related Reserved tickets back to Available.</h2>
-        </hgroup>
+		<AdminCard title="Confirm cancellation" subtitle="Use this only for unpaid reservations.">
+			<div class="space-y-4">
+				<DangerConfirmation
+					bind:firstChecked={userHasConfirmed}
+					bind:secondChecked={userHasUnderstood}
+					firstLabel="I confirm that I wish to cancel this booking."
+					secondLabel="I understand that cancelled bookings cannot be restored."
+				/>
 
-        reference_no: {booking.reference_no} <br>
-        name: {booking.name} -- ({booking.email}) <br>
-        payment_status: {booking.payment_status} <br>
-        amount_total: {booking.amount_total} <br>
-        guests: {booking.guests} <br>
-        ticket_ids: <br>
-        <ul>
-            {#each booking.ticket_ids as ticket_id}
-                <li>
-                    <a href="/api/v0/ticket/{ticket_id}/details">{ticket_id}</a>
-                </li>
-            {/each}
-        </ul>
+				<form action="?/cancelBooking" method="POST">
+					<AdminButton type="submit" variant="danger" disabled={!canDoCancel} fullWidth>
+						Proceed with cancellation
+					</AdminButton>
+				</form>
 
+				<AdminButton
+					href={adminRoutes.booking.details(booking.reference_no)}
+					variant="secondary"
+					fullWidth
+				>
+					No, back to safety
+				</AdminButton>
+			</div>
+		</AdminCard>
+	</div>
 
-        <Alert color="danger">
-            Warning, cancellation cannot be undone!
-        </Alert>
-
-        <input type="checkbox" bind:checked={userHasConfirmed}/> I confirm that I wish to cancel this booking<br>
-        <input type="checkbox" bind:checked={userHasUnderstood}/> I understand that cancelled bookings cannot be restored<br>
-        <br>
-
-
-        <form action="?/cancelBooking" method="POST">
-            <button type="submit" disabled={!canDoCancel}>yes, proceed to cancel</button>
-        </form>
-
-        <form action="/api/v0/booking/{booking.reference_no}/details" method="GET">
-            <button type="submit">No, Back to Safety</button>
-        </form>
-
-        <a href="/api/v0/booking/{booking.reference_no}/details">back to details</a> |
-        <a href="/api/v0/booking/list">list bookings</a> |
-        <a href="/api/v0/booking/search">search</a>
-
-    </article>
-
-    <a href="/api">admin home</a>
-</main>
-
+	<BackLinks
+		links={[
+			{ href: adminRoutes.booking.details(booking.reference_no), label: 'Booking details' },
+			{ href: adminRoutes.booking.list, label: 'List bookings' },
+			{ href: adminRoutes.booking.search(), label: 'Search' },
+			{ href: adminRoutes.home, label: 'Admin home' }
+		]}
+	/>
+</AdminPage>

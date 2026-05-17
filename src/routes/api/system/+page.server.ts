@@ -1,33 +1,24 @@
-import * as system from "$lib/server/workflows/system"
-import * as userWorkflows from "$lib/server/workflows/users";
-import {error} from "@sveltejs/kit";
+import type { Actions, PageServerLoad } from './$types';
+import { requireSuperUserSession } from '$lib/server/http/guards';
+import { superUserAction, withKitErrors } from '$lib/server/http/handlers';
+import { systemService } from '$lib/server/http/services';
 
 export type ServerData = {
-    newBookingsAllowed: boolean,
-}
+	newBookingsAllowed: boolean;
+};
 
-export async function load({ event, locals }): Promise<ServerData> {
-    // reject non-superusers
-    const session = await locals.auth();
+export const load: PageServerLoad = withKitErrors(
+	async ({ locals }: Parameters<PageServerLoad>[0]): Promise<ServerData> => {
+		const session = await locals.auth();
+		await requireSuperUserSession(session);
+		return {
+			newBookingsAllowed: systemService.getNewBookingsAllowed()
+		};
+	}
+);
 
-    const user = await userWorkflows.GetUserFromSession(session)
-    if (!user.isASuperUser) {
-        throw error(401, "unauthorized, must be a superuser")
-    }
-
-    // fetch system data
-    const newBookingsAllowed = system.GetNewBookingsAllowed()
-
-    return {
-        newBookingsAllowed: newBookingsAllowed,
-    }
-}
-
-// actions handle Form Actions
-export const actions = {
-    toggleNewBookingsAllowed: toggleNewBookingsAllowed,
-}
-
-async function toggleNewBookingsAllowed({ request, params }) {
-    system.SetNewBookingsAllowed(!system.GetNewBookingsAllowed())
-}
+export const actions: Actions = {
+	toggleNewBookingsAllowed: superUserAction(async () => {
+		systemService.setNewBookingsAllowed(!systemService.getNewBookingsAllowed());
+	})
+};

@@ -1,71 +1,41 @@
-import {error} from '@sveltejs/kit';
-
-import type {TicketCounter} from "$lib/entities/models"
-import * as ticketCounterWorkflows from "$lib/server/workflows/ticket_counters";
-import * as errors from "$lib/entities/errors";
-
+import type { Actions } from './$types';
+import { NotFoundError } from '$lib/application/errors';
+import type { TicketCounter } from '$lib/domain/ticketCounter';
+import { adminAction, withKitErrors } from '$lib/server/http/handlers';
+import { ticketCounterService } from '$lib/server/http/services';
 
 export type ServerData = {
-    standardTicketCounter: TicketCounter,
-    vipTicketCounter: TicketCounter,
-    youthTicketCounter: TicketCounter,
-}
+	standardTicketCounter: TicketCounter;
+	vipTicketCounter: TicketCounter;
+	youthTicketCounter: TicketCounter;
+};
 
-export async function load({ params }): Promise<ServerData> {
+export const load = withKitErrors(async (): Promise<ServerData> => {
+	const [standardTicketCounter, vipTicketCounter, youthTicketCounter] = await Promise.all([
+		ticketCounterService.getStandardTickets(),
+		ticketCounterService.getVipTickets(),
+		ticketCounterService.getYouthTickets()
+	]);
 
-    // get ticket counters
-    let standardTicketCounter: TicketCounter | null
-    let vipTicketCounter: TicketCounter | null
-    let youthTicketCounter: TicketCounter | null
-    try {
-        standardTicketCounter = await ticketCounterWorkflows.GetStandardTickets()
-        vipTicketCounter = await ticketCounterWorkflows.GetVIPTickets()
-        youthTicketCounter = await ticketCounterWorkflows.GetYouthTickets()
-    } catch (e) {
-        if (e === errors.ERR_DB_TIMEOUT) {
-            throw error(503, "Server is busy. Please Refresh and try again.")
-        }
+	if (!standardTicketCounter) throw new NotFoundError('standard ticket counter is missing');
+	if (!vipTicketCounter) throw new NotFoundError('vip ticket counter is missing');
+	if (!youthTicketCounter) throw new NotFoundError('youth ticket counter is missing');
 
-        throw e
-    }
+	return {
+		standardTicketCounter,
+		vipTicketCounter,
+		youthTicketCounter
+	};
+});
 
-    // handle empty cases
-    if (!standardTicketCounter) {
-        throw error(404, 'standard ticket counter is missing')
-    }
-
-    if (!vipTicketCounter) {
-        throw error(404, 'vip ticket counter is missing')
-    }
-
-    if (!youthTicketCounter) {
-        throw error(404, 'youth ticket counter is missing')
-    }
-
-    // send page data
-    return {
-        standardTicketCounter: standardTicketCounter,
-        vipTicketCounter: vipTicketCounter,
-        youthTicketCounter: youthTicketCounter,
-    }
-}
-
-// actions handle Form Actions
-export const actions = {
-    add10ToAvailableStandardTickets: add10ToAvailableStandardTickets,
-    add10ToAvailableVIPTickets: add10ToAvailableVIPTickets,
-    add10ToAvailableYouthTickets: add10ToAvailableYouthTickets,
-}
-
-async function add10ToAvailableStandardTickets({ request, params }) {
-    await ticketCounterWorkflows.IncrementStandardTickets({available: 10, reserved: 0, sold: 0})
-}
-
-
-async function add10ToAvailableVIPTickets({ request, params }) {
-    await ticketCounterWorkflows.IncrementVIPTickets({available: 10, reserved: 0, sold: 0})
-}
-
-async function add10ToAvailableYouthTickets({ request, params }) {
-    await ticketCounterWorkflows.IncrementYouthTickets({available: 10, reserved: 0, sold: 0})
-}
+export const actions: Actions = {
+	add10ToAvailableStandardTickets: adminAction(async () => {
+		await ticketCounterService.incrementStandardTickets({ available: 10, reserved: 0, sold: 0 });
+	}),
+	add10ToAvailableVIPTickets: adminAction(async () => {
+		await ticketCounterService.incrementVipTickets({ available: 10, reserved: 0, sold: 0 });
+	}),
+	add10ToAvailableYouthTickets: adminAction(async () => {
+		await ticketCounterService.incrementYouthTickets({ available: 10, reserved: 0, sold: 0 });
+	})
+};

@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2200" viewBox="0 0 1600 2200">
+  <defs>
+    <linearGradient id="pageBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eef4f1"/>
+      <stop offset="55%" stop-color="#f7f3ee"/>
+      <stop offset="100%" stop-color="#edf0f8"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#17242b" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .title { font: 800 70px Arial, sans-serif; fill: #17242b; }
+      .subtitle { font: 400 31px Arial, sans-serif; fill: #52636b; }
+      .eyebrow { font: 800 24px Arial, sans-serif; fill: #2f6f73; letter-spacing: 3px; }
+      .h2 { font: 800 38px Arial, sans-serif; fill: #17242b; }
+      .h3 { font: 800 29px Arial, sans-serif; fill: #17242b; }
+      .body { font: 400 25px Arial, sans-serif; fill: #52636b; }
+      .small { font: 400 21px Arial, sans-serif; fill: #52636b; }
+      .mono { font: 700 24px Menlo, Consolas, monospace; fill: #17242b; }
+      .whiteTitle { font: 800 34px Arial, sans-serif; fill: #ffffff; }
+      .whiteBody { font: 400 23px Arial, sans-serif; fill: #d9e8e9; }
+      .label { font: 800 22px Arial, sans-serif; fill: #17242b; }
+      .tiny { font: 700 18px Arial, sans-serif; fill: #6a777d; }
+    </style>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M 0 0 L 14 7 L 0 14 z" fill="#2f6f73"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="2200" fill="url(#pageBg)"/>
+  <circle cx="1330" cy="1900" r="300" fill="#dcefee" opacity="0.75"/>
+  <circle cx="150" cy="250" r="250" fill="#f0d9c7" opacity="0.55"/>
+
+  <text x="110" y="135" class="eyebrow">UI REFACTOR, PAGE 2 OF 2</text>
+  <text x="110" y="230" class="title">Where future UI code should go</text>
+  <text x="110" y="292" class="subtitle">Use this as the quick map when adding or changing a screen.</text>
+
+  <g filter="url(#softShadow)">
+    <rect x="100" y="380" width="1400" height="500" rx="38" fill="#fffdf9" stroke="#ded6ca" stroke-width="2"/>
+  </g>
+  <text x="150" y="455" class="h2">Decision map</text>
+
+  <g transform="translate(150 525)">
+    <rect x="0" y="0" width="330" height="210" rx="26" fill="#e5f2ea" stroke="#4b7f6a" stroke-width="2"/>
+    <text x="32" y="58" class="h3">Admin screen?</text>
+    <text x="32" y="105" class="small">Start with AdminPage,</text>
+    <text x="32" y="136" class="small">AdminCard, DetailRow,</text>
+    <text x="32" y="167" class="small">AdminButton.</text>
+
+    <rect x="500" y="0" width="330" height="210" rx="26" fill="#e7edf8" stroke="#4e6fae" stroke-width="2"/>
+    <text x="532" y="58" class="h3">Public screen?</text>
+    <text x="532" y="105" class="small">Use small focused public</text>
+    <text x="532" y="136" class="small">components like timers,</text>
+    <text x="532" y="167" class="small">backgrounds, or forms.</text>
+
+    <rect x="1000" y="0" width="330" height="210" rx="26" fill="#f7eadb" stroke="#d89a62" stroke-width="2"/>
+    <text x="1032" y="58" class="h3">Business rule?</text>
+    <text x="1032" y="105" class="small">Keep it in domain or</text>
+    <text x="1032" y="136" class="small">application services,</text>
+    <text x="1032" y="167" class="small">not inside markup.</text>
+
+    <line x1="330" y1="105" x2="500" y2="105" stroke="#2f6f73" stroke-width="6" marker-end="url(#arrow)"/>
+    <line x1="830" y1="105" x2="1000" y2="105" stroke="#2f6f73" stroke-width="6" marker-end="url(#arrow)"/>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <rect x="100" y="960" width="660" height="650" rx="38" fill="#17242b"/>
+    <rect x="840" y="960" width="660" height="650" rx="38" fill="#fffdf9" stroke="#ccdcd5" stroke-width="2"/>
+  </g>
+
+  <text x="150" y="1038" class="whiteTitle">Admin UI vocabulary</text>
+  <text x="150" y="1090" class="whiteBody">Most admin pages now read like composition.</text>
+  <g transform="translate(150 1160)">
+    <rect x="0" y="0" width="560" height="74" rx="16" fill="#e5f2ea"/>
+    <text x="26" y="47" class="mono">&lt;AdminPage title="Booking Details"&gt;</text>
+    <rect x="40" y="104" width="520" height="74" rx="16" fill="#dcefee"/>
+    <text x="66" y="151" class="mono">&lt;AdminCard title="Reservation"&gt;</text>
+    <rect x="80" y="208" width="480" height="74" rx="16" fill="#e7edf8"/>
+    <text x="106" y="255" class="mono">&lt;DetailRow label="Status" /&gt;</text>
+    <rect x="80" y="312" width="480" height="74" rx="16" fill="#f7eadb"/>
+    <text x="106" y="359" class="mono">&lt;AdminButton type="submit"&gt;</text>
+  </g>
+
+  <text x="890" y="1038" class="h2">Booking form cleanup</text>
+  <text x="890" y="1090" class="body">The form moved from "update everything" logic</text>
+  <text x="890" y="1128" class="body">to readable derived state.</text>
+  <g transform="translate(890 1190)">
+    <rect x="0" y="0" width="560" height="78" rx="18" fill="#e5f2ea" stroke="#4b7f6a"/>
+    <text x="28" y="48" class="label">selectedTicketOption</text>
+    <rect x="0" y="110" width="560" height="78" rx="18" fill="#dcefee" stroke="#2f6f73"/>
+    <text x="28" y="158" class="label">availableTickets and totalAmount</text>
+    <rect x="0" y="220" width="560" height="78" rx="18" fill="#e7edf8" stroke="#4e6fae"/>
+    <text x="28" y="268" class="label">isValidEmail and validation messages</text>
+    <rect x="0" y="330" width="560" height="78" rx="18" fill="#f7eadb" stroke="#d89a62"/>
+    <text x="28" y="378" class="label">guest fields sync from quantity</text>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <rect x="100" y="1690" width="1400" height="330" rx="38" fill="#fffdf9" stroke="#ded6ca" stroke-width="2"/>
+  </g>
+  <text x="150" y="1766" class="h2">Codex-friendly checklist for a new feature</text>
+
+  <g transform="translate(150 1835)">
+    <rect x="0" y="0" width="245" height="105" rx="20" fill="#e5f2ea"/>
+    <text x="28" y="42" class="tiny">1. Pick route</text>
+    <text x="28" y="74" class="small">thin adapter</text>
+
+    <rect x="280" y="0" width="245" height="105" rx="20" fill="#dcefee"/>
+    <text x="308" y="42" class="tiny">2. Compose UI</text>
+    <text x="308" y="74" class="small">shared pieces</text>
+
+    <rect x="560" y="0" width="245" height="105" rx="20" fill="#e7edf8"/>
+    <text x="588" y="42" class="tiny">3. Wire action</text>
+    <text x="588" y="74" class="small">server handler</text>
+
+    <rect x="840" y="0" width="245" height="105" rx="20" fill="#f7eadb"/>
+    <text x="868" y="42" class="tiny">4. Reuse rules</text>
+    <text x="868" y="74" class="small">domain/services</text>
+
+    <rect x="1120" y="0" width="245" height="105" rx="20" fill="#efe6f4"/>
+    <text x="1148" y="42" class="tiny">5. Verify</text>
+    <text x="1148" y="74" class="small">check/build</text>
+
+    <line x1="245" y1="52" x2="280" y2="52" stroke="#2f6f73" stroke-width="5" marker-end="url(#arrow)"/>
+    <line x1="525" y1="52" x2="560" y2="52" stroke="#2f6f73" stroke-width="5" marker-end="url(#arrow)"/>
+    <line x1="805" y1="52" x2="840" y2="52" stroke="#2f6f73" stroke-width="5" marker-end="url(#arrow)"/>
+    <line x1="1085" y1="52" x2="1120" y2="52" stroke="#2f6f73" stroke-width="5" marker-end="url(#arrow)"/>
+  </g>
+
+  <text x="150" y="2100" class="body">Rule of thumb: routes render and wire. Components shape UI. Domain/application decide behavior.</text>
+</svg>

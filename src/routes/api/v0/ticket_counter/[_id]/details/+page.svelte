@@ -1,29 +1,32 @@
 <script lang="ts">
-    import type {ServerData} from "./+page.server";
+	import AdminButton from '$lib/components/admin/AdminButton.svelte';
+	import AdminCard from '$lib/components/admin/AdminCard.svelte';
+	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import DetailRow from '$lib/components/admin/DetailRow.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
+	import type { ServerData } from './+page.server';
 
-    export let data: ServerData
+	export let data: ServerData;
 </script>
 
+<AdminPage
+	title="Ticket Counter"
+	subtitle={`Inventory for ${data.ticketCounter._id}`}
+	backHref={adminRoutes.home}
+	backLabel="Back to dashboard"
+>
+	<AdminCard
+		title={data.ticketCounter._id}
+		subtitle="Counters are adjusted by operational actions such as booking, payment, and cancellation."
+	>
+		<dl>
+			<DetailRow label="Available" value={data.ticketCounter.available} />
+			<DetailRow label="Reserved" value={data.ticketCounter.reserved} />
+			<DetailRow label="Sold" value={data.ticketCounter.sold} />
+		</dl>
 
-<main class="container">
-
-    <article>
-        <h1>{data.ticketCounter._id} Details</h1>
-
-        <br>
-        ticket type: <b>{data.ticketCounter._id}</b><br>
-        <ul>
-            <li>Available: {data.ticketCounter.available} </li>
-            <li>Reserved: {data.ticketCounter.reserved} </li>
-            <li>Sold: {data.ticketCounter.sold} </li>
-        </ul>
-        <form action="?/incrementAvailableCount" method="POST">
-            <input type="submit" value="add 10 to available">
-        </form>
-
-    </article>
-
-    <a href="/api">admin home</a>
-
-</main>
-
+		<form action="?/incrementAvailableCount" method="POST" class="mt-5">
+			<AdminButton type="submit" variant="secondary">Add 10 available tickets</AdminButton>
+		</form>
+	</AdminCard>
+</AdminPage>

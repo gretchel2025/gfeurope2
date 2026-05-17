@@ -1,25 +1,66 @@
-
-import * as bookingWorkflows from "$lib/server/workflows/bookings";
-import type {Booking, CityStats} from "$lib/entities/models";
+import type { Booking, CityStats } from '$lib/domain/booking';
+import type { TicketCounter } from '$lib/domain/ticketCounter';
+import { bookingService, reportingService, ticketCounterService } from '$lib/server/http/services';
 
 export type ServerData = {
-    topCities: CityStats[],
-}
+	topCities: CityStats[];
+	ticketStateCharts: TicketStateChart[];
+};
+
+type TicketStateChart = {
+	title: string;
+	segments: TicketStateSegment[];
+	total: number;
+};
+
+type TicketStateSegment = {
+	label: string;
+	value: number;
+	colorClass: string;
+};
 
 export async function load({}): Promise<ServerData> {
-    // get all bookings
-    const bookings: Booking[]  = await bookingWorkflows.List()
-    if (!bookings) {
-        return {
-            topCities: [],
-        }
-    }
+	const [bookings, standardTicketCounter, vipTicketCounter] = await Promise.all([
+		bookingService.list(),
+		ticketCounterService.getStandardTickets(),
+		ticketCounterService.getVipTickets()
+	]);
 
-    // get top cities
-    const topCities: CityStats[] = bookingWorkflows.GetTopCitiesByCountOfTicketsBooked(bookings)
+	return {
+		topCities: reportingService.getTopCities(bookings as Booking[]),
+		ticketStateCharts: [
+			createTicketStateChart('Normal Tickets', standardTicketCounter),
+			createTicketStateChart('VIP Tickets', vipTicketCounter)
+		]
+	};
+}
 
-    // respond
-    return {
-        topCities: topCities,
-    }
+function createTicketStateChart(title: string, counter: TicketCounter | null): TicketStateChart {
+	const safeCounter = {
+		available: counter?.available ?? 0,
+		reserved: counter?.reserved ?? 0,
+		sold: counter?.sold ?? 0
+	};
+
+	return {
+		title,
+		total: safeCounter.available + safeCounter.reserved + safeCounter.sold,
+		segments: [
+			{
+				label: 'Available',
+				value: safeCounter.available,
+				colorClass: 'text-emerald-500'
+			},
+			{
+				label: 'Reserved',
+				value: safeCounter.reserved,
+				colorClass: 'text-amber-400'
+			},
+			{
+				label: 'Paid',
+				value: safeCounter.sold,
+				colorClass: 'text-blue-600'
+			}
+		]
+	};
 }

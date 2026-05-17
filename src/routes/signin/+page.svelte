@@ -2,6 +2,22 @@
   import { signIn, signOut } from "@auth/sveltekit/client";
   import { page } from "$app/stores";
   import { goto } from '$app/navigation';
+  import type { ServerData } from "./+page.server";
+
+  export let data: ServerData;
+
+  let localAdminEmail = '';
+
+  async function signOutCurrentUser() {
+    await signOut();
+  }
+
+  async function signInAsLocalAdmin() {
+    await signIn('credentials', {
+      email: localAdminEmail,
+      callbackUrl: '/api'
+    });
+  }
 </script>
 
 <main class="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-[#0f172a]/80 to-[#1e293b]/80 text-white">
@@ -12,7 +28,7 @@
       <div class="space-y-4">
         <p class="text-blue-100">Signed in as <span class="font-semibold text-white">{$page.data.session.user.email}</span></p>
         <button
-          on:click={signOut}
+          on:click={signOutCurrentUser}
           class="w-full py-3 px-6 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition"
         >
           Sign Out
@@ -29,12 +45,39 @@
     {:else}
       <div class="space-y-4">
         <p class="text-blue-100">Not signed in</p>
-        <button
-          on:click={() => signIn('google')}
-          class="w-full py-3 px-6 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 transition"
-        >
-          Sign in with Google
-        </button>
+
+        {#if data.hasGoogleAuth}
+          <button
+            on:click={() => signIn('google')}
+            class="w-full py-3 px-6 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 transition"
+          >
+            Sign in with Google
+          </button>
+        {/if}
+
+        {#if data.hasLocalDevAuth}
+          <div class="space-y-3 border border-white/10 rounded-lg p-4 bg-white/5">
+            <p class="text-sm text-blue-100">Local development admin sign-in</p>
+            <input
+              bind:value={localAdminEmail}
+              type="email"
+              placeholder="Enter a seeded admin email"
+              class="w-full py-3 px-4 rounded-md bg-white text-black"
+            />
+            <button
+              on:click={signInAsLocalAdmin}
+              class="w-full py-3 px-6 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition"
+            >
+              Sign in as Local Admin
+            </button>
+          </div>
+        {/if}
+
+        {#if !data.hasGoogleAuth && !data.hasLocalDevAuth}
+          <p class="text-sm text-red-200">
+            No auth provider is configured for this environment. Configure Google OAuth or set `LOCAL_ADMIN_EMAILS` for local development.
+          </p>
+        {/if}
       </div>
     {/if}
   </article>

@@ -1,54 +1,61 @@
 <script lang="ts">
-    export let data
+	import AdminButton from '$lib/components/admin/AdminButton.svelte';
+	import AdminCard from '$lib/components/admin/AdminCard.svelte';
+	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
+	import type { ServerData } from './+page.server';
 
-    let searchValue: string = ""
-    console.log("[INFO] UI received data:", data)
+	export let data: ServerData;
+
+	let searchValue = '';
 </script>
 
-<main class="min-h-screen px-4 py-10 bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
-  <section class="max-w-xl mx-auto">
-    <h1 class="text-2xl sm:text-3xl font-bold text-center mb-6 text-yellow-500">Search Booking Reference</h1>
+<AdminPage title="Search Bookings" subtitle="Find a booking by reference number.">
+	<AdminCard>
+		<form
+			method="GET"
+			action={adminRoutes.booking.search()}
+			class="flex flex-col gap-3 sm:flex-row"
+		>
+			<label class="sr-only" for="reference_no">Booking reference number</label>
+			<input
+				id="reference_no"
+				name="reference_no"
+				type="text"
+				placeholder="Booking reference number"
+				bind:value={searchValue}
+				class="min-h-10 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+			/>
+			<AdminButton type="submit">Search</AdminButton>
+		</form>
 
-    <div class="space-y-4">
-      <label for="referenceNo" class="block font-medium">Booking Reference Number:</label>
-      <input
-        type="text"
-        id="referenceNo"
-        placeholder="Enter booking reference number"
-        bind:value={searchValue}
-        class="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-400"
-      />
-      <a href={`/api/v0/booking/search?reference_no=${searchValue}`}
-        class="block w-full text-center bg-[#1b2c2d] hover:bg-[#083c40] text-white hover:text-[#fae6c8] font-bold py-2 rounded-md transition">
-        Search
-      </a>
-    </div>
+		{#if data.noneFound}
+			<p
+				class="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800"
+			>
+				Booking reference number not found.
+			</p>
+		{/if}
+	</AdminCard>
 
-    {#if data?.noneFound}
-      <p class="mt-6 text-red-500 font-semibold text-center">Booking reference number not found.</p>
-    {/if}
-
-    {#if data?.bookings?.length > 0}
-      <div class="mt-8 space-y-6">
-        <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-300">Search Results</h2>
-        {#each data.bookings as booking}
-          <div class="p-4 border rounded-md bg-gray-100 dark:bg-gray-800">
-            <p><strong>Reference No:</strong> {booking.reference_no}</p>
-            <p><strong>Name:</strong> {booking.name}</p>
-            <p><strong>Status:</strong> {booking.payment_status}</p>
-            <a
-              href={`/api/v0/booking/${booking.reference_no}/details`}
-              class="mt-3 inline-block bg-[#1b2c2d] hover:bg-[#083c40] text-white hover:text-[#fae6c8] font-semibold px-4 py-2 rounded-md"
-            >
-              View Details
-            </a>
-          </div>
-        {/each}
-      </div>
-    {/if}
-
-    <div class="mt-10 text-center">
-      <a href="/api" class="text-blue-500 hover:underline">Admin Home</a>
-    </div>
-  </section>
-</main>
+	{#if data.bookings.length > 0}
+		<AdminCard title="Search Results">
+			<div class="space-y-3">
+				{#each data.bookings as booking}
+					<article class="rounded-md border border-slate-200 bg-slate-50 p-4">
+						<p class="font-semibold text-slate-950">{booking.reference_no}</p>
+						<p class="mt-1 text-sm text-slate-600">{booking.name} - {booking.payment_status}</p>
+						<div class="mt-3">
+							<AdminButton
+								href={adminRoutes.booking.details(booking.reference_no)}
+								variant="secondary"
+							>
+								View details
+							</AdminButton>
+						</div>
+					</article>
+				{/each}
+			</div>
+		</AdminCard>
+	{/if}
+</AdminPage>

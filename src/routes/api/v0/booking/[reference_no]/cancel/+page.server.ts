@@ -1,38 +1,22 @@
-import {error, redirect} from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+import type { Booking } from '$lib/domain/booking';
+import { adminRoutes } from '$lib/navigation/adminRoutes';
+import { adminAction, requireRouteParam, withKitErrors } from '$lib/server/http/handlers';
+import { bookingService } from '$lib/server/http/services';
 
-// Ticket defines the type/schema for a Ticket business object
-import type { Booking } from "$lib/entities/models"
-import * as bookingWorkflows from "$lib/server/workflows/bookings";
-import * as emailWorkflows from "$lib/server/workflows/emails";
-import {CancelBookingReservation} from "$lib/server/workflows/bookings";
+export const load: PageServerLoad = withKitErrors(
+	async ({ params }: Parameters<PageServerLoad>[0]): Promise<{ aRecord: Booking | null }> => {
+		return {
+			aRecord: await bookingService.getRequiredById(params.reference_no)
+		};
+	}
+);
 
-export async function load({ params }): Promise<{aRecord: Booking | null}> {
-    // get dynamic route param
-    let reference_no = params.reference_no
-
-    // get booking
-    const aBooking: Booking | null = await bookingWorkflows.GetByID(reference_no)
-
-    if (!aBooking){
-        throw error(404, "booking not found")
-    }
-
-    // send page data
-    return {
-        aRecord: aBooking,
-    }
-}
-
-// actions handle Form Actions
-export const actions = {
-    cancelBooking: cancelBooking,
-}
-
-async function cancelBooking({ request, params }) {
-    const reference_no = params.reference_no
-
-    await bookingWorkflows.CancelBookingReservation(reference_no)
-
-    redirect(303, `/api/v0/booking/${reference_no}/cancel/cancel_success`)
-}
-
+export const actions: Actions = {
+	cancelBooking: adminAction(async ({ params }) => {
+		const referenceNo = requireRouteParam(params, 'reference_no');
+		await bookingService.cancelBookingReservation(referenceNo);
+		throw redirect(303, adminRoutes.booking.cancelSuccess(referenceNo));
+	})
+};
