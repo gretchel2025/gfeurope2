@@ -7,7 +7,8 @@ in Oslo, Norway.
 
 Main site: [grandfeast.eu](https://www.grandfeast.eu/)
 
-Live demo: [main--grand-feast-uk-x-europe.netlify.app](https://main--grand-feast-uk-x-europe.netlify.app/)
+Production branch deploy:
+[prod--grand-feast-uk-x-europe.netlify.app](https://prod--grand-feast-uk-x-europe.netlify.app/)
 
 ## Project Structure
 
@@ -139,11 +140,11 @@ npm run build
 
 ## Deploy To Production
 
-The production deployment flow in this repository uses the `prod` branch.
+Netlify is connected to the `prod` branch. Merging or pushing changes to `prod`
+triggers a production deploy to [grandfeast.eu](https://www.grandfeast.eu/).
 
 ```bash
 git checkout prod
-make pull-dev
 git push
 ```
 
