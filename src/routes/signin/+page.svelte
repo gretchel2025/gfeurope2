@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { authClient } from '$lib/infrastructure/auth/authClient';
 	import type { ServerData } from './+page.server';
 
@@ -10,7 +10,8 @@
 
 	async function signOutCurrentUser() {
 		await authClient.signOut();
-		await goto('/signin');
+		await invalidateAll();
+		await goto('/signin', { invalidateAll: true });
 	}
 
 	async function signInWithGoogle() {

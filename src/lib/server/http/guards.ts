@@ -7,7 +7,7 @@
  * instead of being reimplemented differently across many pages and actions.
  */
 import type { RequestEvent } from '@sveltejs/kit';
-import { UnauthorizedError } from '$lib/application/errors';
+import { AuthenticationRequiredError, PermissionDeniedError } from '$lib/application/errors';
 import type { SessionUser } from '$lib/domain/user';
 import { isSuperUser } from '$lib/domain/user';
 import { getAuthSession, type AppSession } from '$lib/infrastructure/auth/session';
@@ -20,12 +20,12 @@ export async function requireAdminSession(
 ): Promise<{ session: AppSession; user: SessionUser }> {
 	const currentUser = getSessionUser(session);
 	if (!currentUser.wasFound || !session) {
-		throw new UnauthorizedError('sign in required');
+		throw new AuthenticationRequiredError('sign in required');
 	}
 
 	const dbUser = await userService.getById(currentUser._id);
 	if (!dbUser) {
-		throw new UnauthorizedError(`user ${currentUser._id} unauthorized`);
+		throw new PermissionDeniedError(`user ${currentUser._id} unauthorized`);
 	}
 
 	return {
@@ -43,7 +43,7 @@ export async function requireSuperUserSession(
 ): Promise<{ session: AppSession; user: SessionUser }> {
 	const result = await requireAdminSession(session);
 	if (!result.user.isASuperUser) {
-		throw new UnauthorizedError('unauthorized, must be a superuser');
+		throw new PermissionDeniedError('unauthorized, must be a superuser');
 	}
 	return result;
 }
