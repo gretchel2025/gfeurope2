@@ -15,6 +15,9 @@ Deploy preview test branches can be used to validate Netlify preview auth flows 
 Production branch deploy:
 [prod--grand-feast-uk-x-europe.netlify.app](https://prod--grand-feast-uk-x-europe.netlify.app/)
 
+Infrastructure notes for agents and maintainers live in
+[`docs/infrastructure.md`](docs/infrastructure.md).
+
 ## Project Structure
 
 - `src/routes/` contains SvelteKit routes.
