@@ -9,4 +9,3 @@
 export { MongoBookingRepository } from '$lib/infrastructure/db/mongo/bookingRepository';
 export { MongoTicketRepository } from '$lib/infrastructure/db/mongo/ticketRepository';
 export { MongoTicketCounterRepository } from '$lib/infrastructure/db/mongo/ticketCounterRepository';
-export { MongoUserRepository } from '$lib/infrastructure/db/mongo/userRepository';

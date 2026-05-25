@@ -42,13 +42,6 @@ const counterSchema = new mongoose.Schema({
 	sold: { type: Number, default: 0 }
 });
 
-/** Mongoose schema for persisted admin/user records. */
-const userSchema = new mongoose.Schema({
-	_id: { type: String, required: true },
-	roles: [{ type: String, required: true }]
-});
-
 export const BookingModel = mongoose.models.Booking || mongoose.model('Booking', bookingSchema);
 export const TicketModel = mongoose.models.Ticket || mongoose.model('Ticket', ticketSchema);
 export const CounterModel = mongoose.models.Counter || mongoose.model('Counter', counterSchema);
-export const UserModel = mongoose.models.User || mongoose.model('User', userSchema);

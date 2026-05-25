@@ -4,7 +4,7 @@
 
 This is a SvelteKit app. Application routes live in `src/routes/`, shared UI components in `src/lib/components/`, and domain logic in `src/lib/domain/`. Application services and port interfaces live under `src/lib/application/`, while infrastructure adapters are grouped under `src/lib/infrastructure/` for auth, bootstrap, config, MongoDB repositories, email, logging, media, and system settings. Server-side HTTP helpers live in `src/lib/server/http/`, navigation metadata lives in `src/lib/navigation/`, and static assets live in `static/`. Tests are co-located with the code they cover, for example `src/lib/domain/booking.test.ts`.
 
-For deployment, DNS, MongoDB Atlas, Better Auth, Google OAuth, and external account context, read `docs/infrastructure.md` before making infrastructure-sensitive changes.
+For deployment, DNS, MongoDB Atlas, Supabase Auth, Google OAuth, and external account context, read `docs/infrastructure.md` before making infrastructure-sensitive changes.
 
 ## Build, Test, and Development Commands
 
@@ -33,6 +33,6 @@ Recent commits use short, imperative, lowercase subjects like `refactor legal pa
 
 ## Security & Configuration Tips
 
-Do not commit secrets. Copy `.env.example` to `.env` for local development and fill in values such as `MONGO_URI`, `APP_BASE_URL`, and `AUTH_SECRET`. The app also reads `MONGO_DB_CONNECT_TIMEOUT_MS`, initial ticket counter values, optional `LOCAL_ADMIN_EMAILS`, `GOOGLE_ID`, `GOOGLE_SECRET`, `MY_POSTMARK_API_KEY`, and Cloudinary credentials. Local development can use Docker MongoDB via `make db-up`, and the app expects `http://localhost:5173` for local OAuth callbacks. Postmark, Cloudinary, and Google OAuth can be left empty unless those integrations are needed locally.
+Do not commit secrets. Copy `.env.example` to `.env` for local development and fill in values such as `MONGO_URI`, `APP_BASE_URL`, `PUBLIC_SUPABASE_URL`, and `PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The app also reads `MONGO_DB_CONNECT_TIMEOUT_MS`, initial ticket counter values, `MY_POSTMARK_API_KEY`, and Cloudinary credentials. Local development can use Docker MongoDB via `make db-up` and Supabase CLI for local Auth. Postmark and Cloudinary can be left empty unless those integrations are needed locally.
 
-Auth uses Better Auth with Google OAuth and a dev-only `LOCAL_ADMIN_EMAILS` email-password path. Keep Google and local email-password providers linkable for the same admin email; local dev Better Auth users should be email-verified so Google sign-in does not fail with `account_not_linked`. Netlify deploy previews should proxy OAuth through the long-lived dev branch URL, not a wildcard Google OAuth origin.
+Auth uses Supabase Auth with Google OAuth. Application roles live in Supabase Auth `app_metadata.roles`; do not use user-editable metadata for authorization. Local auth development should use the Supabase CLI local stack.

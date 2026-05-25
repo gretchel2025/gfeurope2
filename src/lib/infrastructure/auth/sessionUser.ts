@@ -9,10 +9,12 @@
 import type { AppSession } from '$lib/infrastructure/auth/session';
 import type { SessionUser } from '$lib/domain/user';
 
-/** Maps a Better Auth session into the app's normalized session user shape. */
+/** Maps a Supabase Auth session into the app's normalized session user shape. */
 export function getSessionUser(session: AppSession | null): SessionUser {
 	const email = session?.user?.email?.trim().toLowerCase();
-	const name = session?.user?.name ?? email ?? '';
+	const metadataName = session?.user?.user_metadata?.name;
+	const name =
+		typeof metadataName === 'string' && metadataName.trim() ? metadataName : (email ?? '');
 
 	if (!email) {
 		return {

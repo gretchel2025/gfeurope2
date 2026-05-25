@@ -10,9 +10,8 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { AuthenticationRequiredError, PermissionDeniedError } from '$lib/application/errors';
 import type { SessionUser } from '$lib/domain/user';
 import { hasAdminAccess, isSuperUser } from '$lib/domain/user';
-import { getAuthSession, type AppSession } from '$lib/infrastructure/auth/session';
+import { getAuthSession, getSessionRoles, type AppSession } from '$lib/infrastructure/auth/session';
 import { getSessionUser } from '$lib/infrastructure/auth/sessionUser';
-import { userService } from '$lib/server/http/services';
 
 /** Requires an authenticated admin session and returns the normalized session user. */
 export async function requireAdminSession(
@@ -23,8 +22,8 @@ export async function requireAdminSession(
 		throw new AuthenticationRequiredError('sign in required');
 	}
 
-	const dbUser = await userService.getById(currentUser._id);
-	if (!hasAdminAccess(dbUser)) {
+	const roles = getSessionRoles(session);
+	if (!hasAdminAccess(roles)) {
 		throw new PermissionDeniedError(`user ${currentUser._id} unauthorized`);
 	}
 
@@ -32,7 +31,7 @@ export async function requireAdminSession(
 		session,
 		user: {
 			...currentUser,
-			isASuperUser: isSuperUser(dbUser)
+			isASuperUser: isSuperUser(roles)
 		}
 	};
 }

@@ -1,25 +1,22 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { auth } from '$lib/infrastructure/auth/authConfig';
+import type { Session } from '@supabase/supabase-js';
+import { normalizeUserRoles, type UserRole } from '$lib/domain/user';
 
-export type AppSession = {
-	session: {
-		id: string;
-		userId: string;
-		expiresAt: Date;
-	};
-	user: {
-		id: string;
-		email: string;
-		name: string;
-		image?: string | null;
-		emailVerified?: boolean;
-	};
-};
+export type AppSession = Session;
 
 export async function getAuthSession(event: RequestEvent): Promise<AppSession | null> {
-	const session = await auth.api.getSession({
-		headers: event.request.headers
-	});
+	const { session, user } = await event.locals.safeGetSession();
 
-	return session as AppSession | null;
+	if (!session || !user) {
+		return null;
+	}
+
+	return {
+		...session,
+		user
+	};
+}
+
+export function getSessionRoles(session: AppSession | null): UserRole[] {
+	return normalizeUserRoles(session?.user?.app_metadata?.roles);
 }

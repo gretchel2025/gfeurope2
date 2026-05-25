@@ -74,8 +74,8 @@ Make sure `.env` includes local values like:
 ```bash
 MONGO_URI=mongodb://127.0.0.1:27017/grandfeast
 APP_BASE_URL=http://localhost:5173
-AUTH_SECRET=local-dev-auth-secret
-LOCAL_ADMIN_EMAILS=alice@example.com,bob@example.com,charlie@example.com
+PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+PUBLIC_SUPABASE_PUBLISHABLE_KEY=<local anon/publishable key from supabase status>
 ```
 
 Start MongoDB and the app:
@@ -96,47 +96,38 @@ On startup, the app:
 
 - connects to the MongoDB defined in `MONGO_URI`
 - creates missing ticket counter records for standard, VIP, and youth tickets
-- inserts local admin/superuser records from `LOCAL_ADMIN_EMAILS` if they do not already
-  exist
 
 ## Local Admin Sign-In
 
-The app uses Better Auth for admin sessions. Google OAuth is enabled when `GOOGLE_ID`
-and `GOOGLE_SECRET` are set.
+The app uses Supabase Auth for sessions. Google OAuth is configured in Supabase, and the
+SvelteKit app needs:
 
-For local development without Google OAuth, set `LOCAL_ADMIN_EMAILS`. The `/signin` page
-will show a local admin sign-in form, and any configured email can create a local admin
-session. These local development email-password accounts are marked as verified so a
-later Google sign-in with the same email can link to the same Better Auth user instead of
-failing with `account_not_linked`.
+```bash
+PUBLIC_SUPABASE_URL=
+PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+```
 
-Google OAuth setup for local admin sign-in:
+For local auth development, use the Supabase CLI local stack and copy the local URL/key
+from `supabase status`. The app no longer has a custom local admin shortcut.
 
-- Authorized JavaScript origin: `http://localhost:5173`
-- Authorized redirect URI: `http://localhost:5173/api/auth/callback/google`
+Supabase Auth URL setup:
 
-Google OAuth setup for Netlify:
+- Site URL: `https://www.grandfeast.eu`
+- Redirect URLs: `http://localhost:5173/**`, `https://dev.grandfeast.eu/**`,
+  `https://dev--grand-feast-uk-x-europe.netlify.app/**`, and
+  `https://www.grandfeast.eu/**`
 
-- Authorized JavaScript origins use origins only, with no path and no wildcard:
-  `https://dev.grandfeast.eu`, `https://dev--grand-feast-uk-x-europe.netlify.app`, and
-  `https://www.grandfeast.eu`
-- Authorized redirect URIs use the full Better Auth callback URLs:
-  `https://dev.grandfeast.eu/api/auth/callback/google`,
-  `https://dev--grand-feast-uk-x-europe.netlify.app/api/auth/callback/google`, and
-  `https://www.grandfeast.eu/api/auth/callback/google`
+Google OAuth setup:
 
-Netlify deploy previews proxy Google OAuth through the long-lived dev preview. Do not add
-`https://deploy-preview-*--grand-feast-uk-x-europe.netlify.app` to Google OAuth settings;
-Google does not allow wildcard origins, and deploy previews should use the dev callback
-through Better Auth's OAuth proxy.
-
-Set `BETTER_AUTH_PROXY_URL` to `https://dev.grandfeast.eu` for the `dev` branch and
-to `https://www.grandfeast.eu` for production. Deploy previews can continue to proxy
-OAuth through the stable development URL.
+- Configure Google as a Supabase Auth provider.
+- Use Supabase's callback URL in Google OAuth:
+  `https://<project-ref>.supabase.co/auth/v1/callback`
+- Local Supabase uses `http://127.0.0.1:54321/auth/v1/callback`.
 
 ## Access Roles
 
-Hosted access is controlled by Mongo `user` records. The app recognizes these roles:
+Access is controlled by Supabase Auth `app_metadata.roles`. The app recognizes these
+roles:
 
 - `tester`: can access public pages on the live development site.
 - `admin`: can access production/local admin pages, and can access live development admin
@@ -148,9 +139,12 @@ user with `tester` for every non-auth page. Production and local public pages re
 Admin routes under `/api` require `admin` or `superuser`; on live development they also
 require `tester`.
 
-Role records are stored in the app Mongo collection `users`, keyed by normalized email
-address as `_id`. Better Auth's sign-in identity collection is named `user`; assigning
-roles there will not grant app access.
+Do not use `user_metadata` for authorization; users can edit it. Assign roles only in
+provider-owned `app_metadata`, for example:
+
+```json
+{ "roles": ["tester", "admin", "superuser"] }
+```
 
 ## Optional Integrations
 
@@ -224,9 +218,9 @@ The tester-facing dev URL is served through Cloudflare:
 - Worker route: `dev.grandfeast.eu/*`
 - Worker origin: `https://dev--grand-feast-uk-x-europe.netlify.app`
 - Netlify branch-deploy env:
-  `APP_BASE_URL=https://dev.grandfeast.eu` and
-  `BETTER_AUTH_PROXY_URL=https://dev.grandfeast.eu`
+  `APP_BASE_URL=https://dev.grandfeast.eu`, `PUBLIC_SUPABASE_URL`, and
+  `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
 The Worker keeps tester traffic uncached, rewrites Netlify-origin redirects back to
-`dev.grandfeast.eu`, and sends `X-Grandfeast-Public-Origin` so `/api/auth/*` requests
-use the public OAuth callback URL during Google token exchange.
+`dev.grandfeast.eu`, and keeps tester traffic on the public dev origin while Supabase
+handles OAuth callbacks through `/auth/callback`.

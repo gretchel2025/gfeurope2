@@ -121,8 +121,7 @@ export function isAuthBypassPath(pathname: string): boolean {
 	if (
 		pathname === '/signin' ||
 		pathname === '/unauthorized' ||
-		pathname.startsWith('/api/auth/') ||
-		pathname === '/api/auth' ||
+		pathname === '/auth/callback' ||
 		pathname.startsWith('/_app/')
 	) {
 		return true;

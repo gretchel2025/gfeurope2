@@ -16,15 +16,12 @@ const fileEnv = loadDotEnvFile(path.resolve(process.cwd(), '.env'));
 export type AppConfig = {
 	dev: boolean;
 	appBaseUrl: string;
-	betterAuthProxyUrl: string;
 	netlifyContext: string;
 	netlifyBranch: string;
 	mongoUri: string;
 	mongoConnectTimeoutMs: number;
-	authSecret: string;
-	googleClientId: string;
-	googleClientSecret: string;
-	localAdminEmails: string[];
+	supabaseUrl: string;
+	supabasePublishableKey: string;
 	bootstrap: {
 		standardTicketsInitialAvailable: number;
 		vipTicketsInitialAvailable: number;
@@ -42,15 +39,12 @@ export type AppConfig = {
 export const appConfig: AppConfig = {
 	dev,
 	appBaseUrl: readEnv('APP_BASE_URL') || 'http://localhost:5173',
-	betterAuthProxyUrl: readEnv('BETTER_AUTH_PROXY_URL') || '',
 	netlifyContext: readEnv('CONTEXT') || '',
 	netlifyBranch: readEnv('BRANCH') || '',
 	mongoUri: readEnv('MONGO_URI') || '',
 	mongoConnectTimeoutMs: parsePositiveInt(readEnv('MONGO_DB_CONNECT_TIMEOUT_MS'), 5000),
-	authSecret: readEnv('AUTH_SECRET') || (dev ? 'local-dev-auth-secret-change-me' : ''),
-	googleClientId: readEnv('GOOGLE_ID') || '',
-	googleClientSecret: readEnv('GOOGLE_SECRET') || '',
-	localAdminEmails: parseEmailList(readEnv('LOCAL_ADMIN_EMAILS')),
+	supabaseUrl: readEnv('PUBLIC_SUPABASE_URL') || '',
+	supabasePublishableKey: readEnv('PUBLIC_SUPABASE_PUBLISHABLE_KEY') || '',
 	bootstrap: {
 		standardTicketsInitialAvailable: parsePositiveInt(
 			readEnv('STANDARD_TICKETS_INITIAL_AVAILABLE'),
@@ -79,18 +73,6 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
 	}
 
 	return parsed;
-}
-
-/** Parses the comma-separated local admin email list. */
-function parseEmailList(raw: string | undefined): string[] {
-	if (!raw) {
-		return [];
-	}
-
-	return raw
-		.split(',')
-		.map((value) => value.trim().toLowerCase())
-		.filter(Boolean);
 }
 
 /** Reads an env value from process.env first, then from the local .env file snapshot. */

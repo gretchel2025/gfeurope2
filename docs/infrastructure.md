@@ -11,7 +11,7 @@ commits, PRs, or logs.
 - Database: MongoDB Atlas, account `gretchelglopez@gmail.com`
 - Transactional emails: Postmark, username `jonathangersam_gfeu`, linked email account
   `jonathan.lopez@grandfeast.eu`
-- Auth: Google sign-in through Better Auth
+- Auth: Supabase Auth with Google sign-in
 
 ## Live Environments
 
@@ -24,8 +24,8 @@ commits, PRs, or logs.
 Netlify tracks the long-lived `dev` and `prod` branches. Pushing or merging to `dev`
 updates the development branch deploy; pushing or merging to `prod` updates production.
 The tester-facing development URL is `https://dev.grandfeast.eu`; the Netlify branch URL is
-the origin behind it. Deploy previews should use Better Auth's OAuth proxy through the stable
-development URL, not wildcard Google OAuth origins.
+the origin behind it. Supabase Auth redirect URLs must include the public, branch-origin,
+production, and local app origins.
 
 ## DNS
 
@@ -77,15 +77,16 @@ come from `.env`, usually copied from `.env.example`.
 Important deployment-related env vars:
 
 - `APP_BASE_URL`
-- `BETTER_AUTH_PROXY_URL`
+- `PUBLIC_SUPABASE_URL`
+- `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `CONTEXT` and `BRANCH`, supplied by Netlify
-- `AUTH_SECRET`
 
 For Netlify `branch-deploy` context, currently set:
 
 ```txt
 APP_BASE_URL=https://dev.grandfeast.eu
-BETTER_AUTH_PROXY_URL=https://dev.grandfeast.eu
+PUBLIC_SUPABASE_URL=<Supabase project URL>
+PUBLIC_SUPABASE_PUBLISHABLE_KEY=<Supabase publishable key>
 ```
 
 The `dev` branch deploy is rebuilt automatically when `dev` is pushed. After changing
@@ -111,13 +112,12 @@ Relevant code paths:
 - `src/lib/infrastructure/db/mongo/*Repository.ts`
 - `src/lib/infrastructure/bootstrap/bootstrap.ts`
 
-On startup, the app connects to MongoDB, creates missing ticket counter records, and seeds
-local admin users from `LOCAL_ADMIN_EMAILS` when configured.
+On startup, the app connects to MongoDB and creates missing ticket counter records. MongoDB
+continues to store booking, ticket, inventory, email, media, and system-setting data; it no
+longer stores auth identities or authorization roles.
 
-Hosted authorization uses the app authorization records in Mongo collection `users`,
-keyed by normalized email address as `_id`. Better Auth stores sign-in identities in its
-own Mongo collection named `user`; do not confuse the two collections when assigning
-roles.
+Hosted authorization uses Supabase Auth `app_metadata.roles`. Do not use `user_metadata`
+for authorization because users can edit it.
 
 - `tester` grants access to public pages on live development.
 - `admin` grants admin access in production/local and, with `tester`, on live development.
@@ -136,46 +136,40 @@ For `dev.grandfeast.eu`, `jonathangersam@gmail.com` currently needs all three ro
 
 ## Auth
 
-Auth is configured in `src/lib/infrastructure/auth/authConfig.ts` with Better Auth,
-MongoDB persistence, Google OAuth, and a local-development email/password path for
-configured admin emails.
+Auth is configured through Supabase Auth and wired into SvelteKit with `@supabase/ssr`.
+Server-side authorization uses Supabase's trusted `auth.getUser()` path before reading
+`app_metadata.roles`.
 
 Important auth env vars:
 
-- `AUTH_SECRET`
-- `GOOGLE_ID`
-- `GOOGLE_SECRET`
-- `BETTER_AUTH_PROXY_URL`
-- `LOCAL_ADMIN_EMAILS`
+- `PUBLIC_SUPABASE_URL`
+- `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+Supabase Auth URL settings:
+
+- Site URL: `https://www.grandfeast.eu`
+- Redirect URLs: `http://localhost:5173/**`, `https://dev.grandfeast.eu/**`,
+  `https://dev--grand-feast-uk-x-europe.netlify.app/**`, and
+  `https://www.grandfeast.eu/**`
 
 Google OAuth callback URLs:
 
-- Local: `http://localhost:5173/api/auth/callback/google`
-- Development: `https://dev.grandfeast.eu/api/auth/callback/google`
-- Development origin: `https://dev--grand-feast-uk-x-europe.netlify.app/api/auth/callback/google`
-- Production: `https://www.grandfeast.eu/api/auth/callback/google`
+- Hosted Supabase project: `https://<project-ref>.supabase.co/auth/v1/callback`
+- Local Supabase CLI: `http://127.0.0.1:54321/auth/v1/callback`
 
-Google OAuth origins:
-
-- `http://localhost:5173`
-- `https://dev.grandfeast.eu`
-- `https://dev--grand-feast-uk-x-europe.netlify.app`
-- `https://www.grandfeast.eu`
-
-Do not configure wildcard deploy-preview origins in Google OAuth. Google does not allow
-wildcard origins, and this repo expects deploy previews to proxy OAuth through the stable
-development URL.
-
-Local Better Auth users should be email-verified so a later Google sign-in with the same
-admin email links cleanly instead of failing with `account_not_linked`.
+Application OAuth completes in SvelteKit at `/auth/callback`, where the Supabase auth code
+is exchanged for a cookie-backed session.
 
 First-class access policy code:
 
 - `src/lib/infrastructure/auth/accessPolicy.ts`
 - `src/lib/infrastructure/auth/accessPolicy.test.ts`
+- `src/lib/infrastructure/auth/session.ts`
+- `src/lib/infrastructure/auth/sessionUser.ts`
 - `src/hooks.server.ts`
 - `src/routes/signin/+page.server.ts`
 - `src/routes/signin/+page.svelte`
+- `src/routes/auth/callback/+server.ts`
 - `src/lib/server/http/guards.ts`
 
 Access policy behavior:
@@ -192,6 +186,13 @@ The live-dev classifier treats these as live dev:
 - `dev.grandfeast.eu`
 - `dev--grand-feast-uk-x-europe.netlify.app`
 - Netlify `BRANCH=dev`
+
+Current live-dev operator account:
+
+```txt
+Email: jonathangersam@gmail.com
+Required Supabase app_metadata.roles: admin, superuser, tester
+```
 
 ## Optional Integrations
 
@@ -230,18 +231,9 @@ Worker behavior:
 - Rewrites Netlify-origin `Location` headers back to `https://dev.grandfeast.eu`
 - Sends `X-Grandfeast-Public-Origin: https://dev.grandfeast.eu`
 
-`src/hooks.server.ts` uses `X-Grandfeast-Public-Origin` only for `/api/auth/*` requests.
-It rebuilds the Better Auth request URL with the public origin before Better Auth handles
-the request. This keeps Google OAuth authorization and callback/token exchange on the same
-redirect URI:
-
-```txt
-https://dev.grandfeast.eu/api/auth/callback/google
-```
-
-If Google sign-in reaches `/api/auth/error?error=invalid_code`, check Netlify function
-logs. A `redirect_uri_mismatch` usually means the Cloudflare Worker, Netlify env vars, or
-Google OAuth redirect URI no longer agree on `https://dev.grandfeast.eu`.
+Supabase handles the provider OAuth callback on the Supabase project domain. The app's
+`/auth/callback` route exchanges the returned code for a session and then redirects to the
+requested app path.
 
 ## Verification Commands
 
@@ -254,17 +246,8 @@ curl -I https://dev.grandfeast.eu/
 curl -I https://dev.grandfeast.eu/api
 ```
 
-OAuth start:
-
-```bash
-curl -i https://dev.grandfeast.eu/api/auth/sign-in/social \
-  -H 'content-type: application/json' \
-  -H 'origin: https://dev.grandfeast.eu' \
-  --data '{"provider":"google","callbackURL":"/"}'
-```
-
-The OAuth start response should include
-`redirect_uri=https%3A%2F%2Fdev.grandfeast.eu%2Fapi%2Fauth%2Fcallback%2Fgoogle`.
+OAuth start is browser-driven from `/signin`; verify that the Google sign-in URL starts
+from Supabase and returns to `/auth/callback?next=...` on the same app origin.
 
 ## Agent Checklist
 

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { authClient } from '$lib/infrastructure/auth/authClient';
+	import { signOutCurrentUser as signOutAuth } from '$lib/infrastructure/auth/authClient';
 	import { page } from '$app/stores';
 	import { adminRoutes, publicRoutes } from '$lib/navigation/adminRoutes';
 
 	async function signOutCurrentUser() {
-		await authClient.signOut();
+		await signOutAuth($page.data.supabaseAuth);
 		await goto(publicRoutes.signin);
 	}
 </script>

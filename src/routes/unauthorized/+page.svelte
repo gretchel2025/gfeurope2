@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
-	import { authClient } from '$lib/infrastructure/auth/authClient';
+	import { signOutCurrentUser as signOutAuth } from '$lib/infrastructure/auth/authClient';
+	import { page } from '$app/stores';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
 	async function signOutCurrentUser() {
-		await authClient.signOut();
+		await signOutAuth($page.data.supabaseAuth);
 		await invalidateAll();
 		await goto('/signin', { invalidateAll: true });
 	}

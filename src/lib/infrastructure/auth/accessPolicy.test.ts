@@ -136,7 +136,7 @@ describe('access policy', () => {
 	it('bypasses auth endpoints and assets required for sign-in', () => {
 		expect(isAuthBypassPath('/signin')).toBe(true);
 		expect(isAuthBypassPath('/unauthorized')).toBe(true);
-		expect(isAuthBypassPath('/api/auth/callback/google')).toBe(true);
+		expect(isAuthBypassPath('/auth/callback')).toBe(true);
 		expect(isAuthBypassPath('/_app/immutable/entry/app.js')).toBe(true);
 		expect(isAuthBypassPath('/favicon.png')).toBe(true);
 		expect(isAuthBypassPath('/api/v0/booking/list')).toBe(false);
