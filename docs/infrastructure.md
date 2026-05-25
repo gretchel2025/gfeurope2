@@ -8,7 +8,7 @@ commits, PRs, or logs.
 
 - DNS registrar: Squarespace Domains, account `jonathangersam@gmail.com`
 - Deployment platform: Netlify, account `jonathangersam@gmail.com`
-- Database: MongoDB Atlas, account `gretchelglopez@gmail.com`
+- Database/auth: Supabase, account `jonathangersam@gmail.com`
 - Transactional emails: Postmark, username `jonathangersam_gfeu`, linked email account
   `jonathan.lopez@grandfeast.eu`
 - Auth: Supabase Auth with Google sign-in
@@ -77,16 +77,25 @@ come from `.env`, usually copied from `.env.example`.
 Important deployment-related env vars:
 
 - `APP_BASE_URL`
+- `APP_EVENT_ID`
 - `PUBLIC_SUPABASE_URL`
 - `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 - `CONTEXT` and `BRANCH`, supplied by Netlify
 
-For Netlify `branch-deploy` context, currently set:
+Netlify context mapping:
+
+- `production` / `prod` branch: `77 Labs Prod`
+- `branch-deploy` / `dev` branch: `77 Labs Test`
+
+For Netlify `branch-deploy` context, use:
 
 ```txt
 APP_BASE_URL=https://dev.grandfeast.eu
-PUBLIC_SUPABASE_URL=<Supabase project URL>
-PUBLIC_SUPABASE_PUBLISHABLE_KEY=<Supabase publishable key>
+APP_EVENT_ID=gfeu2025
+PUBLIC_SUPABASE_URL=<77 Labs Test Supabase URL>
+PUBLIC_SUPABASE_PUBLISHABLE_KEY=<77 Labs Test publishable key>
+SUPABASE_SERVICE_ROLE_KEY=<77 Labs Test service-role key>
 ```
 
 The `dev` branch deploy is rebuilt automatically when `dev` is pushed. After changing
@@ -94,27 +103,56 @@ Netlify env vars, trigger a redeploy so the branch deploy runtime picks up the n
 
 ## Database
 
-Production and hosted preview environments use MongoDB Atlas. Local development can use a
-Docker MongoDB instance from `compose.yaml`.
+Production and live development use separate hosted Supabase projects for stronger
+isolation. Local development uses the Supabase CLI local stack only.
+
+Hosted projects:
+
+- `77 Labs Prod`
+  - Project ref: `erhrykkyhsygnonyfbis`
+  - Project URL: `https://erhrykkyhsygnonyfbis.supabase.co`
+  - Used by Netlify production / `prod`
+- `77 Labs Test`
+  - Project ref: `guoqhigzyfisvtnlrbjw`
+  - Project URL: `https://guoqhigzyfisvtnlrbjw.supabase.co`
+  - Used by Netlify `branch-deploy` / `dev`
+
+App data tables:
+
+- `grandfeasteu_bookings`
+- `grandfeasteu_tickets`
+- `grandfeasteu_ticket_counters`
+
+All app data tables include `event_id text not null default 'gfeu2025'`, `created_at`,
+and `updated_at`. The app scopes repository reads/writes by `APP_EVENT_ID`; prod/test
+separation comes from the selected Supabase project, not an `environment` column.
+
+RLS is enabled on all `grandfeasteu_*` tables with no anon/authenticated policies. App
+data access uses the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose that key to
+browser code.
 
 Important database env vars:
 
-- `MONGO_URI`
-- `MONGO_DB_CONNECT_TIMEOUT_MS`
+- `APP_EVENT_ID`
+- `PUBLIC_SUPABASE_URL`
+- `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 - `STANDARD_TICKETS_INITIAL_AVAILABLE`
 - `VIP_TICKETS_INITIAL_AVAILABLE`
 - `YOUTH_TICKETS_INITIAL_AVAILABLE`
 
 Relevant code paths:
 
-- `src/lib/infrastructure/db/mongo/client.ts`
-- `src/lib/infrastructure/db/mongo/models.ts`
-- `src/lib/infrastructure/db/mongo/*Repository.ts`
+- `supabase/config.toml`
+- `supabase/migrations/*.sql`
+- `supabase/seed.sql`
+- `src/lib/infrastructure/db/supabase/client.ts`
+- `src/lib/infrastructure/db/supabase/*Repository.ts`
 - `src/lib/infrastructure/bootstrap/bootstrap.ts`
 
-On startup, the app connects to MongoDB and creates missing ticket counter records. MongoDB
-continues to store booking, ticket, inventory, email, media, and system-setting data; it no
-longer stores auth identities or authorization roles.
+On startup, the app creates missing ticket counter records. Local `supabase/seed.sql`
+contains only initial counters for `event_id='gfeu2025'`; do not commit exported booking
+data or PII.
 
 Hosted authorization uses Supabase Auth `app_metadata.roles`. Do not use `user_metadata`
 for authorization because users can edit it.
@@ -147,14 +185,21 @@ Important auth env vars:
 
 Supabase Auth URL settings:
 
-- Site URL: `https://www.grandfeast.eu`
-- Redirect URLs: `http://localhost:5173/**`, `https://dev.grandfeast.eu/**`,
-  `https://dev--grand-feast-uk-x-europe.netlify.app/**`, and
-  `https://www.grandfeast.eu/**`
+- `77 Labs Prod`
+  - Site URL: `https://www.grandfeast.eu`
+  - Redirect URLs: `http://localhost:5173/**`, `http://127.0.0.1:5173/**`,
+    `https://www.grandfeast.eu/**`, and
+    `https://prod--grand-feast-uk-x-europe.netlify.app/**`
+- `77 Labs Test`
+  - Site URL: `https://dev.grandfeast.eu`
+  - Redirect URLs: `http://localhost:5173/**`, `http://127.0.0.1:5173/**`,
+    `https://dev.grandfeast.eu/**`, and
+    `https://dev--grand-feast-uk-x-europe.netlify.app/**`
 
 Google OAuth callback URLs:
 
-- Hosted Supabase project: `https://<project-ref>.supabase.co/auth/v1/callback`
+- `77 Labs Prod`: `https://erhrykkyhsygnonyfbis.supabase.co/auth/v1/callback`
+- `77 Labs Test`: `https://guoqhigzyfisvtnlrbjw.supabase.co/auth/v1/callback`
 - Local Supabase CLI: `http://127.0.0.1:54321/auth/v1/callback`
 
 Application OAuth completes in SvelteKit at `/auth/callback`, where the Supabase auth code
@@ -254,7 +299,7 @@ from Supabase and returns to `/auth/callback?next=...` on the same app origin.
 Before changing infrastructure-sensitive behavior:
 
 - Read `README.md`, `AGENTS.md`, `.env.example`, and this file.
-- Check whether the change affects Netlify env vars, Google OAuth settings, MongoDB Atlas,
+- Check whether the change affects Netlify env vars, Google OAuth settings, Supabase,
   Squarespace DNS, Postmark, or Cloudinary.
 - Keep secrets out of the repo and use placeholder names in documentation.
 - Run `npm run check`, `npm run test`, and `npm run lint` for code changes.

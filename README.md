@@ -27,7 +27,7 @@ Infrastructure notes for agents and maintainers live in
 - `src/lib/components/` contains shared UI components.
 - `src/lib/domain/` contains framework-light domain models and business rules.
 - `src/lib/application/` contains application services and ports.
-- `src/lib/infrastructure/` contains adapters for auth, bootstrap, config, MongoDB, email,
+- `src/lib/infrastructure/` contains adapters for auth, bootstrap, config, Supabase, email,
   logging, media, and system settings.
 - `src/lib/server/http/` contains server-side HTTP service composition.
 - `src/lib/navigation/` contains navigation metadata.
@@ -36,7 +36,8 @@ Infrastructure notes for agents and maintainers live in
 ## Requirements
 
 - Node.js and npm
-- Docker, if you want to run MongoDB locally with `compose.yaml`
+- Docker, for the Supabase CLI local stack
+- Supabase CLI, for local database/auth development
 
 ## Setup
 
@@ -64,38 +65,44 @@ make run
 
 The local app expects `http://localhost:5173`, including for OAuth callback URLs.
 
-## Run With Local MongoDB
+## Run With Local Supabase
 
-Use this when the shared or deployed MongoDB is unavailable, or when you want a disposable
-local database.
+Use this for local database/auth development. Local data lives in the Supabase CLI stack,
+not in either hosted Supabase project.
 
 Make sure `.env` includes local values like:
 
 ```bash
-MONGO_URI=mongodb://127.0.0.1:27017/grandfeast
 APP_BASE_URL=http://localhost:5173
+APP_EVENT_ID=gfeu2025
 PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 PUBLIC_SUPABASE_PUBLISHABLE_KEY=<local anon/publishable key from supabase status>
+SUPABASE_SERVICE_ROLE_KEY=<local service_role key from supabase status>
 ```
 
-Start MongoDB and the app:
+Start Supabase and the app:
 
 ```bash
 make run-local
 ```
 
-Useful MongoDB commands:
+Useful Supabase commands:
 
 ```bash
-make db-up
-make db-logs
-make db-down
+make supabase-up
+make supabase-status
+make supabase-down
+supabase db reset
 ```
 
 On startup, the app:
 
-- connects to the MongoDB defined in `MONGO_URI`
+- connects to the Supabase project in `PUBLIC_SUPABASE_URL`
+- uses `SUPABASE_SERVICE_ROLE_KEY` only on the server for app data
 - creates missing ticket counter records for standard, VIP, and youth tickets
+
+Local seed data includes only ticket counters for `APP_EVENT_ID=gfeu2025`; it does not
+include real booking PII.
 
 ## Local Admin Sign-In
 
@@ -112,10 +119,14 @@ from `supabase status`. The app no longer has a custom local admin shortcut.
 
 Supabase Auth URL setup:
 
-- Site URL: `https://www.grandfeast.eu`
-- Redirect URLs: `http://localhost:5173/**`, `https://dev.grandfeast.eu/**`,
-  `https://dev--grand-feast-uk-x-europe.netlify.app/**`, and
-  `https://www.grandfeast.eu/**`
+- `77 Labs Prod`: Site URL `https://www.grandfeast.eu`; redirects include
+  `http://localhost:5173/**`, `http://127.0.0.1:5173/**`,
+  `https://www.grandfeast.eu/**`, and
+  `https://prod--grand-feast-uk-x-europe.netlify.app/**`.
+- `77 Labs Test`: Site URL `https://dev.grandfeast.eu`; redirects include
+  `http://localhost:5173/**`, `http://127.0.0.1:5173/**`,
+  `https://dev.grandfeast.eu/**`, and
+  `https://dev--grand-feast-uk-x-europe.netlify.app/**`.
 
 Google OAuth setup:
 
@@ -123,6 +134,18 @@ Google OAuth setup:
 - Use Supabase's callback URL in Google OAuth:
   `https://<project-ref>.supabase.co/auth/v1/callback`
 - Local Supabase uses `http://127.0.0.1:54321/auth/v1/callback`.
+
+## App Data
+
+Grand Feast app data also lives in Supabase. Hosted isolation is by project:
+
+- Production and the `prod` branch use `77 Labs Prod`.
+- Live development and `branch-deploy` use `77 Labs Test`.
+- Local development uses the Supabase CLI local stack only.
+
+Tables are prefixed with `grandfeasteu_` and include `event_id`, currently defaulting to
+`gfeu2025`. Repository queries always scope by `APP_EVENT_ID`. App-data tables have RLS
+enabled and no anon/authenticated policies; server code uses the service-role key.
 
 ## Access Roles
 

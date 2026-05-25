@@ -14,18 +14,18 @@ run:
 	npm run dev -- --open
 
 run-local:
-	# start local mongodb, then start the dev server
-	docker-compose up -d mongodb
+	# start local Supabase, then start the dev server
+	supabase start
 	npm run dev -- --open
 
-db-up:
-	docker-compose up -d mongodb
+supabase-up:
+	supabase start
 
-db-down:
-	docker-compose down
+supabase-down:
+	supabase stop
 
-db-logs:
-	docker-compose logs -f mongodb
+supabase-status:
+	supabase status
 
 lint:
 	npm run lint

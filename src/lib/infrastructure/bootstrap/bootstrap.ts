@@ -1,7 +1,6 @@
 /**
  * Purpose:
- * This file bootstraps runtime prerequisites such as Mongo connectivity,
- * and inventory counters.
+ * This file bootstraps runtime prerequisites such as inventory counters.
  *
  * Why this structure is good:
  * Startup behavior is centralized here instead of being spread across hooks and
@@ -9,19 +8,12 @@
  * initialization logic easier to reason about.
  */
 import { appConfig } from '$lib/infrastructure/config/env.server';
-import { connectMongo } from '$lib/infrastructure/db/mongo/client';
 import { logger } from '$lib/infrastructure/logging/logger';
 import { ticketCounterService } from '$lib/server/http/services';
 
 /** Initializes runtime infrastructure that the app expects to exist. */
 export async function bootstrapApplication(): Promise<void> {
 	logger.info('[INFO] bootstrapApplication() initializing app...');
-
-	const connected = await connectMongo();
-	if (!connected) {
-		logger.warn('[WARN] skipping DB bootstrap because the database connection is unavailable');
-		return;
-	}
 
 	await ensureCounters();
 

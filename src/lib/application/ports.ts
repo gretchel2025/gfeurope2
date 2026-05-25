@@ -3,14 +3,14 @@
  * This file declares the ports used by the application layer.
  *
  * Why this structure is good:
- * The services depend on interfaces instead of concrete Mongo, email, or media
+ * The services depend on interfaces instead of concrete database, email, or media
  * implementations. That keeps business logic easier to test, easier to replace,
  * and easier to read because the dependencies are described by capability.
  */
 import type { Booking } from '$lib/domain/booking';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
-import type { BookingPaymentStatus, TicketStatus } from '$lib/domain/shared/enums';
+import type { TicketStatus } from '$lib/domain/shared/enums';
 
 /** A transport-friendly representation of an outbound email. */
 export type EmailMessage = {
@@ -22,10 +22,11 @@ export type EmailMessage = {
 
 /** Persistence contract for booking records. */
 export interface BookingRepository {
-	insert(booking: Booking): Promise<Booking>;
+	insertReservation(booking: Booking): Promise<Booking>;
 	findByReferenceNo(referenceNo: string): Promise<Booking | null>;
 	list(): Promise<Booking[]>;
-	updatePaymentStatus(referenceNo: string, value: BookingPaymentStatus): Promise<void>;
+	markPaid(referenceNo: string): Promise<void>;
+	cancelReservation(referenceNo: string): Promise<void>;
 	appendTicketId(referenceNo: string, ticketId: string): Promise<void>;
 }
 

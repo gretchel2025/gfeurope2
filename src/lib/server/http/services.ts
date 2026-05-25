@@ -13,10 +13,10 @@ import { SystemService } from '$lib/application/services/systemService';
 import { TicketCounterService } from '$lib/application/services/ticketCounterService';
 import { TicketService } from '$lib/application/services/ticketService';
 import {
-	MongoBookingRepository,
-	MongoTicketCounterRepository,
-	MongoTicketRepository
-} from '$lib/infrastructure/db/mongo/repositories';
+	SupabaseBookingRepository,
+	SupabaseTicketCounterRepository,
+	SupabaseTicketRepository
+} from '$lib/infrastructure/db/supabase/repositories';
 import { PostmarkEmailSender } from '$lib/infrastructure/email/postmarkEmailSender';
 import { CloudinaryImageStorage } from '$lib/infrastructure/media/cloudinaryImageStorage';
 import { DefaultQrCodeGenerator } from '$lib/infrastructure/media/qrCodeGenerator';
@@ -29,9 +29,9 @@ import { customAlphabet } from 'nanoid/non-secure';
 const randomIdGenerator = customAlphabet('23456789ABCDEFGHJKLMNPRSTUVWXYZ', 10);
 
 /** Repository implementations used by the service layer. */
-const bookingRepository = new MongoBookingRepository();
-const ticketRepository = new MongoTicketRepository();
-const ticketCounterRepository = new MongoTicketCounterRepository();
+const bookingRepository = new SupabaseBookingRepository();
+const ticketRepository = new SupabaseTicketRepository();
+const ticketCounterRepository = new SupabaseTicketCounterRepository();
 
 /** Infrastructure adapters used by the service layer. */
 const emailSender = new PostmarkEmailSender();

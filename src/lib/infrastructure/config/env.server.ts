@@ -18,10 +18,10 @@ export type AppConfig = {
 	appBaseUrl: string;
 	netlifyContext: string;
 	netlifyBranch: string;
-	mongoUri: string;
-	mongoConnectTimeoutMs: number;
 	supabaseUrl: string;
 	supabasePublishableKey: string;
+	supabaseServiceRoleKey: string;
+	appEventId: string;
 	bootstrap: {
 		standardTicketsInitialAvailable: number;
 		vipTicketsInitialAvailable: number;
@@ -41,10 +41,10 @@ export const appConfig: AppConfig = {
 	appBaseUrl: readEnv('APP_BASE_URL') || 'http://localhost:5173',
 	netlifyContext: readEnv('CONTEXT') || '',
 	netlifyBranch: readEnv('BRANCH') || '',
-	mongoUri: readEnv('MONGO_URI') || '',
-	mongoConnectTimeoutMs: parsePositiveInt(readEnv('MONGO_DB_CONNECT_TIMEOUT_MS'), 5000),
 	supabaseUrl: readEnv('PUBLIC_SUPABASE_URL') || '',
 	supabasePublishableKey: readEnv('PUBLIC_SUPABASE_PUBLISHABLE_KEY') || '',
+	supabaseServiceRoleKey: readEnv('SUPABASE_SERVICE_ROLE_KEY') || '',
+	appEventId: readEnv('APP_EVENT_ID') || 'gfeu2025',
 	bootstrap: {
 		standardTicketsInitialAvailable: parsePositiveInt(
 			readEnv('STANDARD_TICKETS_INITIAL_AVAILABLE'),

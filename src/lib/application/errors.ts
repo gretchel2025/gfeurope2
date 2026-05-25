@@ -4,7 +4,7 @@
  *
  * Why this structure is good:
  * Keeping app errors in one place lets the application layer describe failures
- * without depending on SvelteKit or Mongo details. Routes can translate these
+ * without depending on SvelteKit or database details. Routes can translate these
  * errors into HTTP responses at the edge.
  */
 export class AppError extends Error {
