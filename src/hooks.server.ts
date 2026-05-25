@@ -1,6 +1,7 @@
 import { bootstrapApplication } from '$lib/infrastructure/bootstrap/bootstrap';
 import { redirect, type Handle } from '@sveltejs/kit';
 import { createServerClient } from '@supabase/ssr';
+import { assertAllowedFormOrigin } from '$lib/infrastructure/auth/csrfOrigin';
 import { appConfig } from '$lib/infrastructure/config/env.server';
 import {
 	buildRedirectTo,
@@ -13,6 +14,8 @@ import { getAuthSession, getSessionRoles } from '$lib/infrastructure/auth/sessio
 await bootstrapApplication();
 
 export const handle: Handle = async ({ event, resolve }) => {
+	assertAllowedFormOrigin(event, appConfig.appBaseUrl);
+
 	event.locals.supabase =
 		appConfig.supabaseUrl && appConfig.supabasePublishableKey
 			? createServerClient(appConfig.supabaseUrl, appConfig.supabasePublishableKey, {
