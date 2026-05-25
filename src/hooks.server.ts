@@ -1,6 +1,6 @@
 import { bootstrapApplication } from '$lib/infrastructure/bootstrap/bootstrap';
 import { building } from '$app/environment';
-import { redirect, type Handle } from '@sveltejs/kit';
+import { redirect, type Handle, type RequestEvent } from '@sveltejs/kit';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { auth } from './auth';
 import { appConfig } from '$lib/infrastructure/config/env.server';
@@ -47,5 +47,43 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 	}
 
+	if (isAuthRequest(event.url.pathname)) {
+		return auth.handler(buildPublicOriginAuthRequest(event));
+	}
+
 	return svelteKitHandler({ event, resolve, auth, building });
 };
+
+function isAuthRequest(pathname: string): boolean {
+	return pathname === '/api/auth' || pathname.startsWith('/api/auth/');
+}
+
+function buildPublicOriginAuthRequest(event: RequestEvent): Request {
+	const publicOrigin = event.request.headers.get('x-grandfeast-public-origin');
+	if (!publicOrigin) {
+		return event.request;
+	}
+
+	const publicUrl = new URL(event.request.url);
+	const originUrl = new URL(publicOrigin);
+	publicUrl.protocol = originUrl.protocol;
+	publicUrl.host = originUrl.host;
+
+	const headers = new Headers(event.request.headers);
+	headers.set('host', originUrl.host);
+	headers.set('x-forwarded-host', originUrl.host);
+	headers.set('x-forwarded-proto', originUrl.protocol.replace(':', ''));
+
+	const init: RequestInit & { duplex?: 'half' } = {
+		method: event.request.method,
+		headers,
+		body: event.request.body,
+		redirect: event.request.redirect
+	};
+
+	if (event.request.body) {
+		init.duplex = 'half';
+	}
+
+	return new Request(publicUrl, init);
+}

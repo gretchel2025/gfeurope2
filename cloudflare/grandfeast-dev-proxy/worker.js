@@ -11,6 +11,7 @@ export default {
 
 		const headers = new Headers(request.headers);
 		headers.set('Host', incomingUrl.host);
+		headers.set('X-Grandfeast-Public-Origin', publicOrigin);
 		headers.set('X-Forwarded-Host', incomingUrl.host);
 		headers.set('X-Forwarded-Proto', incomingUrl.protocol.replace(':', ''));
 
