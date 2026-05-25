@@ -81,6 +81,8 @@ Important deployment-related env vars:
 - `PUBLIC_SUPABASE_URL`
 - `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `SECRETS_SCAN_OMIT_KEYS`, set to `SUPABASE_SERVICE_ROLE_KEY` so Netlify does not block
+  deploys on legitimate server-side references to the secret env var name
 - `CONTEXT` and `BRANCH`, supplied by Netlify
 
 Netlify context mapping:
