@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { appConfig } from '$lib/infrastructure/config/env.server';
+import { getRuntimeAccessMode, sanitizeRedirectTo } from '$lib/infrastructure/auth/accessPolicy';
 import {
 	auth,
 	betterAuthUserExists,
@@ -11,14 +12,23 @@ import {
 export type ServerData = {
 	hasGoogleAuth: boolean;
 	hasLocalDevAuth: boolean;
+	callbackURL: string;
 };
 
-export function load(): ServerData {
+export const load: PageServerLoad = (event): ServerData => {
+	const mode = getRuntimeAccessMode({
+		dev: appConfig.dev,
+		hostname: event.url.hostname,
+		netlifyBranch: appConfig.netlifyBranch
+	});
+	const redirectTo = sanitizeRedirectTo(event.url.searchParams.get('redirectTo'));
+
 	return {
 		hasGoogleAuth: Boolean(appConfig.googleClientId && appConfig.googleClientSecret),
-		hasLocalDevAuth: appConfig.dev && appConfig.localAdminEmails.length > 0
+		hasLocalDevAuth: appConfig.dev && appConfig.localAdminEmails.length > 0,
+		callbackURL: redirectTo ?? (mode === 'live-dev' ? '/' : '/api')
 	};
-}
+};
 
 export const actions: Actions = {
 	localAdminSignIn: async ({ request }) => {
@@ -30,6 +40,7 @@ export const actions: Actions = {
 
 		const data = await request.formData();
 		const email = data.get('email')?.toString().trim().toLowerCase() ?? '';
+		const redirectTo = sanitizeRedirectTo(data.get('redirectTo')?.toString() ?? null) ?? '/api';
 
 		if (!email || !appConfig.localAdminEmails.includes(email)) {
 			return fail(400, {
@@ -53,10 +64,10 @@ export const actions: Actions = {
 			body: {
 				email,
 				password: localAdminAuthPassword,
-				callbackURL: '/api'
+				callbackURL: redirectTo
 			}
 		});
 
-		throw redirect(303, '/api');
+		throw redirect(303, redirectTo);
 	}
 };

@@ -9,7 +9,7 @@
 import type { Booking } from '$lib/domain/booking';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter } from '$lib/domain/ticketCounter';
-import type { User } from '$lib/domain/user';
+import type { User, UserRole } from '$lib/domain/user';
 import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
 
 /** Maps a Mongoose booking document into the canonical domain shape. */
@@ -56,6 +56,6 @@ export function mapTicketCounter(record: Record<string, unknown>): TicketCounter
 export function mapUser(record: Record<string, unknown>): User {
 	return {
 		_id: String(record._id),
-		roles: Array.isArray(record.roles) ? record.roles.map(String) : []
+		roles: Array.isArray(record.roles) ? (record.roles.map(String) as UserRole[]) : []
 	};
 }

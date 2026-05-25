@@ -15,6 +15,7 @@ import { MongoClient } from 'mongodb';
 import { appConfig } from '$lib/infrastructure/config/env.server';
 
 const localBaseUrl = 'http://localhost:5173';
+const devTesterUrl = 'https://dev.grandfeast.eu';
 const devPreviewUrl = 'https://dev--grand-feast-uk-x-europe.netlify.app';
 const prodBranchUrl = 'https://prod--grand-feast-uk-x-europe.netlify.app';
 const productionUrl = 'https://www.grandfeast.eu';
@@ -72,6 +73,7 @@ export const auth = betterAuth({
 				allowedHosts: [
 					'grandfeast.eu',
 					'www.grandfeast.eu',
+					'dev.grandfeast.eu',
 					'dev--grand-feast-uk-x-europe.netlify.app',
 					'prod--grand-feast-uk-x-europe.netlify.app',
 					'deploy-preview-*--grand-feast-uk-x-europe.netlify.app'
@@ -101,6 +103,7 @@ export const auth = betterAuth({
 	trustedOrigins: [
 		localBaseUrl,
 		appConfig.appBaseUrl,
+		devTesterUrl,
 		devPreviewUrl,
 		prodBranchUrl,
 		productionUrl,
@@ -130,5 +133,5 @@ function getAuthProxyUrl(): string {
 		return productionUrl;
 	}
 
-	return devPreviewUrl;
+	return devTesterUrl;
 }

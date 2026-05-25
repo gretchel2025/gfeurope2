@@ -17,19 +17,24 @@ commits, PRs, or logs.
 
 - Production domain: `https://www.grandfeast.eu`
 - Netlify production branch URL: `https://prod--grand-feast-uk-x-europe.netlify.app`
-- Netlify development branch URL: `https://dev--grand-feast-uk-x-europe.netlify.app`
+- Development tester URL: `https://dev.grandfeast.eu`
+- Netlify development branch origin URL: `https://dev--grand-feast-uk-x-europe.netlify.app`
 - Local development URL: `http://localhost:5173`
 
 Netlify tracks the long-lived `dev` and `prod` branches. Pushing or merging to `dev`
 updates the development branch deploy; pushing or merging to `prod` updates production.
-Deploy previews should use Better Auth's OAuth proxy through the stable development URL,
-not wildcard Google OAuth origins.
+The tester-facing development URL is `https://dev.grandfeast.eu`; the Netlify branch URL is
+the origin behind it. Deploy previews should use Better Auth's OAuth proxy through the stable
+development URL, not wildcard Google OAuth origins.
 
 ## DNS
 
-DNS is managed in Squarespace Domains. Netlify hosts the deployed SvelteKit app and serves
-the production domain. When debugging domain or certificate issues, check Squarespace DNS
-records first, then the Netlify domain/certificate settings for the site.
+The registrar is Squarespace Domains, while authoritative DNS is managed in Cloudflare.
+Netlify hosts the deployed SvelteKit app and serves the production domain. Production
+records are DNS-only in Cloudflare so they continue pointing directly at Netlify.
+`dev.grandfeast.eu` is proxied through a Cloudflare Worker to the Netlify `dev` branch
+origin. When debugging domain or certificate issues, check Cloudflare DNS/Worker routing
+first, then the Netlify domain/certificate settings for the site.
 
 ## Deployment
 
@@ -74,6 +79,12 @@ Relevant code paths:
 On startup, the app connects to MongoDB, creates missing ticket counter records, and seeds
 local admin users from `LOCAL_ADMIN_EMAILS` when configured.
 
+Hosted authorization uses Mongo `user.roles`:
+
+- `tester` grants access to public pages on live development.
+- `admin` grants admin access in production/local and, with `tester`, on live development.
+- `superuser` counts as admin-level access but does not imply `tester`.
+
 ## Auth
 
 Auth is configured in `src/lib/infrastructure/auth/authConfig.ts` with Better Auth,
@@ -91,12 +102,14 @@ Important auth env vars:
 Google OAuth callback URLs:
 
 - Local: `http://localhost:5173/api/auth/callback/google`
-- Development: `https://dev--grand-feast-uk-x-europe.netlify.app/api/auth/callback/google`
+- Development: `https://dev.grandfeast.eu/api/auth/callback/google`
+- Development origin: `https://dev--grand-feast-uk-x-europe.netlify.app/api/auth/callback/google`
 - Production: `https://www.grandfeast.eu/api/auth/callback/google`
 
 Google OAuth origins:
 
 - `http://localhost:5173`
+- `https://dev.grandfeast.eu`
 - `https://dev--grand-feast-uk-x-europe.netlify.app`
 - `https://www.grandfeast.eu`
 
@@ -126,6 +139,15 @@ Relevant code paths:
 
 - `src/lib/infrastructure/email/postmarkEmailSender.ts`
 - `src/lib/infrastructure/media/cloudinaryImageStorage.ts`
+
+## Cloudflare Worker
+
+The `dev.grandfeast.eu` tester URL uses the Worker source in
+`cloudflare/grandfeast-dev-proxy/`. Deploy it with:
+
+```bash
+npx wrangler deploy --config cloudflare/grandfeast-dev-proxy/wrangler.jsonc
+```
 
 ## Agent Checklist
 
