@@ -67,7 +67,20 @@ export async function markBetterAuthUserEmailVerified(email: string): Promise<vo
 
 /** Exposes the Better Auth instance used by the SvelteKit request handler and server helpers. */
 export const auth = betterAuth({
-	baseURL: getAuthBaseUrl(),
+	baseURL: appConfig.dev
+		? appConfig.appBaseUrl || localBaseUrl
+		: {
+				allowedHosts: [
+					'grandfeast.eu',
+					'www.grandfeast.eu',
+					'dev.grandfeast.eu',
+					'dev--grand-feast-uk-x-europe.netlify.app',
+					'prod--grand-feast-uk-x-europe.netlify.app',
+					'deploy-preview-*--grand-feast-uk-x-europe.netlify.app'
+				],
+				fallback: getAuthProxyUrl(),
+				protocol: 'https'
+			},
 	basePath: '/api/auth',
 	secret: appConfig.authSecret || undefined,
 	database: authDatabase
@@ -121,12 +134,4 @@ function getAuthProxyUrl(): string {
 	}
 
 	return devTesterUrl;
-}
-
-function getAuthBaseUrl(): string {
-	if (appConfig.dev) {
-		return appConfig.appBaseUrl || localBaseUrl;
-	}
-
-	return getAuthProxyUrl();
 }

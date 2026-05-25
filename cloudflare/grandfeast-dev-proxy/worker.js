@@ -10,7 +10,7 @@ export default {
 		originUrl.hostname = originHost;
 
 		const headers = new Headers(request.headers);
-		headers.set('Host', originHost);
+		headers.set('Host', incomingUrl.host);
 		headers.set('X-Forwarded-Host', incomingUrl.host);
 		headers.set('X-Forwarded-Proto', incomingUrl.protocol.replace(':', ''));
 
