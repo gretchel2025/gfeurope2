@@ -8,12 +8,18 @@ in Oslo, Norway.
 Production site: [grandfeast.eu](https://www.grandfeast.eu/)
 
 Development preview:
+[dev.grandfeast.eu](https://dev.grandfeast.eu/)
+
+Development branch origin:
 [dev--grand-feast-uk-x-europe.netlify.app](https://dev--grand-feast-uk-x-europe.netlify.app/)
 
 Deploy preview test branches can be used to validate Netlify preview auth flows before release.
 
 Production branch deploy:
 [prod--grand-feast-uk-x-europe.netlify.app](https://prod--grand-feast-uk-x-europe.netlify.app/)
+
+Infrastructure notes for agents and maintainers live in
+[`docs/infrastructure.md`](docs/infrastructure.md).
 
 ## Project Structure
 
@@ -90,7 +96,8 @@ On startup, the app:
 
 - connects to the MongoDB defined in `MONGO_URI`
 - creates missing ticket counter records for standard, VIP, and youth tickets
-- inserts users from `LOCAL_ADMIN_EMAILS` if they do not already exist
+- inserts local admin/superuser records from `LOCAL_ADMIN_EMAILS` if they do not already
+  exist
 
 ## Local Admin Sign-In
 
@@ -111,9 +118,11 @@ Google OAuth setup for local admin sign-in:
 Google OAuth setup for Netlify:
 
 - Authorized JavaScript origins use origins only, with no path and no wildcard:
-  `https://dev--grand-feast-uk-x-europe.netlify.app` and `https://www.grandfeast.eu`
+  `https://dev.grandfeast.eu`, `https://dev--grand-feast-uk-x-europe.netlify.app`, and
+  `https://www.grandfeast.eu`
 - Authorized redirect URIs use the full Better Auth callback URLs:
-  `https://dev--grand-feast-uk-x-europe.netlify.app/api/auth/callback/google` and
+  `https://dev.grandfeast.eu/api/auth/callback/google`,
+  `https://dev--grand-feast-uk-x-europe.netlify.app/api/auth/callback/google`, and
   `https://www.grandfeast.eu/api/auth/callback/google`
 
 Netlify deploy previews proxy Google OAuth through the long-lived dev preview. Do not add
@@ -121,9 +130,23 @@ Netlify deploy previews proxy Google OAuth through the long-lived dev preview. D
 Google does not allow wildcard origins, and deploy previews should use the dev callback
 through Better Auth's OAuth proxy.
 
-Set `BETTER_AUTH_PROXY_URL` to `https://dev--grand-feast-uk-x-europe.netlify.app`
-for Netlify deploy previews and the `dev` branch. Set it to `https://www.grandfeast.eu`
-for production.
+Set `BETTER_AUTH_PROXY_URL` to `https://dev.grandfeast.eu` for the `dev` branch and
+to `https://www.grandfeast.eu` for production. Deploy previews can continue to proxy
+OAuth through the stable development URL.
+
+## Access Roles
+
+Hosted access is controlled by Mongo `user` records. The app recognizes these roles:
+
+- `tester`: can access public pages on the live development site.
+- `admin`: can access production/local admin pages, and can access live development admin
+  pages only when combined with `tester`.
+- `superuser`: counts as admin-level permission but does not imply `tester`.
+
+Live development (`dev.grandfeast.eu` and the Netlify `dev` branch URL) requires a signed-in
+user with `tester` for every non-auth page. Production and local public pages remain open.
+Admin routes under `/api` require `admin` or `superuser`; on live development they also
+require `tester`.
 
 ## Optional Integrations
 
@@ -168,8 +191,9 @@ npm run build
 Netlify is connected to this GitHub repository and tracks two long-lived branches:
 
 - `dev` is the official development branch. Merging or pushing changes to `dev`
-  triggers the long-lived preview at
-  [dev--grand-feast-uk-x-europe.netlify.app](https://dev--grand-feast-uk-x-europe.netlify.app/).
+  updates the Netlify branch origin at
+  [dev--grand-feast-uk-x-europe.netlify.app](https://dev--grand-feast-uk-x-europe.netlify.app/),
+  which testers should reach through [dev.grandfeast.eu](https://dev.grandfeast.eu/).
 - `prod` is the production branch. Merging or pushing changes to `prod` triggers
   a production deploy to [grandfeast.eu](https://www.grandfeast.eu/).
 

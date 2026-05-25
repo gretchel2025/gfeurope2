@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Dev Domain And Access Policy Explainer</title>
+		<style>
+			:root {
+				color-scheme: light;
+				--ink: #172033;
+				--muted: #52606d;
+				--line: #d9e2ec;
+				--bg: #f6f8fb;
+				--paper: #ffffff;
+				--gold: #f4b942;
+				--teal: #0f766e;
+				--blue: #2563eb;
+				--red: #b91c1c;
+				--green: #15803d;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--ink);
+				font-family:
+					Inter,
+					ui-sans-serif,
+					system-ui,
+					-apple-system,
+					BlinkMacSystemFont,
+					'Segoe UI',
+					sans-serif;
+				line-height: 1.45;
+			}
+
+			main {
+				scroll-snap-type: y mandatory;
+			}
+
+			.slide {
+				min-height: 100vh;
+				padding: 48px clamp(20px, 5vw, 72px);
+				display: grid;
+				align-content: center;
+				gap: 28px;
+				scroll-snap-align: start;
+				border-bottom: 1px solid var(--line);
+			}
+
+			.slide:nth-child(odd) {
+				background: var(--paper);
+			}
+
+			.kicker {
+				color: var(--teal);
+				font-weight: 800;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+				font-size: 13px;
+			}
+
+			h1,
+			h2 {
+				margin: 0;
+				letter-spacing: 0;
+				line-height: 1.05;
+			}
+
+			h1 {
+				font-size: clamp(44px, 8vw, 92px);
+				max-width: 980px;
+			}
+
+			h2 {
+				font-size: clamp(34px, 5vw, 64px);
+				max-width: 960px;
+			}
+
+			p {
+				margin: 0;
+				max-width: 900px;
+				color: var(--muted);
+				font-size: clamp(18px, 2vw, 25px);
+			}
+
+			code {
+				background: #edf2f7;
+				border: 1px solid var(--line);
+				border-radius: 6px;
+				padding: 2px 6px;
+				color: #0f172a;
+				font-size: 0.9em;
+			}
+
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+				gap: 18px;
+			}
+
+			.card,
+			.node {
+				background: var(--paper);
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				padding: 18px;
+				box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+			}
+
+			.card strong,
+			.node strong {
+				display: block;
+				font-size: 19px;
+				margin-bottom: 8px;
+			}
+
+			.card span,
+			.node span,
+			li {
+				color: var(--muted);
+				font-size: 17px;
+			}
+
+			.path {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+				gap: 12px;
+				align-items: stretch;
+			}
+
+			.node {
+				position: relative;
+				min-height: 120px;
+			}
+
+			.node::after {
+				content: '->';
+				position: absolute;
+				right: -18px;
+				top: 42%;
+				color: var(--teal);
+				font-weight: 900;
+			}
+
+			.node:last-child::after {
+				content: '';
+			}
+
+			.matrix {
+				display: grid;
+				grid-template-columns: 1.2fr repeat(3, 1fr);
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				overflow: hidden;
+				background: var(--paper);
+			}
+
+			.cell {
+				padding: 16px;
+				border-right: 1px solid var(--line);
+				border-bottom: 1px solid var(--line);
+				min-height: 70px;
+				font-size: 17px;
+			}
+
+			.cell:nth-child(4n) {
+				border-right: 0;
+			}
+
+			.head {
+				font-weight: 800;
+				background: #ecfeff;
+				color: #134e4a;
+			}
+
+			.yes {
+				color: var(--green);
+				font-weight: 800;
+			}
+
+			.no {
+				color: var(--red);
+				font-weight: 800;
+			}
+
+			.badge-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+			}
+
+			.badge {
+				border-radius: 999px;
+				padding: 8px 12px;
+				background: #eff6ff;
+				color: #1d4ed8;
+				border: 1px solid #bfdbfe;
+				font-weight: 700;
+			}
+
+			.split {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+				gap: 24px;
+				align-items: center;
+			}
+
+			.visual {
+				min-height: 300px;
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				background:
+					linear-gradient(90deg, rgba(15, 118, 110, 0.08) 1px, transparent 1px),
+					linear-gradient(rgba(15, 118, 110, 0.08) 1px, transparent 1px), #ffffff;
+				background-size: 32px 32px;
+				display: grid;
+				place-items: center;
+				padding: 24px;
+			}
+
+			.stack {
+				display: grid;
+				gap: 14px;
+				width: min(420px, 100%);
+			}
+
+			.pill {
+				border-radius: 8px;
+				padding: 16px;
+				background: #0f172a;
+				color: white;
+				font-weight: 800;
+				text-align: center;
+			}
+
+			.pill.teal {
+				background: var(--teal);
+			}
+
+			.pill.gold {
+				background: var(--gold);
+				color: #172033;
+			}
+
+			ul {
+				margin: 0;
+				padding-left: 22px;
+				display: grid;
+				gap: 10px;
+			}
+
+			@media (max-width: 780px) {
+				.split {
+					grid-template-columns: 1fr;
+				}
+
+				.matrix {
+					grid-template-columns: 1fr;
+				}
+
+				.cell,
+				.cell:nth-child(4n) {
+					border-right: 0;
+				}
+
+				.node::after {
+					display: none;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<section class="slide">
+				<div class="kicker">Grand Feast EU and UK</div>
+				<h1>Dev Domain And Role-Based Access</h1>
+				<p>
+					A short explainer for the new tester URL, the first-class access policy, and the
+					infrastructure handoff points.
+				</p>
+				<div class="badge-row">
+					<span class="badge">dev.grandfeast.eu</span>
+					<span class="badge">tester role</span>
+					<span class="badge">admin role</span>
+					<span class="badge">Cloudflare proxy</span>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">Problem</div>
+				<h2>Testers need a real-looking URL without public access.</h2>
+				<p>
+					The Netlify branch URL is useful for deploys, but testers should use
+					<code>dev.grandfeast.eu</code>. That live dev site must be closed to random visitors.
+				</p>
+				<div class="path">
+					<div class="node"><strong>Before</strong><span>Public dev branch URL</span></div>
+					<div class="node"><strong>Risk</strong><span>Anyone with URL can poke around</span></div>
+					<div class="node"><strong>After</strong><span>Role-gated tester domain</span></div>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">New URL Model</div>
+				<h2>One friendly tester URL, one Netlify origin.</h2>
+				<div class="path">
+					<div class="node"><strong>Tester</strong><span>Opens dev.grandfeast.eu</span></div>
+					<div class="node"><strong>Cloudflare</strong><span>DNS plus Worker proxy</span></div>
+					<div class="node"><strong>Netlify</strong><span>dev branch origin</span></div>
+					<div class="node"><strong>SvelteKit</strong><span>Policy gate runs first</span></div>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">Runtime Modes</div>
+				<h2>The app now names the environment it is protecting.</h2>
+				<div class="grid">
+					<div class="card">
+						<strong>production</strong>
+						<span>Normal public site with admin routes protected.</span>
+					</div>
+					<div class="card">
+						<strong>local</strong>
+						<span>Same public/admin split as production, plus local shortcut auth.</span>
+					</div>
+					<div class="card">
+						<strong>live-dev</strong>
+						<span>Every non-auth page requires the tester role.</span>
+					</div>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">First-Class Policy</div>
+				<h2>The access rules live in one module.</h2>
+				<div class="split">
+					<p>
+						<code>accessPolicy.ts</code> exposes named policy concepts:
+						<code>getRuntimeAccessMode</code>, <code>getRequiredAccess</code>,
+						<code>evaluateAccess</code>, and <code>isAuthBypassPath</code>.
+					</p>
+					<div class="visual">
+						<div class="stack">
+							<div class="pill">request</div>
+							<div class="pill teal">runtime mode</div>
+							<div class="pill gold">required roles</div>
+							<div class="pill">allow / sign in / deny</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">Role Model</div>
+				<h2>Tester and admin are intentionally separate.</h2>
+				<div class="matrix">
+					<div class="cell head">Role set</div>
+					<div class="cell head">Prod public</div>
+					<div class="cell head">Live-dev public</div>
+					<div class="cell head">Live-dev admin</div>
+					<div class="cell">No sign-in</div>
+					<div class="cell yes">Allowed</div>
+					<div class="cell no">No</div>
+					<div class="cell no">No</div>
+					<div class="cell"><code>tester</code></div>
+					<div class="cell yes">Allowed</div>
+					<div class="cell yes">Allowed</div>
+					<div class="cell no">No</div>
+					<div class="cell"><code>admin</code></div>
+					<div class="cell yes">Allowed</div>
+					<div class="cell no">No</div>
+					<div class="cell no">No</div>
+					<div class="cell"><code>tester</code> + <code>admin</code></div>
+					<div class="cell yes">Allowed</div>
+					<div class="cell yes">Allowed</div>
+					<div class="cell yes">Allowed</div>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">Request Flow</div>
+				<h2>Live dev checks happen before a page is served.</h2>
+				<div class="path">
+					<div class="node">
+						<strong>1. Classify</strong><span>Host or Netlify branch says live-dev</span>
+					</div>
+					<div class="node">
+						<strong>2. Bypass?</strong><span>Auth endpoints and assets can load</span>
+					</div>
+					<div class="node">
+						<strong>3. Session</strong><span>No session redirects to sign-in</span>
+					</div>
+					<div class="node">
+						<strong>4. Roles</strong><span>Missing role redirects to unauthorized</span>
+					</div>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">Admin Guard</div>
+				<h2>Admin now means Mongo role, not just a session.</h2>
+				<p>
+					Admin routes under <code>/api</code> require a Better Auth session and a Mongo
+					<code>user</code> record with <code>admin</code> or <code>superuser</code>. On live dev,
+					the same user must also have <code>tester</code>.
+				</p>
+				<div class="grid">
+					<div class="card"><strong>Session</strong><span>Proves identity.</span></div>
+					<div class="card"><strong>Mongo user</strong><span>Stores permissions.</span></div>
+					<div class="card"><strong>Roles</strong><span>Decide access.</span></div>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">Sign-In</div>
+				<h2>Redirects now preserve intent.</h2>
+				<p>
+					Signed-out protected requests go to <code>/signin?redirectTo=...</code>. Google sign-in
+					uses that destination when present, defaults to <code>/</code> on live dev, and defaults
+					to <code>/api</code> for normal admin sign-in.
+				</p>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">External Config</div>
+				<h2>Netlify dev env now points at the tester URL.</h2>
+				<div class="grid">
+					<div class="card">
+						<strong>APP_BASE_URL</strong>
+						<span><code>https://dev.grandfeast.eu</code></span>
+					</div>
+					<div class="card">
+						<strong>BETTER_AUTH_PROXY_URL</strong>
+						<span><code>https://dev.grandfeast.eu</code></span>
+					</div>
+					<div class="card">
+						<strong>Google OAuth</strong>
+						<span>Needs the new origin and callback added manually.</span>
+					</div>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">Cloudflare</div>
+				<h2>The DNS/proxy path is now active for live dev.</h2>
+				<p>
+					Cloudflare now hosts authoritative DNS for <code>grandfeast.eu</code>. Production web and
+					email records are DNS-only; <code>dev.grandfeast.eu</code> is proxied through the
+					<code>grandfeast-dev-proxy</code> Worker to the Netlify dev branch origin.
+				</p>
+				<div class="path">
+					<div class="node"><strong>Cloudflare zone</strong><span>Active</span></div>
+					<div class="node"><strong>DNS records</strong><span>Web and email preserved</span></div>
+					<div class="node"><strong>Worker route</strong><span>dev.grandfeast.eu/*</span></div>
+					<div class="node"><strong>Netlify origin</strong><span>dev branch deploy</span></div>
+				</div>
+			</section>
+
+			<section class="slide">
+				<div class="kicker">Verification</div>
+				<h2>What proves this worked?</h2>
+				<ul>
+					<li>
+						Unit tests cover production, local, live-dev, role combinations, and bypass paths.
+					</li>
+					<li>
+						<code>npm run check</code>, <code>npm run test</code>, <code>npm run lint</code>, and
+						<code>npm run build</code> should pass.
+					</li>
+					<li>
+						<code>dev.grandfeast.eu</code> resolves through Cloudflare and serves the Netlify dev
+						branch.
+					</li>
+					<li>
+						Live-dev tester, admin-only, and tester-plus-admin accounts show the expected access
+						behavior.
+					</li>
+				</ul>
+			</section>
+		</main>
+	</body>
+</html>

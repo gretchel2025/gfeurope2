@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { authClient } from '$lib/infrastructure/auth/authClient';
 	import type { ServerData } from './+page.server';
 
@@ -10,13 +10,14 @@
 
 	async function signOutCurrentUser() {
 		await authClient.signOut();
-		await goto('/signin');
+		await invalidateAll();
+		await goto('/signin', { invalidateAll: true });
 	}
 
 	async function signInWithGoogle() {
 		await authClient.signIn.social({
 			provider: 'google',
-			callbackURL: '/api'
+			callbackURL: data.callbackURL
 		});
 	}
 </script>
@@ -39,8 +40,11 @@
 					Sign Out
 				</button>
 
-				<a href="/api" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-					Go to Admin Page
+				<a
+					href={data.callbackURL}
+					class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+				>
+					Continue
 				</a>
 			</div>
 		{:else}
@@ -70,6 +74,7 @@
 							placeholder="Enter a seeded admin email"
 							class="w-full py-3 px-4 rounded-md bg-white text-black"
 						/>
+						<input type="hidden" name="redirectTo" value={data.callbackURL} />
 						<button
 							type="submit"
 							class="w-full py-3 px-6 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition"
