@@ -406,12 +406,12 @@
 				<h2>Admin now means Mongo role, not just a session.</h2>
 				<p>
 					Admin routes under <code>/api</code> require a Better Auth session and a Mongo
-					<code>user</code> record with <code>admin</code> or <code>superuser</code>. On live dev,
-					the same user must also have <code>tester</code>.
+					<code>users</code> authorization record with <code>admin</code> or <code>superuser</code>.
+					On live dev, the same user must also have <code>tester</code>.
 				</p>
 				<div class="grid">
 					<div class="card"><strong>Session</strong><span>Proves identity.</span></div>
-					<div class="card"><strong>Mongo user</strong><span>Stores permissions.</span></div>
+					<div class="card"><strong>Mongo users</strong><span>Stores permissions.</span></div>
 					<div class="card"><strong>Roles</strong><span>Decide access.</span></div>
 				</div>
 			</section>
@@ -432,15 +432,15 @@
 				<div class="grid">
 					<div class="card">
 						<strong>APP_BASE_URL</strong>
-						<span><code>https://dev.grandfeast.eu</code></span>
+						<span>Netlify branch deploy: <code>https://dev.grandfeast.eu</code></span>
 					</div>
 					<div class="card">
 						<strong>BETTER_AUTH_PROXY_URL</strong>
-						<span><code>https://dev.grandfeast.eu</code></span>
+						<span>Netlify branch deploy: <code>https://dev.grandfeast.eu</code></span>
 					</div>
 					<div class="card">
 						<strong>Google OAuth</strong>
-						<span>Needs the new origin and callback added manually.</span>
+						<span>Uses <code>https://dev.grandfeast.eu/api/auth/callback/google</code>.</span>
 					</div>
 				</div>
 			</section>
@@ -451,7 +451,9 @@
 				<p>
 					Cloudflare now hosts authoritative DNS for <code>grandfeast.eu</code>. Production web and
 					email records are DNS-only; <code>dev.grandfeast.eu</code> is proxied through the
-					<code>grandfeast-dev-proxy</code> Worker to the Netlify dev branch origin.
+					<code>grandfeast-dev-proxy</code> Worker to the Netlify dev branch origin. The Worker
+					keeps traffic uncached, rewrites Netlify redirects back to the public host, and sends
+					<code>X-Grandfeast-Public-Origin</code> so OAuth callbacks use the tester URL.
 				</p>
 				<div class="path">
 					<div class="node"><strong>Cloudflare zone</strong><span>Active</span></div>
@@ -479,6 +481,10 @@
 					<li>
 						Live-dev tester, admin-only, and tester-plus-admin accounts show the expected access
 						behavior.
+					</li>
+					<li>
+						Google OAuth start includes the redirect URI
+						<code>https://dev.grandfeast.eu/api/auth/callback/google</code>.
 					</li>
 				</ul>
 			</section>

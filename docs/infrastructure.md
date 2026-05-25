@@ -36,6 +36,31 @@ records are DNS-only in Cloudflare so they continue pointing directly at Netlify
 origin. When debugging domain or certificate issues, check Cloudflare DNS/Worker routing
 first, then the Netlify domain/certificate settings for the site.
 
+Cloudflare zone details:
+
+```txt
+Domain: grandfeast.eu
+Zone ID: d05d5c6d1877f64cc4afa670536462f7
+Nameservers: peter.ns.cloudflare.com, veronica.ns.cloudflare.com
+Cloudflare account: jonathangersam@gmail.com
+```
+
+`grandfeast.eu` was moved from Squarespace/Google nameservers to Cloudflare
+nameservers. Squarespace remains the registrar account, but DNS records now live in
+Cloudflare. Keep the copied Google/Fastmail/Postmark records intact when editing DNS.
+
+Current important Cloudflare DNS records:
+
+- `grandfeast.eu` A `75.2.60.5`, DNS-only, Netlify apex
+- `grandfeast.eu` A `99.83.231.61`, DNS-only, Netlify apex
+- `www.grandfeast.eu` CNAME `apex-loadbalancer.netlify.com`, DNS-only
+- `dev.grandfeast.eu` CNAME `dev--grand-feast-uk-x-europe.netlify.app`, proxied
+- MX `grandfeast.eu` to `in1-smtp.messagingengine.com` priority 10, DNS-only
+- MX `grandfeast.eu` to `in2-smtp.messagingengine.com` priority 20, DNS-only
+- TXT SPF and Google verification records, DNS-only
+- Fastmail DKIM CNAMEs `fm1._domainkey`, `fm2._domainkey`, and `fm3._domainkey`
+- Postmark bounce CNAME `pm-bounces.grandfeast.eu -> pm.mtasv.net`
+
 ## Deployment
 
 The app deploys on Netlify with the checked-in `netlify.toml`:
@@ -55,6 +80,16 @@ Important deployment-related env vars:
 - `BETTER_AUTH_PROXY_URL`
 - `CONTEXT` and `BRANCH`, supplied by Netlify
 - `AUTH_SECRET`
+
+For Netlify `branch-deploy` context, currently set:
+
+```txt
+APP_BASE_URL=https://dev.grandfeast.eu
+BETTER_AUTH_PROXY_URL=https://dev.grandfeast.eu
+```
+
+The `dev` branch deploy is rebuilt automatically when `dev` is pushed. After changing
+Netlify env vars, trigger a redeploy so the branch deploy runtime picks up the new values.
 
 ## Database
 
@@ -79,11 +114,25 @@ Relevant code paths:
 On startup, the app connects to MongoDB, creates missing ticket counter records, and seeds
 local admin users from `LOCAL_ADMIN_EMAILS` when configured.
 
-Hosted authorization uses Mongo `user.roles`:
+Hosted authorization uses the app authorization records in Mongo collection `users`,
+keyed by normalized email address as `_id`. Better Auth stores sign-in identities in its
+own Mongo collection named `user`; do not confuse the two collections when assigning
+roles.
 
 - `tester` grants access to public pages on live development.
 - `admin` grants admin access in production/local and, with `tester`, on live development.
 - `superuser` counts as admin-level access but does not imply `tester`.
+
+Expected role combinations:
+
+- `tester`: live-dev public pages only.
+- `tester` plus `admin`: live-dev public pages and live-dev `/api`.
+- `tester` plus `superuser`: live-dev public pages and live-dev `/api`.
+- `admin`: production/local `/api` only; no live-dev access.
+- `superuser`: production/local `/api` only; no live-dev access.
+
+For `dev.grandfeast.eu`, `jonathangersam@gmail.com` currently needs all three roles:
+`admin`, `superuser`, and `tester`.
 
 ## Auth
 
@@ -120,6 +169,30 @@ development URL.
 Local Better Auth users should be email-verified so a later Google sign-in with the same
 admin email links cleanly instead of failing with `account_not_linked`.
 
+First-class access policy code:
+
+- `src/lib/infrastructure/auth/accessPolicy.ts`
+- `src/lib/infrastructure/auth/accessPolicy.test.ts`
+- `src/hooks.server.ts`
+- `src/routes/signin/+page.server.ts`
+- `src/routes/signin/+page.svelte`
+- `src/lib/server/http/guards.ts`
+
+Access policy behavior:
+
+- Production and local public pages are open.
+- Production and local `/api` requires `admin` or `superuser`.
+- Live dev public pages require a signed-in user with `tester`.
+- Live dev `/api` requires `tester` and either `admin` or `superuser`.
+- Signed-out protected requests redirect to `/signin?redirectTo=...`.
+- Signed-in users missing required roles redirect to `/unauthorized`.
+
+The live-dev classifier treats these as live dev:
+
+- `dev.grandfeast.eu`
+- `dev--grand-feast-uk-x-europe.netlify.app`
+- Netlify `BRANCH=dev`
+
 ## Optional Integrations
 
 Postmark sends transactional emails. The Postmark account username is
@@ -148,6 +221,50 @@ The `dev.grandfeast.eu` tester URL uses the Worker source in
 ```bash
 npx wrangler deploy --config cloudflare/grandfeast-dev-proxy/wrangler.jsonc
 ```
+
+Worker behavior:
+
+- Route: `dev.grandfeast.eu/*`
+- Origin: `https://dev--grand-feast-uk-x-europe.netlify.app`
+- Keeps tester traffic uncached with `Cache-Control: no-store`
+- Rewrites Netlify-origin `Location` headers back to `https://dev.grandfeast.eu`
+- Sends `X-Grandfeast-Public-Origin: https://dev.grandfeast.eu`
+
+`src/hooks.server.ts` uses `X-Grandfeast-Public-Origin` only for `/api/auth/*` requests.
+It rebuilds the Better Auth request URL with the public origin before Better Auth handles
+the request. This keeps Google OAuth authorization and callback/token exchange on the same
+redirect URI:
+
+```txt
+https://dev.grandfeast.eu/api/auth/callback/google
+```
+
+If Google sign-in reaches `/api/auth/error?error=invalid_code`, check Netlify function
+logs. A `redirect_uri_mismatch` usually means the Cloudflare Worker, Netlify env vars, or
+Google OAuth redirect URI no longer agree on `https://dev.grandfeast.eu`.
+
+## Verification Commands
+
+DNS and routing:
+
+```bash
+dig NS grandfeast.eu @1.1.1.1 +short
+dig dev.grandfeast.eu @1.1.1.1 +short
+curl -I https://dev.grandfeast.eu/
+curl -I https://dev.grandfeast.eu/api
+```
+
+OAuth start:
+
+```bash
+curl -i https://dev.grandfeast.eu/api/auth/sign-in/social \
+  -H 'content-type: application/json' \
+  -H 'origin: https://dev.grandfeast.eu' \
+  --data '{"provider":"google","callbackURL":"/"}'
+```
+
+The OAuth start response should include
+`redirect_uri=https%3A%2F%2Fdev.grandfeast.eu%2Fapi%2Fauth%2Fcallback%2Fgoogle`.
 
 ## Agent Checklist
 

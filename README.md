@@ -148,6 +148,10 @@ user with `tester` for every non-auth page. Production and local public pages re
 Admin routes under `/api` require `admin` or `superuser`; on live development they also
 require `tester`.
 
+Role records are stored in the app Mongo collection `users`, keyed by normalized email
+address as `_id`. Better Auth's sign-in identity collection is named `user`; assigning
+roles there will not grant app access.
+
 ## Optional Integrations
 
 Postmark and Cloudinary credentials can be left empty for local booting. Fill them in only
@@ -211,3 +215,18 @@ Netlify is configured with:
 command = "npm run build"
 publish = "build"
 ```
+
+The tester-facing dev URL is served through Cloudflare:
+
+- Cloudflare DNS record: `dev.grandfeast.eu` CNAME to
+  `dev--grand-feast-uk-x-europe.netlify.app`, proxied
+- Worker source: `cloudflare/grandfeast-dev-proxy/`
+- Worker route: `dev.grandfeast.eu/*`
+- Worker origin: `https://dev--grand-feast-uk-x-europe.netlify.app`
+- Netlify branch-deploy env:
+  `APP_BASE_URL=https://dev.grandfeast.eu` and
+  `BETTER_AUTH_PROXY_URL=https://dev.grandfeast.eu`
+
+The Worker keeps tester traffic uncached, rewrites Netlify-origin redirects back to
+`dev.grandfeast.eu`, and sends `X-Grandfeast-Public-Origin` so `/api/auth/*` requests
+use the public OAuth callback URL during Google token exchange.
