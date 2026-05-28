@@ -250,6 +250,7 @@ Required Supabase app_metadata.roles: admin, superuser, tester
 Resend sends transactional emails from the verified `grandfeast.eu` domain.
 The primary transactional sender is `admin@grandfeast.eu`, with Resend configured
 in `eu-west-1` and MAIL FROM / bounce handling on `send.grandfeast.eu`.
+Live-dev and local development use `test@grandfeast.eu` for both sender and reply-to.
 
 Resend and Cloudinary can be left empty for local booting unless local email delivery or
 QR image uploads are being tested.
