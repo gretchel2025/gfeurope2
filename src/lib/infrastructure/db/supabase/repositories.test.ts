@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { InfrastructureError } from '$lib/application/errors';
 import type { Booking } from '$lib/domain/booking';
-import { BookingPaymentStatus, TicketType } from '$lib/domain/shared/enums';
+import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
+import type { Ticket } from '$lib/domain/ticket';
 import { SupabaseBookingRepository } from '$lib/infrastructure/db/supabase/bookingRepository';
 import { SupabaseTicketCounterRepository } from '$lib/infrastructure/db/supabase/ticketCounterRepository';
+import { SupabaseTicketRepository } from '$lib/infrastructure/db/supabase/ticketRepository';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 describe('Supabase repositories', () => {
@@ -18,6 +20,16 @@ describe('Supabase repositories', () => {
 		amount_total: 40,
 		guests: ['Ada Lovelace', 'Grace Hopper'],
 		ticket_ids: []
+	};
+	const ticket: Ticket = {
+		ticket_id: 'T123',
+		name: 'Ada Lovelace',
+		ticket_type: TicketType.STANDARD,
+		description: '',
+		status: TicketStatus.CREATED,
+		is_paid: true,
+		booking_reference_no: 'B123',
+		checkin_qr_code_image_url: ''
 	};
 
 	it('scopes booking lookups by event id', async () => {
@@ -34,6 +46,10 @@ describe('Supabase repositories', () => {
 			maybeSingle: async () => ({ data: null, error: null })
 		};
 		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
 			from: (table: string) => {
 				calls.push(['from', table]);
 				return query;
@@ -43,7 +59,8 @@ describe('Supabase repositories', () => {
 		const repository = new SupabaseBookingRepository(client, 'event-test');
 		await repository.findByReferenceNo('B123');
 
-		expect(calls).toContainEqual(['from', 'grandfeasteu_bookings']);
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'bookings']);
 		expect(calls).toContainEqual(['event_id', 'event-test']);
 		expect(calls).toContainEqual(['reference_no', 'B123']);
 	});
@@ -51,6 +68,10 @@ describe('Supabase repositories', () => {
 	it('creates booking reservations through the atomic lifecycle rpc', async () => {
 		const calls: Array<[string, unknown]> = [];
 		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
 			rpc: async (name: string, params: Record<string, unknown>) => {
 				calls.push([name, params]);
 				return {
@@ -75,8 +96,9 @@ describe('Supabase repositories', () => {
 		await repository.insertReservation(booking);
 
 		expect(calls).toEqual([
+			['schema', 'grandfeasteu'],
 			[
-				'grandfeasteu_create_booking_reservation',
+				'create_booking_reservation',
 				{
 					p_event_id: 'event-test',
 					p_reference_no: 'B123',
@@ -95,6 +117,10 @@ describe('Supabase repositories', () => {
 	it('moves paid and cancelled bookings through event-scoped lifecycle rpcs', async () => {
 		const calls: Array<[string, unknown]> = [];
 		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
 			rpc: async (name: string, params: Record<string, unknown>) => {
 				calls.push([name, params]);
 				return { data: null, error: null };
@@ -106,15 +132,17 @@ describe('Supabase repositories', () => {
 		await repository.cancelReservation('B124');
 
 		expect(calls).toEqual([
+			['schema', 'grandfeasteu'],
 			[
-				'grandfeasteu_mark_booking_paid',
+				'mark_booking_paid',
 				{
 					p_event_id: 'event-test',
 					p_reference_no: 'B123'
 				}
 			],
+			['schema', 'grandfeasteu'],
 			[
-				'grandfeasteu_cancel_booking_reservation',
+				'cancel_booking_reservation',
 				{
 					p_event_id: 'event-test',
 					p_reference_no: 'B124'
@@ -126,6 +154,10 @@ describe('Supabase repositories', () => {
 	it('appends generated ticket ids to the event-scoped booking', async () => {
 		const calls: Array<[string, unknown]> = [];
 		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
 			rpc: async (name: string, params: Record<string, unknown>) => {
 				calls.push([name, params]);
 				return { data: null, error: null };
@@ -136,8 +168,9 @@ describe('Supabase repositories', () => {
 		await repository.appendTicketId('B123', 'T123');
 
 		expect(calls).toEqual([
+			['schema', 'grandfeasteu'],
 			[
-				'grandfeasteu_append_booking_ticket_id',
+				'append_booking_ticket_id',
 				{
 					p_event_id: 'event-test',
 					p_reference_no: 'B123',
@@ -150,6 +183,10 @@ describe('Supabase repositories', () => {
 	it('passes event id to atomic ticket counter increments', async () => {
 		const calls: Array<[string, unknown]> = [];
 		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
 			rpc: async (name: string, params: Record<string, unknown>) => {
 				calls.push([name, params]);
 				return { data: null, error: null };
@@ -160,8 +197,9 @@ describe('Supabase repositories', () => {
 		await repository.increment('standard_tickets', { available: -1, reserved: 1, sold: 0 });
 
 		expect(calls).toEqual([
+			['schema', 'grandfeasteu'],
 			[
-				'grandfeasteu_increment_ticket_counter',
+				'increment_ticket_counter',
 				{
 					p_event_id: 'event-test',
 					p_counter_id: 'standard_tickets',
@@ -173,8 +211,75 @@ describe('Supabase repositories', () => {
 		]);
 	});
 
+	it('scopes ticket counter lookups to the app schema and event id', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			select: (value: string) => {
+				calls.push(['select', value]);
+				return query;
+			},
+			eq: (key: string, value: unknown) => {
+				calls.push([key, value]);
+				return query;
+			},
+			maybeSingle: async () => ({ data: null, error: null })
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseTicketCounterRepository(client, 'event-test');
+		await repository.findById('standard_tickets');
+
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'ticket_counters']);
+		expect(calls).toContainEqual(['event_id', 'event-test']);
+		expect(calls).toContainEqual(['counter_id', 'standard_tickets']);
+	});
+
+	it('inserts tickets into the app schema with event id scoping', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			insert: async (value: Record<string, unknown>) => {
+				calls.push(['insert', value]);
+				return { data: null, error: null };
+			}
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseTicketRepository(client, 'event-test');
+		await repository.insert(ticket);
+
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'tickets']);
+		expect(calls).toContainEqual([
+			'insert',
+			expect.objectContaining({
+				event_id: 'event-test',
+				ticket_id: 'T123'
+			})
+		]);
+	});
+
 	it('wraps failed counter increments as infrastructure errors', async () => {
 		const client = {
+			schema: () => client,
 			rpc: async () => ({ data: null, error: { message: 'negative inventory' } })
 		} as unknown as SupabaseClient;
 

@@ -119,19 +119,22 @@ Hosted projects:
   - Project URL: `https://guoqhigzyfisvtnlrbjw.supabase.co`
   - Used by Netlify `branch-deploy` / `dev`
 
+App data schema: `grandfeasteu`
+
 App data tables:
 
-- `grandfeasteu_bookings`
-- `grandfeasteu_tickets`
-- `grandfeasteu_ticket_counters`
+- `bookings`
+- `tickets`
+- `ticket_counters`
 
 All app data tables include `event_id text not null default 'gfeu2025'`, `created_at`,
 and `updated_at`. The app scopes repository reads/writes by `APP_EVENT_ID`; prod/test
 separation comes from the selected Supabase project, not an `environment` column.
 
-RLS is enabled on all `grandfeasteu_*` tables with no anon/authenticated policies. App
-data access uses the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose that key to
-browser code.
+RLS is enabled on all `grandfeasteu` schema tables with no anon/authenticated policies.
+The schema is exposed to Supabase's Data API for server-side service-role access only.
+App data access uses the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose that key
+to browser code.
 
 Important database env vars:
 

@@ -4,9 +4,10 @@ import { appConfig } from '$lib/infrastructure/config/env.server';
 import { getSupabaseDataClient } from '$lib/infrastructure/db/supabase/client';
 import { throwSupabaseError } from '$lib/infrastructure/db/supabase/errors';
 import { mapBooking, type SupabaseBookingRow } from '$lib/infrastructure/db/supabase/mappers';
+import { appDataSchema } from '$lib/infrastructure/db/supabase/schema';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const tableName = 'grandfeasteu_bookings';
+const tableName = 'bookings';
 
 export class SupabaseBookingRepository implements BookingRepository {
 	constructor(
@@ -15,7 +16,7 @@ export class SupabaseBookingRepository implements BookingRepository {
 	) {}
 
 	async insertReservation(booking: Booking): Promise<Booking> {
-		const { data, error } = await this.client.rpc('grandfeasteu_create_booking_reservation', {
+		const { data, error } = await this.schema.rpc('create_booking_reservation', {
 			p_event_id: this.eventId,
 			p_reference_no: booking.reference_no,
 			p_name: booking.name,
@@ -32,7 +33,7 @@ export class SupabaseBookingRepository implements BookingRepository {
 	}
 
 	async findByReferenceNo(referenceNo: string): Promise<Booking | null> {
-		const { data, error } = await this.client
+		const { data, error } = await this.schema
 			.from(tableName)
 			.select('*')
 			.eq('event_id', this.eventId)
@@ -44,7 +45,7 @@ export class SupabaseBookingRepository implements BookingRepository {
 	}
 
 	async list(): Promise<Booking[]> {
-		const { data, error } = await this.client
+		const { data, error } = await this.schema
 			.from(tableName)
 			.select('*')
 			.eq('event_id', this.eventId);
@@ -54,7 +55,7 @@ export class SupabaseBookingRepository implements BookingRepository {
 	}
 
 	async markPaid(referenceNo: string): Promise<void> {
-		const { error } = await this.client.rpc('grandfeasteu_mark_booking_paid', {
+		const { error } = await this.schema.rpc('mark_booking_paid', {
 			p_event_id: this.eventId,
 			p_reference_no: referenceNo
 		});
@@ -63,7 +64,7 @@ export class SupabaseBookingRepository implements BookingRepository {
 	}
 
 	async cancelReservation(referenceNo: string): Promise<void> {
-		const { error } = await this.client.rpc('grandfeasteu_cancel_booking_reservation', {
+		const { error } = await this.schema.rpc('cancel_booking_reservation', {
 			p_event_id: this.eventId,
 			p_reference_no: referenceNo
 		});
@@ -72,7 +73,7 @@ export class SupabaseBookingRepository implements BookingRepository {
 	}
 
 	async appendTicketId(referenceNo: string, ticketId: string): Promise<void> {
-		const { error } = await this.client.rpc('grandfeasteu_append_booking_ticket_id', {
+		const { error } = await this.schema.rpc('append_booking_ticket_id', {
 			p_event_id: this.eventId,
 			p_reference_no: referenceNo,
 			p_ticket_id: ticketId
@@ -83,5 +84,9 @@ export class SupabaseBookingRepository implements BookingRepository {
 
 	private get client(): SupabaseClient {
 		return this.clientOverride ?? getSupabaseDataClient();
+	}
+
+	private get schema() {
+		return this.client.schema(appDataSchema);
 	}
 }

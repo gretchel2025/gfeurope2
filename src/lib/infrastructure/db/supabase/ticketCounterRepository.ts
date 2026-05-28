@@ -7,9 +7,10 @@ import {
 	mapTicketCounter,
 	type SupabaseTicketCounterRow
 } from '$lib/infrastructure/db/supabase/mappers';
+import { appDataSchema } from '$lib/infrastructure/db/supabase/schema';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-const tableName = 'grandfeasteu_ticket_counters';
+const tableName = 'ticket_counters';
 
 export class SupabaseTicketCounterRepository implements TicketCounterRepository {
 	constructor(
@@ -18,7 +19,7 @@ export class SupabaseTicketCounterRepository implements TicketCounterRepository 
 	) {}
 
 	async create(counterId: string, values?: TicketCounterDelta): Promise<void> {
-		const { error } = await this.client.from(tableName).insert({
+		const { error } = await this.schema.from(tableName).insert({
 			event_id: this.eventId,
 			counter_id: counterId,
 			available: values?.available ?? 0,
@@ -30,7 +31,7 @@ export class SupabaseTicketCounterRepository implements TicketCounterRepository 
 	}
 
 	async findById(id: string): Promise<TicketCounter | null> {
-		const { data, error } = await this.client
+		const { data, error } = await this.schema
 			.from(tableName)
 			.select('*')
 			.eq('event_id', this.eventId)
@@ -42,7 +43,7 @@ export class SupabaseTicketCounterRepository implements TicketCounterRepository 
 	}
 
 	async set(id: string, values: TicketCounterDelta): Promise<void> {
-		const { error } = await this.client
+		const { error } = await this.schema
 			.from(tableName)
 			.update(values)
 			.eq('event_id', this.eventId)
@@ -52,7 +53,7 @@ export class SupabaseTicketCounterRepository implements TicketCounterRepository 
 	}
 
 	async increment(id: string, values: TicketCounterDelta): Promise<void> {
-		const { error } = await this.client.rpc('grandfeasteu_increment_ticket_counter', {
+		const { error } = await this.schema.rpc('increment_ticket_counter', {
 			p_event_id: this.eventId,
 			p_counter_id: id,
 			p_available_delta: values.available,
@@ -65,5 +66,9 @@ export class SupabaseTicketCounterRepository implements TicketCounterRepository 
 
 	private get client(): SupabaseClient {
 		return this.clientOverride ?? getSupabaseDataClient();
+	}
+
+	private get schema() {
+		return this.client.schema(appDataSchema);
 	}
 }

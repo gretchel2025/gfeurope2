@@ -143,9 +143,12 @@ Grand Feast app data also lives in Supabase. Hosted isolation is by project:
 - Live development and `branch-deploy` use `77 Labs Test`.
 - Local development uses the Supabase CLI local stack only.
 
-Tables are prefixed with `grandfeasteu_` and include `event_id`, currently defaulting to
-`gfeu2025`. Repository queries always scope by `APP_EVENT_ID`. App-data tables have RLS
-enabled and no anon/authenticated policies; server code uses the service-role key.
+App data lives in the `grandfeasteu` schema. Tables use clean domain names
+(`bookings`, `tickets`, `ticket_counters`) and include `event_id`, currently defaulting
+to `gfeu2025`. Repository queries always scope by `APP_EVENT_ID`. App-data tables have
+RLS enabled and no anon/authenticated policies; server code uses the service-role key.
+The `grandfeasteu` schema is exposed to Supabase's Data API only so the server-side
+service-role client can access it.
 
 ## Access Roles
 

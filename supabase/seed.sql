@@ -1,4 +1,4 @@
-insert into public.grandfeasteu_ticket_counters (event_id, counter_id, available, reserved, sold)
+insert into grandfeasteu.ticket_counters (event_id, counter_id, available, reserved, sold)
 values
 	('gfeu2025', 'standard_tickets', 200, 0, 0),
 	('gfeu2025', 'vip_tickets', 50, 0, 0),
