@@ -6,6 +6,10 @@ This is a SvelteKit app. Application routes live in `src/routes/`, shared UI com
 
 For deployment, DNS, Supabase, Google OAuth, and external account context, read `docs/infrastructure.md` before making infrastructure-sensitive changes.
 
+## Activity Logging
+
+Keep `LOG.md` as a concise running record of meaningful project activity. Add entries for changes that affect app behavior, infrastructure, deployment, provider configuration, data/auth/email behavior, or operational procedures. Do not log routine checks or one-off verification tasks such as sending a test email, confirming a site is live, running standard tests, or checking command output unless the result changes project state or reveals a decision worth preserving.
+
 ## Build, Test, and Development Commands
 
 - `make install` or `npm install`: install dependencies.

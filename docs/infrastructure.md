@@ -308,10 +308,14 @@ from Supabase and returns to `/auth/callback?next=...` on the same app origin.
 
 Before changing infrastructure-sensitive behavior:
 
-- Read `README.md`, `AGENTS.md`, `.env.example`, and this file.
+- Read `README.md`, `AGENTS.md`, `LOG.md`, `.env.example`, and this file.
 - Check whether the change affects Netlify env vars, Google OAuth settings, Supabase,
   Squarespace DNS, Resend, or Cloudinary.
 - Keep secrets out of the repo and use placeholder names in documentation.
+- Update `LOG.md` when the work changes app behavior, infrastructure, provider
+  configuration, deployment state, auth/data/email behavior, or operating procedures.
+  Skip routine verification-only actions such as test emails, availability checks, and
+  normal command output.
 - Run `npm run check`, `npm run test`, and `npm run lint` for code changes.
 - Run `npm run build` when changing routes, deployment config, auth wiring, or server load
   behavior.
