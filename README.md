@@ -174,12 +174,14 @@ provider-owned `app_metadata`, for example:
 
 ## Optional Integrations
 
-Postmark and Cloudinary credentials can be left empty for local booting. Fill them in only
+Resend and Cloudinary credentials can be left empty for local booting. Fill them in only
 when local email sending or QR image uploads need to work.
 
 Relevant env vars:
 
-- `MY_POSTMARK_API_KEY`
+- `RESEND_API_KEY`
+- `EMAIL_FROM`
+- `EMAIL_REPLY_TO`
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`

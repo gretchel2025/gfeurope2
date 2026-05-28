@@ -28,7 +28,9 @@ export type AppConfig = {
 		youthTicketsInitialAvailable: number;
 	};
 	integrations: {
-		postmarkApiKey: string;
+		resendApiKey: string;
+		emailFrom: string;
+		emailReplyTo: string;
 		cloudinaryCloudName: string;
 		cloudinaryApiKey: string;
 		cloudinaryApiSecret: string;
@@ -54,7 +56,9 @@ export const appConfig: AppConfig = {
 		youthTicketsInitialAvailable: parsePositiveInt(readEnv('YOUTH_TICKETS_INITIAL_AVAILABLE'), 25)
 	},
 	integrations: {
-		postmarkApiKey: readEnv('MY_POSTMARK_API_KEY') || '',
+		resendApiKey: readEnv('RESEND_API_KEY') || '',
+		emailFrom: readEnv('EMAIL_FROM') || '',
+		emailReplyTo: readEnv('EMAIL_REPLY_TO') || '',
 		cloudinaryCloudName: readEnv('CLOUDINARY_CLOUD_NAME') || '',
 		cloudinaryApiKey: readEnv('CLOUDINARY_API_KEY') || '',
 		cloudinaryApiSecret: readEnv('CLOUDINARY_API_SECRET') || ''

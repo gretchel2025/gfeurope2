@@ -17,7 +17,7 @@ import {
 	SupabaseTicketCounterRepository,
 	SupabaseTicketRepository
 } from '$lib/infrastructure/db/supabase/repositories';
-import { PostmarkEmailSender } from '$lib/infrastructure/email/postmarkEmailSender';
+import { ResendEmailSender } from '$lib/infrastructure/email/resendEmailSender';
 import { CloudinaryImageStorage } from '$lib/infrastructure/media/cloudinaryImageStorage';
 import { DefaultQrCodeGenerator } from '$lib/infrastructure/media/qrCodeGenerator';
 import { PinoEventLogger } from '$lib/infrastructure/logging/eventLogger';
@@ -34,7 +34,7 @@ const ticketRepository = new SupabaseTicketRepository();
 const ticketCounterRepository = new SupabaseTicketCounterRepository();
 
 /** Infrastructure adapters used by the service layer. */
-const emailSender = new PostmarkEmailSender();
+const emailSender = new ResendEmailSender();
 const imageStorage = new CloudinaryImageStorage();
 const qrCodeGenerator = new DefaultQrCodeGenerator();
 const eventLogger = new PinoEventLogger();

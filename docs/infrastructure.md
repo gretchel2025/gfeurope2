@@ -9,8 +9,7 @@ commits, PRs, or logs.
 - DNS registrar: Squarespace Domains, account `jonathangersam@gmail.com`
 - Deployment platform: Netlify, account `jonathangersam@gmail.com`
 - Database/auth: Supabase, account `jonathangersam@gmail.com`
-- Transactional emails: Postmark, username `jonathangersam_gfeu`, linked email account
-  `jonathan.lopez@grandfeast.eu`
+- Transactional emails: Resend, sending from verified domain `grandfeast.eu`
 - Auth: Supabase Auth with Google sign-in
 
 ## Live Environments
@@ -47,7 +46,7 @@ Cloudflare account: jonathangersam@gmail.com
 
 `grandfeast.eu` was moved from Squarespace/Google nameservers to Cloudflare
 nameservers. Squarespace remains the registrar account, but DNS records now live in
-Cloudflare. Keep the copied Google/Fastmail/Postmark records intact when editing DNS.
+Cloudflare. Keep the copied Google/Fastmail/Resend records intact when editing DNS.
 
 Current important Cloudflare DNS records:
 
@@ -59,7 +58,9 @@ Current important Cloudflare DNS records:
 - MX `grandfeast.eu` to `in2-smtp.messagingengine.com` priority 20, DNS-only
 - TXT SPF and Google verification records, DNS-only
 - Fastmail DKIM CNAMEs `fm1._domainkey`, `fm2._domainkey`, and `fm3._domainkey`
-- Postmark bounce CNAME `pm-bounces.grandfeast.eu -> pm.mtasv.net`
+- Resend bounce records on `send.grandfeast.eu`, DNS-only
+- Resend DKIM TXT `resend._domainkey.grandfeast.eu`, DNS-only
+- DMARC TXT `_dmarc.grandfeast.eu`, DNS-only
 
 ## Deployment
 
@@ -246,22 +247,25 @@ Required Supabase app_metadata.roles: admin, superuser, tester
 
 ## Optional Integrations
 
-Postmark sends transactional emails. The Postmark account username is
-`jonathangersam_gfeu`, linked to `jonathan.lopez@grandfeast.eu`.
+Resend sends transactional emails from the verified `grandfeast.eu` domain.
+The primary transactional sender is `admin@grandfeast.eu`, with Resend configured
+in `eu-west-1` and MAIL FROM / bounce handling on `send.grandfeast.eu`.
 
-Postmark and Cloudinary can be left empty for local booting unless local email delivery or
+Resend and Cloudinary can be left empty for local booting unless local email delivery or
 QR image uploads are being tested.
 
 Important integration env vars:
 
-- `MY_POSTMARK_API_KEY`
+- `RESEND_API_KEY`
+- `EMAIL_FROM`
+- `EMAIL_REPLY_TO`
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
 
 Relevant code paths:
 
-- `src/lib/infrastructure/email/postmarkEmailSender.ts`
+- `src/lib/infrastructure/email/resendEmailSender.ts`
 - `src/lib/infrastructure/media/cloudinaryImageStorage.ts`
 
 ## Cloudflare Worker
@@ -305,7 +309,7 @@ Before changing infrastructure-sensitive behavior:
 
 - Read `README.md`, `AGENTS.md`, `.env.example`, and this file.
 - Check whether the change affects Netlify env vars, Google OAuth settings, Supabase,
-  Squarespace DNS, Postmark, or Cloudinary.
+  Squarespace DNS, Resend, or Cloudinary.
 - Keep secrets out of the repo and use placeholder names in documentation.
 - Run `npm run check`, `npm run test`, and `npm run lint` for code changes.
 - Run `npm run build` when changing routes, deployment config, auth wiring, or server load

@@ -14,7 +14,6 @@ import type { TicketStatus } from '$lib/domain/shared/enums';
 
 /** A transport-friendly representation of an outbound email. */
 export type EmailMessage = {
-	from: string;
 	to: string;
 	subject: string;
 	message: string;
