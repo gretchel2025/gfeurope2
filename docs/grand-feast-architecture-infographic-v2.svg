@@ -1,0 +1,262 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024">
+  <defs>
+    <style>
+      .bg { fill: #f8f2e8; }
+      .grain { opacity: 0.14; }
+      .title { font: 800 52px Arial, Helvetica, sans-serif; fill: #071f49; }
+      .subtitle { font: italic 22px Arial, Helvetica, sans-serif; fill: #1f2937; }
+      .section { font: 800 32px Arial, Helvetica, sans-serif; fill: #063f4c; }
+      .small-title { font: 800 23px Arial, Helvetica, sans-serif; fill: #071f49; }
+      .card-title { font: 800 22px Arial, Helvetica, sans-serif; fill: #071f49; }
+      .path { font: 700 15px Menlo, Consolas, monospace; fill: white; }
+      .body { font: 16px Arial, Helvetica, sans-serif; fill: #111827; }
+      .body-small { font: 14px Arial, Helvetica, sans-serif; fill: #111827; }
+      .micro { font: 12px Arial, Helvetica, sans-serif; fill: #374151; }
+      .label { font: 700 14px Arial, Helvetica, sans-serif; fill: #374151; }
+      .panel { fill: rgba(255,255,255,0.5); stroke: #c7bfae; stroke-width: 1.2; }
+      .rule-panel { fill: rgba(255,255,255,0.58); stroke: #fb5d3d; stroke-width: 1.2; }
+      .teal { stroke: #05858d; }
+      .blue { stroke: #1f5fa8; }
+      .green { stroke: #4f8a3a; }
+      .gold { stroke: #c97b00; }
+      .red { stroke: #ef4b36; }
+      .navy-fill { fill: #071f49; }
+      .teal-fill { fill: #05858d; }
+      .blue-fill { fill: #1f5fa8; }
+      .green-fill { fill: #4f8a3a; }
+      .gold-fill { fill: #c97b00; }
+      .red-fill { fill: #ef4b36; }
+      .soft-teal { fill: #e4f5f2; }
+      .soft-blue { fill: #e9f2fb; }
+      .soft-green { fill: #edf7e8; }
+      .soft-gold { fill: #fff3d8; }
+      .soft-red { fill: #fff0ec; }
+      .arrow { stroke: #071f49; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+      .dash { stroke-dasharray: 7 6; }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
+      <path d="M0,0 L12,4 L0,8 Z" fill="#071f49"/>
+    </marker>
+    <pattern id="speckle" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="4" r="1" fill="#bda674"/>
+      <circle cx="16" cy="12" r="0.8" fill="#d3bc83"/>
+      <circle cx="10" cy="20" r="0.7" fill="#a98548"/>
+    </pattern>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#7c6d58" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect class="bg" width="1536" height="1024"/>
+  <rect class="grain" width="1536" height="1024" fill="url(#speckle)"/>
+
+  <text x="768" y="70" text-anchor="middle" class="title">Grand Feast App Architecture: Current Codebase Map</text>
+  <line x1="300" y1="104" x2="360" y2="104" stroke="#e88920" stroke-width="3"/>
+  <text x="768" y="112" text-anchor="middle" class="subtitle">A practical guide for placing features, services, providers, and auth logic</text>
+  <line x1="1176" y1="104" x2="1238" y2="104" stroke="#e88920" stroke-width="3"/>
+
+  <rect x="24" y="138" width="1488" height="246" rx="8" class="panel"/>
+  <line x1="38" y1="152" x2="520" y2="152" stroke="#c7bfae"/>
+  <line x1="1016" y1="152" x2="1498" y2="152" stroke="#c7bfae"/>
+  <text x="768" y="158" text-anchor="middle" class="section">How feature code flows through the app</text>
+
+  <g filter="url(#shadow)">
+    <rect x="38" y="174" width="202" height="184" rx="10" fill="#fffdf8" class="teal" stroke-width="1.6"/>
+    <circle cx="62" cy="198" r="16" class="teal-fill"/>
+    <text x="62" y="206" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" fill="white">1</text>
+    <path d="M94 212 h46 v34 h-46 z M100 206 h18 l6 7 h16" fill="none" stroke="#05858d" stroke-width="4"/>
+    <text x="139" y="264" text-anchor="middle" class="card-title">Routes</text>
+    <rect x="50" y="276" width="178" height="24" rx="5" class="teal-fill"/>
+    <text x="139" y="293" text-anchor="middle" class="path">src/routes/...</text>
+    <text x="139" y="322" text-anchor="middle" class="body">pages, loads, actions,</text>
+    <text x="139" y="344" text-anchor="middle" class="body">redirects, callbacks</text>
+
+    <rect x="296" y="174" width="202" height="184" rx="10" fill="#fffdf8" class="blue" stroke-width="1.6"/>
+    <circle cx="320" cy="198" r="16" class="blue-fill"/>
+    <text x="320" y="206" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" fill="white">2</text>
+    <path d="M362 200 l-25 25 l25 25 M432 200 l25 25 l-25 25 M388 254 l18 -58" fill="none" stroke="#1f5fa8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="397" y="264" text-anchor="middle" class="card-title">HTTP Helpers</text>
+    <rect x="308" y="276" width="178" height="24" rx="5" class="blue-fill"/>
+    <text x="397" y="293" text-anchor="middle" class="path">src/lib/server/http</text>
+    <text x="397" y="322" text-anchor="middle" class="body">forms, guards, errors,</text>
+    <text x="397" y="344" text-anchor="middle" class="body">service composition</text>
+
+    <rect x="554" y="174" width="202" height="184" rx="10" fill="#fffdf8" class="teal" stroke-width="1.6"/>
+    <circle cx="578" cy="198" r="16" class="teal-fill"/>
+    <text x="578" y="206" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" fill="white">3</text>
+    <path d="M624 202 h26 v18 h18 v26 h-18 v18 h-26 v-18 h-18 v-26 h18 z M668 202 h26 v18 h18 v26 h-18 v18 h-26 v-18 h-18 v-26 h18 z" fill="#05858d"/>
+    <text x="655" y="264" text-anchor="middle" class="card-title">Application Services</text>
+    <rect x="566" y="276" width="178" height="24" rx="5" class="teal-fill"/>
+    <text x="655" y="293" text-anchor="middle" class="path">src/lib/application</text>
+    <text x="655" y="322" text-anchor="middle" class="body">booking, tickets, counters,</text>
+    <text x="655" y="344" text-anchor="middle" class="body">notifications, reports</text>
+
+    <rect x="812" y="174" width="202" height="184" rx="10" fill="#fffdf8" class="green" stroke-width="1.6"/>
+    <circle cx="836" cy="198" r="16" class="green-fill"/>
+    <text x="836" y="206" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" fill="white">4</text>
+    <path d="M912 190 l34 13 v27 c0 23 -14 39 -34 50 c-20 -11 -34 -27 -34 -50 v-27 z" fill="none" stroke="#4f8a3a" stroke-width="4"/>
+    <path d="M898 232 l10 10 l22 -30" fill="none" stroke="#4f8a3a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="913" y="264" text-anchor="middle" class="card-title">Domain + Ports</text>
+    <rect x="824" y="276" width="178" height="24" rx="5" class="green-fill"/>
+    <text x="913" y="293" text-anchor="middle" class="path">domain, ports.ts</text>
+    <text x="913" y="322" text-anchor="middle" class="body">rules, types, interfaces,</text>
+    <text x="913" y="344" text-anchor="middle" class="body">state transitions</text>
+
+    <rect x="1070" y="174" width="202" height="184" rx="10" fill="#fffdf8" class="gold" stroke-width="1.6"/>
+    <circle cx="1094" cy="198" r="16" class="gold-fill"/>
+    <text x="1094" y="206" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" fill="white">5</text>
+    <ellipse cx="1170" cy="204" rx="30" ry="12" fill="none" stroke="#c97b00" stroke-width="4"/>
+    <path d="M1140 204 v54 c0 7 14 12 30 12 s30 -5 30 -12 v-54 M1140 222 c0 7 14 12 30 12 s30 -5 30 -12 M1140 240 c0 7 14 12 30 12 s30 -5 30 -12" fill="none" stroke="#c97b00" stroke-width="4"/>
+    <text x="1171" y="264" text-anchor="middle" class="card-title">Infrastructure</text>
+    <rect x="1082" y="276" width="178" height="24" rx="5" class="gold-fill"/>
+    <text x="1171" y="293" text-anchor="middle" class="path">infrastructure/...</text>
+    <text x="1171" y="322" text-anchor="middle" class="body">Supabase, auth, email,</text>
+    <text x="1171" y="344" text-anchor="middle" class="body">media, logging, config</text>
+
+    <rect x="1328" y="174" width="168" height="184" rx="10" fill="#fffdf8" class="red" stroke-width="1.6"/>
+    <circle cx="1352" cy="198" r="16" class="red-fill"/>
+    <text x="1352" y="206" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" fill="white">6</text>
+    <path d="M1392 236 h82 c15 0 25 -10 25 -23 c0 -13 -10 -23 -23 -23 c-4 0 -7 1 -10 2 c-5 -15 -18 -26 -35 -26 c-20 0 -36 16 -36 36 c-11 1 -20 10 -20 21 c0 8 7 13 17 13 z" fill="none" stroke="#ef4b36" stroke-width="4"/>
+    <text x="1412" y="264" text-anchor="middle" class="card-title">External Systems</text>
+    <text x="1412" y="302" text-anchor="middle" class="body-small" fill="#b42318">Supabase, Google OAuth,</text>
+    <text x="1412" y="324" text-anchor="middle" class="body-small" fill="#b42318">Resend, Cloudinary,</text>
+    <text x="1412" y="346" text-anchor="middle" class="body-small" fill="#b42318">PayPal, Cloudflare</text>
+  </g>
+
+  <path d="M240 266 H288" class="arrow"/>
+  <path d="M498 266 H546" class="arrow"/>
+  <path d="M756 266 H804" class="arrow"/>
+  <path d="M1014 266 H1062" class="arrow"/>
+  <path d="M1272 266 H1320" class="arrow"/>
+
+  <rect x="24" y="410" width="1190" height="368" rx="8" class="panel"/>
+  <line x1="38" y1="423" x2="512" y2="423" stroke="#c7bfae"/>
+  <line x1="840" y1="423" x2="1200" y2="423" stroke="#c7bfae"/>
+  <text x="676" y="430" text-anchor="middle" class="section">What belongs where now?</text>
+
+  <g filter="url(#shadow)">
+    <rect x="38" y="452" width="206" height="220" rx="10" fill="#fffdf8" class="teal" stroke-width="1.4"/>
+    <circle cx="72" cy="490" r="28" class="soft-teal"/>
+    <path d="M55 497 h42 v30 h-42 z M61 489 h16 l6 7 h14" fill="none" stroke="#05858d" stroke-width="4"/>
+    <text x="112" y="491" class="small-title" fill="#05858d">src/routes</text>
+    <text x="58" y="548" class="body">• entry points for users</text>
+    <text x="58" y="573" class="body">• Svelte pages and forms</text>
+    <text x="58" y="598" class="body">• load/actions/redirects</text>
+    <text x="58" y="623" class="body">• auth callback route</text>
+    <text x="58" y="648" class="body">• stay thin</text>
+
+    <rect x="266" y="452" width="206" height="220" rx="10" fill="#fffdf8" class="blue" stroke-width="1.4"/>
+    <circle cx="300" cy="490" r="28" class="soft-blue"/>
+    <path d="M291 476 l-14 14 l14 14 M309 476 l14 14 l-14 14 M297 510 l10 -40" fill="none" stroke="#1f5fa8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="340" y="491" class="small-title" fill="#1f5fa8">server/http</text>
+    <text x="286" y="548" class="body">• service composition</text>
+    <text x="286" y="573" class="body">• form parsing</text>
+    <text x="286" y="598" class="body">• admin/superuser guards</text>
+    <text x="286" y="623" class="body">• app-error to HTTP</text>
+    <text x="286" y="648" class="body">• reusable route wrappers</text>
+
+    <rect x="494" y="452" width="214" height="220" rx="10" fill="#fffdf8" class="teal" stroke-width="1.4"/>
+    <circle cx="528" cy="490" r="28" class="soft-teal"/>
+    <path d="M520 474 h24 v17 h17 v24 h-17 v17 h-24 v-17 h-17 v-24 h17 z" fill="#05858d"/>
+    <text x="568" y="491" class="small-title" fill="#05858d">application</text>
+    <text x="514" y="548" class="body">• orchestrates use cases</text>
+    <text x="514" y="573" class="body">• BookingService</text>
+    <text x="514" y="598" class="body">• TicketService</text>
+    <text x="514" y="623" class="body">• NotificationService</text>
+    <text x="514" y="648" class="body">• counters, reports, system</text>
+
+    <rect x="730" y="452" width="214" height="220" rx="10" fill="#fffdf8" class="green" stroke-width="1.4"/>
+    <circle cx="764" cy="490" r="28" class="soft-green"/>
+    <path d="M764 465 l28 11 v23 c0 20 -12 34 -28 43 c-16 -9 -28 -23 -28 -43 v-23 z" fill="none" stroke="#4f8a3a" stroke-width="4"/>
+    <path d="M752 496 l9 9 l18 -25" fill="none" stroke="#4f8a3a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="804" y="491" class="small-title" fill="#4f8a3a">domain + ports</text>
+    <text x="750" y="548" class="body">• Booking, Ticket, User</text>
+    <text x="750" y="573" class="body">• enums and state rules</text>
+    <text x="750" y="598" class="body">• repository contracts</text>
+    <text x="750" y="623" class="body">• provider contracts</text>
+    <text x="750" y="648" class="body">• no vendor imports</text>
+
+    <rect x="966" y="452" width="224" height="220" rx="10" fill="#fffdf8" class="gold" stroke-width="1.4"/>
+    <circle cx="1000" cy="490" r="28" class="soft-gold"/>
+    <ellipse cx="1000" cy="474" rx="22" ry="9" fill="none" stroke="#c97b00" stroke-width="4"/>
+    <path d="M978 474 v40 c0 6 10 10 22 10 s22 -4 22 -10 v-40 M978 487 c0 6 10 10 22 10 s22 -4 22 -10 M978 500 c0 6 10 10 22 10 s22 -4 22 -10" fill="none" stroke="#c97b00" stroke-width="4"/>
+    <text x="1042" y="491" class="small-title" fill="#c97b00">infrastructure</text>
+    <text x="986" y="548" class="body">• Supabase repos/RPC</text>
+    <text x="986" y="573" class="body">• Supabase SSR auth</text>
+    <text x="986" y="598" class="body">• Resend email sender</text>
+    <text x="986" y="623" class="body">• Cloudinary QR storage</text>
+    <text x="986" y="648" class="body">• env, logging, bootstrap</text>
+  </g>
+
+  <path d="M141 704 V690 H602 V672" class="arrow"/>
+  <text x="328" y="726" text-anchor="middle" class="label">routes call HTTP helpers and composed services</text>
+  <path d="M601 690 V674" class="arrow"/>
+  <path d="M601 690 H836 V674" class="arrow dash"/>
+  <text x="718" y="714" text-anchor="middle" class="label">services depend on domain rules</text>
+  <path d="M836 690 H1078 V674" class="arrow dash" stroke="#c97b00"/>
+  <text x="958" y="714" text-anchor="middle" class="label">infrastructure implements ports</text>
+  <rect x="376" y="738" width="506" height="28" rx="6" fill="#fffdf8" stroke="#c7bfae" stroke-dasharray="5 5"/>
+  <text x="629" y="758" text-anchor="middle" class="body-small">Application owns workflow. Domain owns rules. Infrastructure owns outside-world details.</text>
+
+  <rect x="1240" y="406" width="272" height="372" rx="8" class="rule-panel"/>
+  <rect x="1240" y="406" width="272" height="54" rx="8" fill="#fb5d3d"/>
+  <text x="1376" y="441" text-anchor="middle" font-family="Arial" font-size="22" font-weight="800" fill="white">Quick rule of thumb</text>
+  <g>
+    <path d="M1264 492 l22 8 v18 c0 16 -9 27 -22 35 c-13 -8 -22 -19 -22 -35 v-18 z" fill="none" stroke="#4f8a3a" stroke-width="4"/>
+    <text x="1308" y="494" class="card-title">Domain</text>
+    <text x="1308" y="516" class="body-small">what the business means</text>
+    <line x1="1252" y1="536" x2="1498" y2="536" stroke="#c7bfae" stroke-dasharray="4 4"/>
+
+    <path d="M1254 556 h22 v15 h15 v22 h-15 v15 h-22 v-15 h-15 v-22 h15 z" fill="#05858d"/>
+    <text x="1308" y="570" class="card-title">Application</text>
+    <text x="1308" y="592" class="body-small">what the app does</text>
+    <line x1="1252" y1="612" x2="1498" y2="612" stroke="#c7bfae" stroke-dasharray="4 4"/>
+
+    <ellipse cx="1264" cy="635" rx="23" ry="9" fill="none" stroke="#c97b00" stroke-width="4"/>
+    <path d="M1241 635 v29 c0 5 10 9 23 9 s23 -4 23 -9 v-29 M1241 649 c0 5 10 9 23 9 s23 -4 23 -9" fill="none" stroke="#c97b00" stroke-width="4"/>
+    <text x="1308" y="646" class="card-title">Infrastructure</text>
+    <text x="1308" y="668" class="body-small">how providers are reached</text>
+    <line x1="1252" y1="688" x2="1498" y2="688" stroke="#c7bfae" stroke-dasharray="4 4"/>
+
+    <path d="M1250 708 h32 v25 h-32 z M1254 702 h13 l5 7 h10" fill="none" stroke="#05858d" stroke-width="4"/>
+    <text x="1308" y="721" class="card-title">Routes</text>
+    <text x="1308" y="743" class="body-small">how people enter the app</text>
+  </g>
+
+  <rect x="24" y="810" width="1488" height="176" rx="8" class="panel"/>
+  <line x1="38" y1="826" x2="532" y2="826" stroke="#c7bfae"/>
+  <line x1="1004" y1="826" x2="1498" y2="826" stroke="#c7bfae"/>
+  <text x="768" y="834" text-anchor="middle" class="section">Current cross-cutting flows</text>
+
+  <g filter="url(#shadow)">
+    <rect x="38" y="864" width="346" height="92" rx="10" fill="#fffdf8" class="teal" stroke-width="1.1"/>
+    <circle cx="80" cy="910" r="28" class="soft-teal"/>
+    <path d="M67 925 l13 -38 l23 23 z M79 887 l19 -10 l-10 19" fill="none" stroke="#05858d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="126" y="904" class="small-title" fill="#05858d">Booking reservation</text>
+    <text x="126" y="926" class="body-small">form -> BookingService -></text>
+    <text x="126" y="944" class="body-small">Supabase RPC -> Resend</text>
+
+    <rect x="404" y="864" width="346" height="92" rx="10" fill="#fffdf8" class="green" stroke-width="1.1"/>
+    <circle cx="446" cy="910" r="28" class="soft-green"/>
+    <path d="M446 887 l25 9 v20 c0 17 -10 28 -25 36 c-15 -8 -25 -19 -25 -36 v-20 z" fill="none" stroke="#4f8a3a" stroke-width="4"/>
+    <text x="492" y="904" class="small-title" fill="#4f8a3a">Access policy</text>
+    <text x="492" y="926" class="body-small">hooks.server.ts -> Supabase</text>
+    <text x="492" y="944" class="body-small">session -> app_metadata.roles</text>
+
+    <rect x="770" y="864" width="346" height="92" rx="10" fill="#fffdf8" class="gold" stroke-width="1.1"/>
+    <circle cx="812" cy="910" r="28" class="soft-gold"/>
+    <path d="M793 891 h38 v38 h-38 z M801 899 h22 M801 909 h22 M801 919 h14" fill="none" stroke="#c97b00" stroke-width="4" stroke-linecap="round"/>
+    <text x="858" y="904" class="small-title" fill="#c97b00">Ticket generation</text>
+    <text x="858" y="926" class="body-small">paid booking -> QR code -></text>
+    <text x="858" y="944" class="body-small">Cloudinary image -> email</text>
+
+    <rect x="1136" y="864" width="346" height="92" rx="10" fill="#fffdf8" class="red" stroke-width="1.1"/>
+    <circle cx="1178" cy="910" r="28" class="soft-red"/>
+    <path d="M1158 914 h40 M1178 894 v40 M1164 900 h28 v28 h-28 z" fill="none" stroke="#ef4b36" stroke-width="4" stroke-linecap="round"/>
+    <text x="1224" y="904" class="small-title" fill="#ef4b36">Runtime bootstrap</text>
+    <text x="1224" y="926" class="body-small">startup ensures counters</text>
+    <text x="1224" y="944" class="body-small">exist for APP_EVENT_ID</text>
+  </g>
+
+  <text x="768" y="1000" text-anchor="middle" class="micro">Source of truth: docs/architecture.md, docs/infrastructure.md, and current src/lib boundaries.</text>
+</svg>

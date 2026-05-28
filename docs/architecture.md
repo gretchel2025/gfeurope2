@@ -4,6 +4,12 @@ This document uses C4-style views to make the codebase easier to navigate. It is
 exhaustive inventory of every route or class. Instead, it shows the main runtime
 boundaries, dependency direction, and flows that explain where new work usually belongs.
 
+Visual overview:
+[`grand-feast-architecture-infographic-v2.png`](grand-feast-architecture-infographic-v2.png).
+
+Booking flow overview:
+[`booking-flow-infographic-v1.png`](booking-flow-infographic-v1.png).
+
 ## Level 1: System Context
 
 ```mermaid
