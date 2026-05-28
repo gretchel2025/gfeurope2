@@ -21,6 +21,9 @@ Production branch deploy:
 Infrastructure notes for agents and maintainers live in
 [`docs/infrastructure.md`](docs/infrastructure.md).
 
+Architecture diagrams and codebase orientation notes live in
+[`docs/architecture.md`](docs/architecture.md).
+
 ## Project Structure
 
 - `src/routes/` contains SvelteKit routes.

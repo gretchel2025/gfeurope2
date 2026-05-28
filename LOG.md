@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-28
 
+- Added `docs/architecture.md` with C4-style context, container, component, flow, and
+  access-policy diagrams for maintainers.
 - Migrated transactional email delivery from Postmark to Resend using the verified
   `grandfeast.eu` sending domain.
 - Configured Resend environment variables for live dev and production, with live
