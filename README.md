@@ -86,6 +86,9 @@ Start Supabase and the app:
 make run-local
 ```
 
+`make run-local` also creates or updates the default local auth user for the local
+sign-in form. Use `admin` / `password` on `/signin`.
+
 Useful Supabase commands:
 
 ```bash
@@ -148,25 +151,53 @@ First-time local auth setup:
 3. Copy the local `supabase status` URL/key values into `.env`:
    `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and
    `SUPABASE_SERVICE_ROLE_KEY`.
-4. Add the local Google OAuth env vars:
-   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and
-   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET`.
-5. Confirm the Google OAuth client allows
-   `http://127.0.0.1:54321/auth/v1/callback`.
-6. Restart Supabase so `supabase/config.toml` reloads the OAuth env values.
-7. Start the app, sign in once with Google, then grant local roles:
+4. For offline-friendly local auth, set these in `.env`:
 
    ```bash
-   make grant-local-roles EMAIL=you@example.com
+   LOCAL_DEV_AUTH_EMAIL=admin@example.test
+   LOCAL_DEV_AUTH_PASSWORD=password
+   LOCAL_DEV_AUTH_ROLES=tester,admin,superuser
    ```
 
-8. Sign out and back in if the browser was already signed in before roles were granted.
+5. Create or update the local Supabase email/password user:
+
+   ```bash
+   make setup-local-auth
+   ```
+
+   The local sign-in form accepts username `admin` and maps it to
+   `admin@example.test`. You can also pass values directly:
+
+   ```bash
+   make setup-local-auth EMAIL=you@example.com PASSWORD=local-password
+   ```
+
+6. Add the local Google OAuth env vars if you also want local Google sign-in:
+   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and
+   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET`.
+7. Confirm the Google OAuth client allows
+   `http://127.0.0.1:54321/auth/v1/callback`.
+8. Restart Supabase so `supabase/config.toml` reloads the OAuth env values.
+9. Start the app. When running locally against the local Supabase URL, `/signin` shows a
+   local username/password form prefilled with `admin` / `password`.
+10. If you use Google instead of the local email/password form, sign in once with Google,
+    then grant local roles:
+
+```bash
+make grant-local-roles EMAIL=you@example.com
+```
+
+11. Sign out and back in if the browser was already signed in before roles were granted.
 
 Local auth troubleshooting:
 
 - `Unsupported provider: provider is not enabled`: local Supabase has not loaded the
   Google provider. Check the `SUPABASE_AUTH_EXTERNAL_GOOGLE_*` env vars and restart
   Supabase.
+- No local email/password form: confirm the app is running in local dev and
+  `PUBLIC_SUPABASE_URL` points to `http://127.0.0.1:54321`.
+- Local password sign-in fails: run `make setup-local-auth` while local Supabase is
+  running and use `admin` / `password` unless `.env` intentionally overrides it.
 - Google `redirect_uri_mismatch`: add
   `http://127.0.0.1:54321/auth/v1/callback` to the Google OAuth client.
 - `Access unavailable` after sign-in: grant local roles with `make grant-local-roles`,
@@ -223,6 +254,11 @@ make grant-local-roles EMAIL=you@example.com ROLES=admin
 
 If the browser is already signed in when roles change, sign out and back in once so the
 session picks up the updated `app_metadata`.
+
+For offline-friendly local auth, prefer `make setup-local-auth`. It uses the local
+Supabase service-role key, refuses non-local Supabase URLs, creates or updates the
+email/password user, confirms the email, and writes roles to `app_metadata`. The default
+browser login is `admin` / `password`, backed by Supabase user `admin@example.test`.
 
 ## Optional Integrations
 

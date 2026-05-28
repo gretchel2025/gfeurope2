@@ -181,8 +181,23 @@ For `dev.grandfeast.eu`, `jonathangersam@gmail.com` currently needs all three ro
 Local Supabase role setup:
 
 1. Start the local stack with `make supabase-up` or `make run-local`.
-2. Sign in once with Google so Supabase creates the local `auth.users` row.
-3. Grant local roles:
+2. For offline-friendly local auth, use the default `admin` / `password` login or set
+   `LOCAL_DEV_AUTH_EMAIL`, `LOCAL_DEV_AUTH_PASSWORD`, and optionally
+   `LOCAL_DEV_AUTH_ROLES` in `.env`.
+3. Create or update the local Supabase email/password user. `make run-local` does this
+   automatically after Supabase starts, or run it directly:
+
+   ```bash
+   make setup-local-auth
+   ```
+
+   The helper refuses non-local Supabase URLs and writes roles to
+   `auth.users.raw_app_meta_data`. The default UI login `admin` maps to Supabase user
+   `admin@example.test`.
+
+4. If using Google instead of local email/password, sign in once with Google so Supabase
+   creates the local `auth.users` row.
+5. Grant local roles:
 
    ```bash
    make grant-local-roles EMAIL=you@example.com
@@ -191,7 +206,7 @@ Local Supabase role setup:
    The default roles are `tester`, `admin`, and `superuser`. Use
    `ROLES=admin` or another comma-separated subset for narrower local testing.
 
-4. If the browser session was already active, sign out and back in once so the session
+6. If the browser session was already active, sign out and back in once so the session
    reads the updated `app_metadata`.
 
 ## Auth
@@ -243,16 +258,25 @@ First-time local setup checklist for agents:
 5. Confirm Google Cloud OAuth has `http://127.0.0.1:54321/auth/v1/callback` as an
    authorized redirect URI for the configured client.
 6. Restart local Supabase after changing `.env` auth provider values.
-7. Ask the developer to sign in once so the local `auth.users` row exists.
-8. Run `make grant-local-roles EMAIL=<developer email>` against the local stack.
-9. If the developer was already signed in, have them sign out and sign in again to refresh
-   session claims.
+7. For offline-friendly auth, run `make setup-local-auth`. The script creates or updates a
+   confirmed local email/password Supabase Auth user and grants roles.
+8. Ask the developer to use the local username/password form on `/signin`; by default, it
+   is prefilled with `admin` / `password`.
+9. If using Google instead, ask the developer to sign in once so the local `auth.users` row
+   exists, then run `make grant-local-roles EMAIL=<developer email>` against the local
+   stack.
+10. If the developer was already signed in, have them sign out and sign in again to refresh
+    session claims.
 
 Auth troubleshooting map:
 
 - Supabase returns `Unsupported provider: provider is not enabled`: the local auth service
   did not load Google provider config. Check the two local Google OAuth env vars and
   restart Supabase.
+- No local email/password form appears: the app is not in local access mode or
+  `PUBLIC_SUPABASE_URL` does not point to the local Supabase URL.
+- Local password sign-in fails: run `make setup-local-auth` while local Supabase is
+  running, then use `admin` / `password` unless `.env` intentionally overrides it.
 - Google returns `redirect_uri_mismatch`: the Google Cloud OAuth client is missing
   `http://127.0.0.1:54321/auth/v1/callback`.
 - The app shows `Access unavailable` after successful sign-in: the user exists but lacks

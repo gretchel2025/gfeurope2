@@ -10,6 +10,9 @@
 	export let data: ServerData;
 
 	let signInError = '';
+	let localUsername = data.allowLocalPasswordAuth ? 'admin' : '';
+	let localPassword = data.allowLocalPasswordAuth ? 'password' : '';
+	let localSignInLoading = false;
 
 	async function signOutCurrentUser() {
 		await signOutAuth($page.data.supabaseAuth);
@@ -33,6 +36,34 @@
 		if (error) {
 			signInError = 'Unable to start Google sign-in. Please try again.';
 		}
+	}
+
+	async function signInWithLocalPassword() {
+		if (!data.allowLocalPasswordAuth) {
+			return;
+		}
+
+		signInError = '';
+		localSignInLoading = true;
+		const supabase = createAuthClient($page.data.supabaseAuth);
+		const { error } = await supabase.auth.signInWithPassword({
+			email: normalizeLocalLogin(localUsername),
+			password: localPassword
+		});
+		localSignInLoading = false;
+
+		if (error) {
+			signInError = 'Unable to sign in with local credentials.';
+			return;
+		}
+
+		await invalidateAll();
+		await goto(data.callbackURL, { invalidateAll: true });
+	}
+
+	function normalizeLocalLogin(value: string) {
+		const trimmed = value.trim().toLowerCase();
+		return trimmed === 'admin' ? 'admin@example.test' : trimmed;
 	}
 </script>
 
@@ -80,7 +111,51 @@
 					</button>
 				{/if}
 
-				{#if !data.hasGoogleAuth}
+				{#if data.allowLocalPasswordAuth}
+					<form class="space-y-3 text-left" on:submit|preventDefault={signInWithLocalPassword}>
+						<p class="rounded-md bg-yellow-400/15 px-3 py-2 text-sm font-semibold text-yellow-100">
+							Local dev: use admin / password.
+						</p>
+
+						<div class="space-y-1">
+							<label for="local-username" class="block text-sm font-semibold text-blue-100">
+								Local dev username
+							</label>
+							<input
+								id="local-username"
+								type="text"
+								bind:value={localUsername}
+								autocomplete="username"
+								required
+								class="w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-white placeholder:text-blue-100/60 focus:border-yellow-400 focus:outline-none"
+							/>
+						</div>
+
+						<div class="space-y-1">
+							<label for="local-password" class="block text-sm font-semibold text-blue-100">
+								Local dev password
+							</label>
+							<input
+								id="local-password"
+								type="password"
+								bind:value={localPassword}
+								autocomplete="current-password"
+								required
+								class="w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-white placeholder:text-blue-100/60 focus:border-yellow-400 focus:outline-none"
+							/>
+						</div>
+
+						<button
+							type="submit"
+							disabled={localSignInLoading}
+							class="w-full py-3 px-6 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition disabled:cursor-not-allowed disabled:opacity-60"
+						>
+							{localSignInLoading ? 'Signing in...' : 'Sign in locally'}
+						</button>
+					</form>
+				{/if}
+
+				{#if !data.hasGoogleAuth && !data.allowLocalPasswordAuth}
 					<p class="text-sm text-red-200">
 						No auth provider is configured for this environment. Configure Supabase Auth environment
 						variables.

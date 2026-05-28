@@ -16,6 +16,7 @@ run:
 run-local:
 	# start local Supabase, then start the dev server
 	supabase start
+	node scripts/setup-local-auth.mjs "$(EMAIL)" "$(PASSWORD)" "$(ROLES)"
 	npm run dev -- --open
 
 supabase-up:
@@ -30,6 +31,9 @@ supabase-status:
 grant-local-roles:
 	@test -n "$(EMAIL)" || (echo "Usage: make grant-local-roles EMAIL=user@example.com [ROLES=tester,admin,superuser]" && exit 1)
 	node scripts/grant-local-roles.mjs "$(EMAIL)" "$(ROLES)"
+
+setup-local-auth:
+	node scripts/setup-local-auth.mjs "$(EMAIL)" "$(PASSWORD)" "$(ROLES)"
 
 lint:
 	npm run lint

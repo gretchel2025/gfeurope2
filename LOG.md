@@ -16,3 +16,5 @@ test sends, site availability checks, or command-only housekeeping.
 - Added a local role-grant helper for Supabase Auth onboarding.
 - Expanded first-time local auth setup and troubleshooting runbooks for agents.
 - Granted co-developer hosted Supabase app roles in live dev and production.
+- Added local-only Supabase email/password auth setup for offline-friendly development.
+- Prefilled local-only sign-in with the default admin credentials.
