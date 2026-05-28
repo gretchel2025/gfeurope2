@@ -10,12 +10,49 @@ For deployment, DNS, Supabase, Google OAuth, and external account context, read 
 
 Keep `LOG.md` as a concise running record of meaningful project activity. Add entries for changes that affect app behavior, infrastructure, deployment, provider configuration, data/auth/email behavior, or operational procedures. Do not log routine checks or one-off verification tasks such as sending a test email, confirming a site is live, running standard tests, or checking command output unless the result changes project state or reveals a decision worth preserving.
 
+## Agent Runbook: First-Time Local Auth Setup
+
+For a new developer or a fresh local Supabase setup, use the local Supabase CLI stack. Do not point local development at hosted production/test unless the user explicitly asks to verify hosted behavior.
+
+1. Copy `.env.example` to `.env` and set local Supabase values from `supabase status`:
+   `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and server-only
+   `SUPABASE_SERVICE_ROLE_KEY`.
+2. For local Google OAuth, ensure `.env` has
+   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and
+   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET`. Do not print these values.
+3. In the matching Google Cloud OAuth client, ensure the authorized redirect URIs include
+   `http://127.0.0.1:54321/auth/v1/callback`.
+4. Restart local Supabase after changing OAuth env values:
+   `make supabase-down && make supabase-up`, or use the equivalent `supabase stop/start`
+   commands.
+5. Start the app with `npm run dev -- --host 127.0.0.1` or `make run-local`.
+6. Have the developer sign in once with Google so Supabase creates the local
+   `auth.users` row.
+7. Grant local roles with `make grant-local-roles EMAIL=developer@example.com`. The
+   default grants `tester`, `admin`, and `superuser`; pass `ROLES=admin` or another
+   comma-separated subset only for narrower testing.
+8. If the browser was already signed in before roles were granted, have the developer
+   sign out and sign back in so the session picks up updated `app_metadata`.
+
+Local auth failure map:
+
+- `Unsupported provider: provider is not enabled`: local Supabase did not load the
+  Google provider. Check the two `SUPABASE_AUTH_EXTERNAL_GOOGLE_*` env vars and restart
+  the local Supabase stack.
+- Google `redirect_uri_mismatch`: add
+  `http://127.0.0.1:54321/auth/v1/callback` to the Google Cloud OAuth client's
+  authorized redirect URIs.
+- App page says signed in but access unavailable: grant roles with
+  `make grant-local-roles EMAIL=...`, then refresh the session by signing out and back in.
+
 ## Build, Test, and Development Commands
 
 - `make install` or `npm install`: install dependencies.
 - `make run`: start the Vite dev server and open the app in a browser.
 - `make run-local`: start the Supabase CLI local stack, then run the app.
 - `make supabase-up`, `make supabase-down`, `make supabase-status`: manage local Supabase.
+- `make grant-local-roles EMAIL=you@example.com [ROLES=tester,admin,superuser]`: grant
+  local Supabase Auth roles after first local sign-in.
 - `npm run build` or `make build`: create the production build.
 - `npm run check` or `make test-unit`: run Svelte/TypeScript validation with `svelte-check`.
 - `npm run test`: run Vitest once.

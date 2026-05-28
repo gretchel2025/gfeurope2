@@ -134,6 +134,43 @@ Google OAuth setup:
 - Use Supabase's callback URL in Google OAuth:
   `https://<project-ref>.supabase.co/auth/v1/callback`
 - Local Supabase uses `http://127.0.0.1:54321/auth/v1/callback`.
+- For local Supabase Google OAuth, add `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and
+  `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET` to `.env`, then restart the local
+  Supabase stack so `supabase/config.toml` is reloaded.
+- If Google returns `redirect_uri_mismatch`, add
+  `http://127.0.0.1:54321/auth/v1/callback` to the Google Cloud OAuth client's
+  authorized redirect URIs.
+
+First-time local auth setup:
+
+1. Copy `.env.example` to `.env`.
+2. Start Supabase with `make supabase-up`.
+3. Copy the local `supabase status` URL/key values into `.env`:
+   `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and
+   `SUPABASE_SERVICE_ROLE_KEY`.
+4. Add the local Google OAuth env vars:
+   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and
+   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET`.
+5. Confirm the Google OAuth client allows
+   `http://127.0.0.1:54321/auth/v1/callback`.
+6. Restart Supabase so `supabase/config.toml` reloads the OAuth env values.
+7. Start the app, sign in once with Google, then grant local roles:
+
+   ```bash
+   make grant-local-roles EMAIL=you@example.com
+   ```
+
+8. Sign out and back in if the browser was already signed in before roles were granted.
+
+Local auth troubleshooting:
+
+- `Unsupported provider: provider is not enabled`: local Supabase has not loaded the
+  Google provider. Check the `SUPABASE_AUTH_EXTERNAL_GOOGLE_*` env vars and restart
+  Supabase.
+- Google `redirect_uri_mismatch`: add
+  `http://127.0.0.1:54321/auth/v1/callback` to the Google OAuth client.
+- `Access unavailable` after sign-in: grant local roles with `make grant-local-roles`,
+  then sign out and back in.
 
 ## App Data
 
@@ -171,6 +208,21 @@ provider-owned `app_metadata`, for example:
 ```json
 { "roles": ["tester", "admin", "superuser"] }
 ```
+
+For a local Supabase user, sign in once so the user exists, then grant local roles:
+
+```bash
+make grant-local-roles EMAIL=you@example.com
+```
+
+The default grants `tester`, `admin`, and `superuser`. To grant a narrower set:
+
+```bash
+make grant-local-roles EMAIL=you@example.com ROLES=admin
+```
+
+If the browser is already signed in when roles change, sign out and back in once so the
+session picks up the updated `app_metadata`.
 
 ## Optional Integrations
 

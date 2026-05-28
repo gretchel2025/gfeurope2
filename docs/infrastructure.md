@@ -178,6 +178,22 @@ Expected role combinations:
 For `dev.grandfeast.eu`, `jonathangersam@gmail.com` currently needs all three roles:
 `admin`, `superuser`, and `tester`.
 
+Local Supabase role setup:
+
+1. Start the local stack with `make supabase-up` or `make run-local`.
+2. Sign in once with Google so Supabase creates the local `auth.users` row.
+3. Grant local roles:
+
+   ```bash
+   make grant-local-roles EMAIL=you@example.com
+   ```
+
+   The default roles are `tester`, `admin`, and `superuser`. Use
+   `ROLES=admin` or another comma-separated subset for narrower local testing.
+
+4. If the browser session was already active, sign out and back in once so the session
+   reads the updated `app_metadata`.
+
 ## Auth
 
 Auth is configured through Supabase Auth and wired into SvelteKit with `@supabase/ssr`.
@@ -210,6 +226,38 @@ Google OAuth callback URLs:
 
 Application OAuth completes in SvelteKit at `/auth/callback`, where the Supabase auth code
 is exchanged for a cookie-backed session.
+Local Supabase Google OAuth is configured in `supabase/config.toml` and reads
+`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` plus
+`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET` from `.env`. Restart the local Supabase
+stack after changing those values.
+
+First-time local setup checklist for agents:
+
+1. Confirm `.env` points to local Supabase, not hosted Supabase, unless hosted verification
+   is intentional.
+2. Confirm the local Supabase URL is `http://127.0.0.1:54321`.
+3. Confirm `PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SERVICE_ROLE_KEY` match
+   `supabase status`.
+4. Confirm `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and
+   `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET` are set, but never print their values.
+5. Confirm Google Cloud OAuth has `http://127.0.0.1:54321/auth/v1/callback` as an
+   authorized redirect URI for the configured client.
+6. Restart local Supabase after changing `.env` auth provider values.
+7. Ask the developer to sign in once so the local `auth.users` row exists.
+8. Run `make grant-local-roles EMAIL=<developer email>` against the local stack.
+9. If the developer was already signed in, have them sign out and sign in again to refresh
+   session claims.
+
+Auth troubleshooting map:
+
+- Supabase returns `Unsupported provider: provider is not enabled`: the local auth service
+  did not load Google provider config. Check the two local Google OAuth env vars and
+  restart Supabase.
+- Google returns `redirect_uri_mismatch`: the Google Cloud OAuth client is missing
+  `http://127.0.0.1:54321/auth/v1/callback`.
+- The app shows `Access unavailable` after successful sign-in: the user exists but lacks
+  required `app_metadata.roles`; run `make grant-local-roles EMAIL=...`, then refresh the
+  browser session.
 
 First-class access policy code:
 

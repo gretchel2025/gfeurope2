@@ -11,3 +11,7 @@ test sends, site availability checks, or command-only housekeeping.
   dev/local mail sent from `test@grandfeast.eu` and production mail sent from
   `admin@grandfeast.eu`.
 - Redeployed live dev from the `dev` branch after the Resend migration.
+- Added local Supabase Google OAuth provider configuration using env-based client
+  credentials.
+- Added a local role-grant helper for Supabase Auth onboarding.
+- Expanded first-time local auth setup and troubleshooting runbooks for agents.

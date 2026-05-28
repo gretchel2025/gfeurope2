@@ -27,6 +27,10 @@ supabase-down:
 supabase-status:
 	supabase status
 
+grant-local-roles:
+	@test -n "$(EMAIL)" || (echo "Usage: make grant-local-roles EMAIL=user@example.com [ROLES=tester,admin,superuser]" && exit 1)
+	node scripts/grant-local-roles.mjs "$(EMAIL)" "$(ROLES)"
+
 lint:
 	npm run lint
 
