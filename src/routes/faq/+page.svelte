@@ -148,7 +148,7 @@
 		</li>
 	</ul>
 
-	<div class="mt-10 border-t border-white/10 pt-6 text-sm text-blue-200">
+	<div class="mt-10 border-t border-white/10 pt-6 text-sm text-[#fff3df]/70">
 		<p>
 			Ready to reserve your place? Continue to the <a href="/newbooking">ticket booking page</a>.
 		</p>

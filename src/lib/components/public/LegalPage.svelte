@@ -8,35 +8,37 @@
 	export let eyebrow: string = 'Legal';
 </script>
 
-<section class="relative z-10 px-4 py-10 sm:py-14">
+<section class="px-4 py-10 sm:py-14">
 	<div class="mx-auto flex max-w-5xl flex-col gap-6">
 		<div class="flex flex-wrap items-center justify-between gap-3 text-sm">
 			<a
 				href="/"
-				class="inline-flex items-center gap-2 text-blue-200 transition hover:text-white"
+				class="inline-flex items-center gap-2 font-semibold text-[#f3c15f] transition hover:text-white"
 			>
 				<span aria-hidden="true">←</span>
 				Back to Home
 			</a>
-			<a href={companionHref} class="text-blue-200 underline underline-offset-4 transition hover:text-white">
+			<a
+				href={companionHref}
+				class="font-semibold text-[#f3c15f] underline underline-offset-4 transition hover:text-white"
+			>
 				{companionLabel}
 			</a>
 		</div>
 
-			<header class="rounded-3xl border border-white/10 bg-white/8 px-6 py-8 shadow-xl backdrop-blur-md sm:px-10">
-				<p class="text-sm font-semibold uppercase tracking-[0.3em] text-teal-200">{eyebrow}</p>
-			<h1 class="mt-3 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">{title}</h1>
-			<p class="mt-4 text-sm font-medium text-yellow-200">Last updated: {lastUpdated}</p>
-			<div class="mt-6 h-1 w-24 rounded-full bg-gradient-to-r from-yellow-300 via-teal-300 to-blue-400"></div>
-			<p class="mt-6 max-w-3xl text-base leading-7 text-blue-100 sm:text-lg">{intro}</p>
+		<header class="conference-panel px-6 py-8 sm:px-10">
+			<p class="conference-kicker">{eyebrow}</p>
+			<h1 class="conference-section-title mt-3 text-4xl sm:text-5xl">{title}</h1>
+			<p class="mt-4 text-sm font-bold text-[#f3c15f]">Last updated: {lastUpdated}</p>
+			<p class="mt-6 max-w-3xl text-base leading-7 text-[#fff3df]/80 sm:text-lg">{intro}</p>
 			{#if introSecondary}
-				<p class="mt-3 max-w-3xl text-base leading-7 text-blue-100 sm:text-lg">{introSecondary}</p>
+				<p class="mt-3 max-w-3xl text-base leading-7 text-[#fff3df]/80 sm:text-lg">
+					{introSecondary}
+				</p>
 			{/if}
 		</header>
 
-		<article
-			class="legal-copy rounded-3xl border border-white/10 bg-black/35 px-6 py-8 text-blue-50 shadow-xl backdrop-blur-md sm:px-10"
-		>
+		<article class="legal-copy conference-panel px-6 py-8 text-[#fff3df] sm:px-10">
 			<slot />
 		</article>
 	</div>
@@ -49,7 +51,7 @@
 		font-size: 1.65rem;
 		font-weight: 700;
 		line-height: 1.2;
-		color: #fde68a;
+		color: #f3c15f;
 	}
 
 	:global(.legal-copy h3) {
@@ -58,7 +60,7 @@
 		font-size: 1.2rem;
 		font-weight: 700;
 		line-height: 1.35;
-		color: #bfdbfe;
+		color: #ffffff;
 	}
 
 	:global(.legal-copy h4) {
@@ -67,20 +69,20 @@
 		font-size: 1rem;
 		font-weight: 700;
 		line-height: 1.4;
-		color: #ccfbf1;
+		color: #f3c15f;
 	}
 
 	:global(.legal-copy p) {
 		margin: 0.85rem 0;
 		line-height: 1.8;
-		color: #e2e8f0;
+		color: rgba(255, 243, 223, 0.82);
 	}
 
 	:global(.legal-copy ul) {
 		margin: 1rem 0 1.25rem;
 		padding-left: 1.35rem;
 		list-style-type: disc;
-		color: #e2e8f0;
+		color: rgba(255, 243, 223, 0.82);
 	}
 
 	:global(.legal-copy li) {
@@ -89,7 +91,7 @@
 	}
 
 	:global(.legal-copy li::marker) {
-		color: #fde68a;
+		color: #f3c15f;
 	}
 
 	:global(.legal-copy strong) {
@@ -97,7 +99,7 @@
 	}
 
 	:global(.legal-copy a) {
-		color: #7dd3fc;
+		color: #f3c15f;
 		text-decoration: underline;
 		text-underline-offset: 0.22em;
 	}
@@ -105,7 +107,7 @@
 	:global(.legal-copy a:hover) {
 		color: #ffffff;
 	}
-	
+
 	:global(.legal-copy h2:first-child) {
 		margin-top: 0;
 	}

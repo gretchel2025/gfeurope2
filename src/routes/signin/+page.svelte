@@ -67,34 +67,28 @@
 	}
 </script>
 
-<main
-	class="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-[#0f172a]/80 to-[#1e293b]/80 text-white"
->
-	<article class="w-full max-w-md bg-black/70 rounded-xl shadow-lg p-8 text-center space-y-6">
-		<h1 class="text-3xl font-bold text-yellow-400">Log In</h1>
+<section class="public-status-page">
+	<article class="conference-panel w-full max-w-md p-8 text-center">
+		<p class="conference-kicker">Organizer Access</p>
+		<h1 class="mt-3 text-3xl font-black text-white">Log In</h1>
 
 		{#if $page.data.session?.user}
-			<div class="space-y-4">
-				<p class="text-blue-100">
+			<div class="mt-6 space-y-4">
+				<p class="text-[#fff3df]/75">
 					Signed in as <span class="font-semibold text-white">{$page.data.session.user.email}</span>
 				</p>
 				<button
 					on:click={signOutCurrentUser}
-					class="w-full py-3 px-6 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition"
+					class="w-full bg-[#d64b55] px-6 py-3 font-bold text-white transition hover:brightness-110"
 				>
 					Sign Out
 				</button>
 
-				<a
-					href={data.callbackURL}
-					class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-				>
-					Continue
-				</a>
+				<a href={data.callbackURL} class="conference-button px-4 py-3 text-sm"> Continue </a>
 			</div>
 		{:else}
-			<div class="space-y-4">
-				<p class="text-blue-100">Not signed in</p>
+			<div class="mt-6 space-y-4">
+				<p class="text-[#fff3df]/75">Not signed in</p>
 
 				{#if data.authError || signInError}
 					<p class="text-sm text-red-200">
@@ -103,22 +97,22 @@
 				{/if}
 
 				{#if data.hasGoogleAuth}
-					<button
-						on:click={signInWithGoogle}
-						class="w-full py-3 px-6 bg-green-600 text-white rounded-md font-semibold hover:bg-green-700 transition"
-					>
+					<button on:click={signInWithGoogle} class="conference-button w-full px-6 py-3 text-sm">
 						Sign in with Google
 					</button>
 				{/if}
 
 				{#if data.allowLocalPasswordAuth}
-					<form class="space-y-3 text-left" on:submit|preventDefault={signInWithLocalPassword}>
-						<p class="rounded-md bg-yellow-400/15 px-3 py-2 text-sm font-semibold text-yellow-100">
+					<form
+						class="public-form-card space-y-3 text-left"
+						on:submit|preventDefault={signInWithLocalPassword}
+					>
+						<p class="bg-[#d99a32]/20 px-3 py-2 text-sm font-bold text-[#f3c15f]">
 							Local dev: use admin / password.
 						</p>
 
 						<div class="space-y-1">
-							<label for="local-username" class="block text-sm font-semibold text-blue-100">
+							<label for="local-username" class="block text-sm font-bold text-white">
 								Local dev username
 							</label>
 							<input
@@ -127,12 +121,12 @@
 								bind:value={localUsername}
 								autocomplete="username"
 								required
-								class="w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-white placeholder:text-blue-100/60 focus:border-yellow-400 focus:outline-none"
+								class="w-full px-3 py-2"
 							/>
 						</div>
 
 						<div class="space-y-1">
-							<label for="local-password" class="block text-sm font-semibold text-blue-100">
+							<label for="local-password" class="block text-sm font-bold text-white">
 								Local dev password
 							</label>
 							<input
@@ -141,14 +135,14 @@
 								bind:value={localPassword}
 								autocomplete="current-password"
 								required
-								class="w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-white placeholder:text-blue-100/60 focus:border-yellow-400 focus:outline-none"
+								class="w-full px-3 py-2"
 							/>
 						</div>
 
 						<button
 							type="submit"
 							disabled={localSignInLoading}
-							class="w-full py-3 px-6 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition disabled:cursor-not-allowed disabled:opacity-60"
+							class="conference-button w-full px-6 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
 						>
 							{localSignInLoading ? 'Signing in...' : 'Sign in locally'}
 						</button>
@@ -164,4 +158,4 @@
 			</div>
 		{/if}
 	</article>
-</main>
+</section>

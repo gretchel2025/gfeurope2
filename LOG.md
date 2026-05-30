@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-30
 
+- Restyled the public website with the modern conference theme inspired by the
+  Ireland Grand Feast visual direction.
 - Prevented the 5+ group discount from stacking with the Standard Early Bird promo.
 - Updated public ticket offerings and pricing rules to Standard and GrandFeast Plus,
   with child tickets shown as informational only and 5+ family discounts on paid tickets.

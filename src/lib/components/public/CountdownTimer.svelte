@@ -25,20 +25,20 @@
 </script>
 
 <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-	<div class="rounded-lg bg-white/10 p-4 text-center backdrop-blur-sm">
-		<div class="text-2xl font-bold sm:text-3xl md:text-4xl">{format(days)}</div>
-		<div class="text-sm text-blue-200">Days</div>
+	<div class="conference-card p-4 text-center">
+		<div class="text-2xl font-black text-white sm:text-3xl md:text-4xl">{format(days)}</div>
+		<div class="text-sm font-semibold text-[#f3c15f]">Days</div>
 	</div>
-	<div class="rounded-lg bg-white/10 p-4 text-center backdrop-blur-sm">
-		<div class="text-2xl font-bold sm:text-3xl md:text-4xl">{format(hours)}</div>
-		<div class="text-sm text-blue-200">Hours</div>
+	<div class="conference-card p-4 text-center">
+		<div class="text-2xl font-black text-white sm:text-3xl md:text-4xl">{format(hours)}</div>
+		<div class="text-sm font-semibold text-[#f3c15f]">Hours</div>
 	</div>
-	<div class="rounded-lg bg-white/10 p-4 text-center backdrop-blur-sm">
-		<div class="text-2xl font-bold sm:text-3xl md:text-4xl">{format(minutes)}</div>
-		<div class="text-sm text-blue-200">Minutes</div>
+	<div class="conference-card p-4 text-center">
+		<div class="text-2xl font-black text-white sm:text-3xl md:text-4xl">{format(minutes)}</div>
+		<div class="text-sm font-semibold text-[#f3c15f]">Minutes</div>
 	</div>
-	<div class="rounded-lg bg-white/10 p-4 text-center backdrop-blur-sm">
-		<div class="text-2xl font-bold sm:text-3xl md:text-4xl">{format(seconds)}</div>
-		<div class="text-sm text-blue-200">Seconds</div>
+	<div class="conference-card p-4 text-center">
+		<div class="text-2xl font-black text-white sm:text-3xl md:text-4xl">{format(seconds)}</div>
+		<div class="text-sm font-semibold text-[#f3c15f]">Seconds</div>
 	</div>
 </div>
