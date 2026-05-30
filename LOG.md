@@ -3,6 +3,10 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-05-30
+
+- Converted the public FAQ page question-and-answer content into bulleted lists.
+
 ## 2026-05-29
 
 - Embedded the current architecture and booking-flow infographics in the README.

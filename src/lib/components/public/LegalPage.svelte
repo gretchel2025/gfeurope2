@@ -79,12 +79,17 @@
 	:global(.legal-copy ul) {
 		margin: 1rem 0 1.25rem;
 		padding-left: 1.35rem;
+		list-style-type: disc;
 		color: #e2e8f0;
 	}
 
 	:global(.legal-copy li) {
 		margin: 0.65rem 0;
 		padding-left: 0.2rem;
+	}
+
+	:global(.legal-copy li::marker) {
+		color: #fde68a;
 	}
 
 	:global(.legal-copy strong) {
