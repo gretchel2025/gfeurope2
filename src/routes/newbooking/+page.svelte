@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { TicketPrice, TicketType } from '$lib/domain/shared/enums';
+	import {
+		computeFamilyDiscountAmount,
+		computeSubtotalAmount,
+		computeTotalAmountDue,
+		getTicketUnitPrice,
+		isStandardEarlyBirdActive
+	} from '$lib/domain/booking';
+	import { formatTicketTypeLabel, TicketPrice, TicketType } from '$lib/domain/shared/enums';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;
@@ -7,22 +14,27 @@
 	type TicketOption = {
 		value: TicketType;
 		label: string;
-		price: TicketPrice;
 		available: number;
+		description: string;
 	};
+
+	const now = new Date();
+	const earlyBirdActive = isStandardEarlyBirdActive(now);
 
 	const ticketOptions: TicketOption[] = [
 		{
 			value: TicketType.STANDARD,
-			label: 'Standard',
-			price: TicketPrice.STANDARD,
-			available: data.standardTicketCounter.available
+			label: formatTicketTypeLabel(TicketType.STANDARD),
+			available: data.standardTicketCounter.available,
+			description: earlyBirdActive
+				? `Early Bird Promo: ${TicketPrice.STANDARD_EARLY_BIRD} EUR until August 31`
+				: `${TicketPrice.STANDARD} EUR`
 		},
 		{
-			value: TicketType.VIP,
-			label: 'Premium',
-			price: TicketPrice.VIP,
-			available: data.vipTicketCounter.available
+			value: TicketType.GRAND_FEAST_PLUS,
+			label: formatTicketTypeLabel(TicketType.GRAND_FEAST_PLUS),
+			available: data.grandFeastPlusTicketCounter.available,
+			description: `${TicketPrice.GRAND_FEAST_PLUS} EUR, includes pilgrimage to Our Lady of Knock on Oct 4 plus sightseeing`
 		}
 	];
 
@@ -36,7 +48,16 @@
 
 	$: selectedTicketOption = ticketOptions.find((option) => option.value === ticketType);
 	$: availableTickets = selectedTicketOption?.available ?? 0;
-	$: totalAmount = selectedTicketOption ? selectedTicketOption.price * quantity : 0;
+	$: unitPrice = selectedTicketOption ? getTicketUnitPrice(selectedTicketOption.value, now) : 0;
+	$: subtotalAmount = selectedTicketOption
+		? computeSubtotalAmount(selectedTicketOption.value, quantity, now)
+		: 0;
+	$: familyDiscountAmount = selectedTicketOption
+		? computeFamilyDiscountAmount(selectedTicketOption.value, quantity, now)
+		: 0;
+	$: totalAmount = selectedTicketOption
+		? computeTotalAmountDue(selectedTicketOption.value, quantity, now)
+		: 0;
 	$: isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 	$: emailValidationMessage = email && !isValidEmail ? 'Please enter a valid email address.' : '';
 	$: quantityMessage =
@@ -61,12 +82,12 @@
 		</h1>
 
 		<h2 class="text-2xl font-semibold tracking-wide text-yellow-200 sm:text-3xl">
-			Grand Feast 2025 - Oslo
+			Grand Feast EU and UK 2026 - Dublin
 		</h2>
 
 		<p class="text-md font-light text-blue-100 sm:text-lg">
-			Lambertseter Kirke - Sept 20, 2025 <br class="hidden sm:inline" />
-			(Registration starts at 1:00 PM)
+			St. Helen's Hotel - October 3, 2026 <br class="hidden sm:inline" />
+			(Registration starts at 12:00 PM)
 		</p>
 
 		<div
@@ -134,7 +155,7 @@
 				>
 					<option value="">Select Ticket Type</option>
 					{#each ticketOptions as option}
-						<option value={option.value}>{option.label} - {option.price} EUR</option>
+						<option value={option.value}>{option.label} - {option.description}</option>
 					{/each}
 				</select>
 			</div>
@@ -192,6 +213,20 @@
 
 			<div class="rounded-lg bg-white/10 p-4 text-white">
 				<p>Payment Method: Bank Transfer</p>
+				{#if selectedTicketOption}
+					<p class="mt-2">Unit Price: {unitPrice} EUR</p>
+					{#if selectedTicketOption.value === TicketType.STANDARD && earlyBirdActive}
+						<p class="text-sm text-green-200">
+							Early Bird Promo applied until August 31: standard tickets are 30 EUR.
+						</p>
+					{/if}
+					<p>Subtotal: {subtotalAmount} EUR</p>
+					{#if familyDiscountAmount > 0}
+						<p class="text-sm text-green-200">
+							Family Discount: -{familyDiscountAmount} EUR (10% off 5 or more tickets)
+						</p>
+					{/if}
+				{/if}
 				<p class="mt-2 font-semibold">Total Amount Payable: {totalAmount} EUR</p>
 			</div>
 

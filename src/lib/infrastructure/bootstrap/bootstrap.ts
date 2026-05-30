@@ -28,12 +28,8 @@ async function ensureCounters(): Promise<void> {
 			available: appConfig.bootstrap.standardTicketsInitialAvailable
 		},
 		{
-			id: ticketCounterService.getVipCounterId(),
-			available: appConfig.bootstrap.vipTicketsInitialAvailable
-		},
-		{
-			id: ticketCounterService.getYouthCounterId(),
-			available: appConfig.bootstrap.youthTicketsInitialAvailable
+			id: ticketCounterService.getGrandFeastPlusCounterId(),
+			available: appConfig.bootstrap.grandFeastPlusTicketsInitialAvailable
 		}
 	];
 

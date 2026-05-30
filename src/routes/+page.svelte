@@ -1,13 +1,13 @@
 <script lang="ts">
 	import CountdownTimer from '$lib/components/public/CountdownTimer.svelte';
+	import { isStandardEarlyBirdActive, STANDARD_EARLY_BIRD_DEADLINE } from '$lib/domain/booking';
 
 	let ticketsSection: HTMLElement;
 	const eventDate = new Date('2026-10-03T12:30:00+01:00');
-
-	const earlyBirdDeadline = new Date('2025-06-18T23:59:59');
+	const earlyBirdDeadline = STANDARD_EARLY_BIRD_DEADLINE;
 
 	const now = new Date();
-	let earlyBirdActive = now < earlyBirdDeadline;
+	let earlyBirdActive = isStandardEarlyBirdActive(now);
 
 	let countdown = '';
 	if (earlyBirdActive) {
@@ -26,8 +26,7 @@
 	<div class="max-w-5xl mx-auto">
 		<p class="text-center italic text-lg sm:text-xl text-blue-200 mb-6 px-4">
 			“In him the whole building is joined together and rises to become a holy temple in the Lord.”
-			— <span class="font-semibold text-green-300">Ephesians 2:21</span
-			>
+			— <span class="font-semibold text-green-300">Ephesians 2:21</span>
 		</p>
 		<br />
 		<h1
@@ -76,28 +75,26 @@
 
 			<div class="space-y-4 text-blue-100 leading-relaxed">
 				<p>
-					In a world that has mastered digital connection, we have somehow become more isolated
-					than ever. We scroll through crowded feeds yet wake up feeling unseen, carrying our
-					heaviest burdens in absolute silence.
+					In a world that has mastered digital connection, we have somehow become more isolated than
+					ever. We scroll through crowded feeds yet wake up feeling unseen, carrying our heaviest
+					burdens in absolute silence.
 				</p>
 
 				<p>
-					If you have felt that ache lately, we want to remind you of a simple truth: You were
-					never meant to walk through this life alone.
+					If you have felt that ache lately, we want to remind you of a simple truth: You were never
+					meant to walk through this life alone.
 				</p>
 
 				<p>
 					When God designed humanity, He built us for communion—first with Him, and then with one
 					another. He designed a rhythm of life where your joy multiplies when shared, and your
-					sorrow divides when carried by a brother or sister. The Church isn't a building you
-					visit; it is a home. And this year, we are calling everyone back to the hearth.
+					sorrow divides when carried by a brother or sister. The Church isn't a building you visit;
+					it is a home. And this year, we are calling everyone back to the hearth.
 				</p>
 
 				<h4 class="text-xl font-bold text-green-300">The Theme: Together</h4>
 
-				<p>
-					Our focus for the Grand Feast 2026 is singular, profound, and urgent: Together.
-				</p>
+				<p>Our focus for the Grand Feast 2026 is singular, profound, and urgent: Together.</p>
 
 				<p class="italic text-blue-200">
 					“In him the whole building is joined together and rises to become a holy temple in the
@@ -105,8 +102,8 @@
 				</p>
 
 				<p>
-					This is a sacred space where you don't have to pretend to have it all figured out. You
-					are invited to bring your whole self—your faith, your doubts, your victories, and your
+					This is a sacred space where you don't have to pretend to have it all figured out. You are
+					invited to bring your whole self—your faith, your doubts, your victories, and your
 					weariness. When we gather, the walls that divide us crumble. We find wisdom in our shared
 					stories, wonder in His presence, and a unified voice of worship that shakes the heavens.
 				</p>
@@ -123,9 +120,7 @@
 
 				<p>Come to be connected to a community that will stand by you.</p>
 
-				<p>
-					Come to encounter Christ, the chief cornerstone who binds us all in love.
-				</p>
+				<p>Come to encounter Christ, the chief cornerstone who binds us all in love.</p>
 
 				<p>
 					We are ready to heal, grow, and move forward—not in isolation, but as one body. Join us
@@ -230,6 +225,7 @@
 					>
 						🎉 Early Bird Discount! <span class="text-xs text-yellow-300 ml-2">{countdown}</span>
 					</div>
+					<p class="mb-3 text-sm text-blue-200">Until August 31 only</p>
 
 					<div class="mb-6">
 						<div class="text-2xl text-blue-200 line-through">35 €</div>
@@ -245,6 +241,12 @@
 					</li>
 					<li class="flex items-center">
 						<span class="text-teal-300 mr-2">✔</span>Standard seating
+					</li>
+					<li class="flex items-center">
+						<span class="text-teal-300 mr-2">✔</span>
+						{earlyBirdActive
+							? '10% group discount starts after Early Bird'
+							: '10% group discount for 5+ tickets'}
 					</li>
 				</ul>
 
@@ -262,37 +264,27 @@
 				<div
 					class="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold text-yellow-100 bg-yellow-600 animate-pulse"
 				>
-					LIMITED OFFER
+					PLUS EXPERIENCE
 				</div>
-				<h3 class="text-2xl font-bold mb-2 text-white">Premium</h3>
+				<h3 class="text-2xl font-bold mb-2 text-white">GrandFeast Plus</h3>
 
-				{#if earlyBirdActive}
-					<div
-						class="text-sm font-semibold text-yellow-400 bg-yellow-800/30 inline-block px-2 py-1 rounded-full mb-2"
-					>
-						🎉 Early Bird Discount! <span class="text-xs text-yellow-300 ml-2">{countdown}</span>
-					</div>
-					<div class="mb-2">
-						<div class="text-2xl text-blue-200 line-through">55 €</div>
-						<div class="text-3xl font-bold text-teal-300">50 €</div>
-					</div>
-				{:else}
-					<div class="text-3xl font-bold mb-2 text-teal-300">55 €</div>
-				{/if}
+				<div class="text-3xl font-bold mb-2 text-teal-300">65 €</div>
 
-				<p class="text-yellow-300 text-sm mb-4">Limited to 40 seats only</p>
+				<p class="text-yellow-300 text-sm mb-4">
+					Includes pilgrimage to Our Lady of Knock on Oct 4 plus sightseeing
+				</p>
 				<ul class="mb-8 flex-grow text-blue-100 space-y-3">
 					<li class="flex items-center">
-						<span class="text-teal-300 mr-2">🎟</span>Premium seating area
+						<span class="text-teal-300 mr-2">🎟</span>Grand Feast admission
 					</li>
 					<li class="flex items-center">
-						<span class="text-teal-300 mr-2">📘</span>One Bo Sanchez book
+						<span class="text-teal-300 mr-2">🙏</span>Our Lady of Knock pilgrimage
 					</li>
 					<li class="flex items-center">
-						<span class="text-teal-300 mr-2">✍️</span>Priority book signing access
+						<span class="text-teal-300 mr-2">🗺</span>Oct 4 sightseeing
 					</li>
 					<li class="flex items-center">
-						<span class="text-teal-300 mr-2">🤝</span>Meet-and-greet with Bro. Bo
+						<span class="text-teal-300 mr-2">✔</span>10% family discount for 5+ tickets
 					</li>
 				</ul>
 				<a
@@ -316,6 +308,7 @@
 						<span class="text-teal-300 mr-2">✔</span>Must be with a paying adult
 					</li>
 				</ul>
+				<p class="text-sm font-semibold text-blue-200">No ticket reservation needed</p>
 			</div>
 		</div>
 	</div>

@@ -24,8 +24,7 @@ export type AppConfig = {
 	appEventId: string;
 	bootstrap: {
 		standardTicketsInitialAvailable: number;
-		vipTicketsInitialAvailable: number;
-		youthTicketsInitialAvailable: number;
+		grandFeastPlusTicketsInitialAvailable: number;
 	};
 	integrations: {
 		resendApiKey: string;
@@ -52,8 +51,10 @@ export const appConfig: AppConfig = {
 			readEnv('STANDARD_TICKETS_INITIAL_AVAILABLE'),
 			100
 		),
-		vipTicketsInitialAvailable: parsePositiveInt(readEnv('VIP_TICKETS_INITIAL_AVAILABLE'), 50),
-		youthTicketsInitialAvailable: parsePositiveInt(readEnv('YOUTH_TICKETS_INITIAL_AVAILABLE'), 25)
+		grandFeastPlusTicketsInitialAvailable: parsePositiveInt(
+			readEnv('GRAND_FEAST_PLUS_TICKETS_INITIAL_AVAILABLE'),
+			50
+		)
 	},
 	integrations: {
 		resendApiKey: readEnv('RESEND_API_KEY') || '',

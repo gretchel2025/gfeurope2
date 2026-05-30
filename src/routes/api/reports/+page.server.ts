@@ -20,17 +20,17 @@ type TicketStateSegment = {
 };
 
 export async function load({}): Promise<ServerData> {
-	const [bookings, standardTicketCounter, vipTicketCounter] = await Promise.all([
+	const [bookings, standardTicketCounter, grandFeastPlusTicketCounter] = await Promise.all([
 		bookingService.list(),
 		ticketCounterService.getStandardTickets(),
-		ticketCounterService.getVipTickets()
+		ticketCounterService.getGrandFeastPlusTickets()
 	]);
 
 	return {
 		topCities: reportingService.getTopCities(bookings as Booking[]),
 		ticketStateCharts: [
-			createTicketStateChart('Normal Tickets', standardTicketCounter),
-			createTicketStateChart('VIP Tickets', vipTicketCounter)
+			createTicketStateChart('Standard Tickets', standardTicketCounter),
+			createTicketStateChart('GrandFeast Plus Tickets', grandFeastPlusTicketCounter)
 		]
 	};
 }

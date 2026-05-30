@@ -13,10 +13,9 @@ import type { Booking } from '$lib/domain/booking';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
 import { TicketType } from '$lib/domain/shared/enums';
 
-/** Stable ids for the three inventory counters stored in Supabase. */
+/** Stable ids for the inventory counters stored in Supabase. */
 const STANDARD_TICKETS_ID = 'standard_tickets';
-const VIP_TICKETS_ID = 'vip_tickets';
-const YOUTH_TICKETS_ID = 'youth_tickets';
+const GRAND_FEAST_PLUS_TICKETS_ID = 'grand_feast_plus_tickets';
 
 /** Application service for ticket inventory counters. */
 export class TicketCounterService {
@@ -27,14 +26,9 @@ export class TicketCounterService {
 		return STANDARD_TICKETS_ID;
 	}
 
-	/** Returns the storage id for the VIP ticket counter. */
-	getVipCounterId(): string {
-		return VIP_TICKETS_ID;
-	}
-
-	/** Returns the storage id for the youth ticket counter. */
-	getYouthCounterId(): string {
-		return YOUTH_TICKETS_ID;
+	/** Returns the storage id for the GrandFeast Plus ticket counter. */
+	getGrandFeastPlusCounterId(): string {
+		return GRAND_FEAST_PLUS_TICKETS_ID;
 	}
 
 	/** Loads a counter by its storage id. */
@@ -52,14 +46,9 @@ export class TicketCounterService {
 		return await this.getById(STANDARD_TICKETS_ID);
 	}
 
-	/** Convenience reader for the VIP counter. */
-	async getVipTickets(): Promise<TicketCounter | null> {
-		return await this.getById(VIP_TICKETS_ID);
-	}
-
-	/** Convenience reader for the youth counter. */
-	async getYouthTickets(): Promise<TicketCounter | null> {
-		return await this.getById(YOUTH_TICKETS_ID);
+	/** Convenience reader for the GrandFeast Plus counter. */
+	async getGrandFeastPlusTickets(): Promise<TicketCounter | null> {
+		return await this.getById(GRAND_FEAST_PLUS_TICKETS_ID);
 	}
 
 	/** Resolves the correct counter for a business-level ticket type. */
@@ -67,10 +56,8 @@ export class TicketCounterService {
 		switch (ticketType) {
 			case TicketType.STANDARD:
 				return await this.getStandardTickets();
-			case TicketType.VIP:
-				return await this.getVipTickets();
-			case TicketType.YOUTH:
-				return await this.getYouthTickets();
+			case TicketType.GRAND_FEAST_PLUS:
+				return await this.getGrandFeastPlusTickets();
 			default:
 				throw new ValidationError(`Invalid ticket type ${ticketType}`);
 		}
@@ -86,14 +73,9 @@ export class TicketCounterService {
 		await this.incrementTickets(STANDARD_TICKETS_ID, values);
 	}
 
-	/** Applies a delta to the VIP counter. */
-	async incrementVipTickets(values: TicketCounterDelta): Promise<void> {
-		await this.incrementTickets(VIP_TICKETS_ID, values);
-	}
-
-	/** Applies a delta to the youth counter. */
-	async incrementYouthTickets(values: TicketCounterDelta): Promise<void> {
-		await this.incrementTickets(YOUTH_TICKETS_ID, values);
+	/** Applies a delta to the GrandFeast Plus counter. */
+	async incrementGrandFeastPlusTickets(values: TicketCounterDelta): Promise<void> {
+		await this.incrementTickets(GRAND_FEAST_PLUS_TICKETS_ID, values);
 	}
 
 	/** Applies inventory changes based on the ticket type referenced by a booking. */
@@ -101,10 +83,8 @@ export class TicketCounterService {
 		switch (booking.ticket_type) {
 			case TicketType.STANDARD:
 				return await this.incrementStandardTickets(delta);
-			case TicketType.VIP:
-				return await this.incrementVipTickets(delta);
-			case TicketType.YOUTH:
-				return await this.incrementYouthTickets(delta);
+			case TicketType.GRAND_FEAST_PLUS:
+				return await this.incrementGrandFeastPlusTickets(delta);
 			default:
 				throw new ValidationError(
 					`Invalid ticket type ${booking.ticket_type} on booking ${booking.reference_no}`

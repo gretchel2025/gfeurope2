@@ -4,6 +4,7 @@
 	import AdminPage from '$lib/components/admin/AdminPage.svelte';
 	import BackLinks from '$lib/components/admin/BackLinks.svelte';
 	import DetailRow from '$lib/components/admin/DetailRow.svelte';
+	import { formatTicketTypeLabel } from '$lib/domain/shared/enums';
 	import { canCheckInTicket, canCheckOutTicket } from '$lib/domain/ticket';
 	import { adminRoutes } from '$lib/navigation/adminRoutes';
 	import type { ServerData } from './+page.server';
@@ -37,7 +38,7 @@
 					</a>
 				</DetailRow>
 				<DetailRow label="Name" value={data.aTicket.name} />
-				<DetailRow label="Ticket Type" value={data.aTicket.ticket_type} />
+				<DetailRow label="Ticket Type" value={formatTicketTypeLabel(data.aTicket.ticket_type)} />
 				<DetailRow label="Status" value={data.aTicket.status} />
 			</dl>
 		</AdminCard>

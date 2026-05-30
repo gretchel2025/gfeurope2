@@ -10,6 +10,7 @@
 import { NotFoundError } from '$lib/application/errors';
 import type { BookingRepository, EmailSender, TicketRepository } from '$lib/application/ports';
 import type { Booking } from '$lib/domain/booking';
+import { formatTicketTypeLabel } from '$lib/domain/shared/enums';
 
 /** Sends the user-facing emails associated with bookings and tickets. */
 export class NotificationService {
@@ -24,6 +25,7 @@ export class NotificationService {
 		const paypalBaseUrl = 'https://paypal.me/TheFeastNorway';
 		const paypalUrl = `${paypalBaseUrl}/${booking.amount_total}?country.x=NO&locale.x=en_US&item_name=${booking.reference_no}`;
 		const amountNOK = Math.round(booking.amount_total * 11.52);
+		const ticketTypeLabel = formatTicketTypeLabel(booking.ticket_type);
 
 		await this.emailSender.send({
 			to: booking.email,
@@ -36,7 +38,7 @@ export class NotificationService {
                     <p>Please complete your payment within <strong>24H</strong> and use reference <strong>${booking.reference_no}</strong>.</p>
                     <p>PayPal link: <a href="${paypalUrl}">${paypalUrl}</a></p>
                     <p>Approximate amount in NOK: ${amountNOK}</p>
-                    <p>${booking.guests.length} ${booking.ticket_type} ticket(s), total ${booking.amount_total} EUR.</p>
+                    <p>${booking.guests.length} ${ticketTypeLabel} ticket(s), total ${booking.amount_total} EUR.</p>
                 </body>
             </html>
             `
@@ -51,6 +53,7 @@ export class NotificationService {
 		}
 
 		const tickets = await this.loadTickets(booking);
+		const ticketTypeLabel = formatTicketTypeLabel(booking.ticket_type);
 
 		await this.emailSender.send({
 			to: booking.email,
@@ -59,14 +62,14 @@ export class NotificationService {
             <html>
                 <body>
                     <h2>Dear ${booking.name},</h2>
-                    <p>Here are your eTickets for the 2025 EU and UK Grand Feast in Oslo.</p>
+                    <p>Here are your eTickets for the 2026 EU and UK Grand Feast in Dublin.</p>
                     ${tickets
 											.map(
 												(ticket, i) => `
                             <div>
                                 <h3>${i + 1}: eTicket ${ticket.ticket_id}</h3>
                                 Name: ${ticket.name}<br>
-                                Ticket Class: ${ticket.ticket_type}<br>
+                                Ticket Class: ${formatTicketTypeLabel(ticket.ticket_type)}<br>
                                 <img src="${ticket.checkin_qr_code_image_url}" alt="QR Code" />
                             </div>
                             <hr>
@@ -74,7 +77,7 @@ export class NotificationService {
 											)
 											.join('')}
                     <p>Booking reference number: ${booking.reference_no}</p>
-                    <p>${booking.ticket_ids.length} ${booking.ticket_type} tickets, ${booking.amount_total} EUR, ${booking.payment_status}</p>
+                    <p>${booking.ticket_ids.length} ${ticketTypeLabel} tickets, ${booking.amount_total} EUR, ${booking.payment_status}</p>
                 </body>
             </html>
             `

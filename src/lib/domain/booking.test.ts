@@ -3,7 +3,9 @@ import {
 	canCancelBooking,
 	canGenerateTickets,
 	canMarkBookingPaid,
+	computeFamilyDiscountAmount,
 	computeTotalAmountDue,
+	getTicketUnitPrice,
 	getTopCitiesByCountOfTicketsBooked,
 	type Booking
 } from '$lib/domain/booking';
@@ -27,9 +29,29 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 
 describe('booking domain rules', () => {
 	it('computes totals from ticket type and quantity', () => {
-		expect(computeTotalAmountDue(TicketType.STANDARD, 2)).toBe(TicketPrice.STANDARD * 2);
-		expect(computeTotalAmountDue(TicketType.VIP, 3)).toBe(TicketPrice.VIP * 3);
-		expect(computeTotalAmountDue(TicketType.YOUTH, 4)).toBe(TicketPrice.YOUTH * 4);
+		const earlyBirdDate = new Date('2026-08-01T12:00:00+01:00');
+		const standardDate = new Date('2026-09-01T12:00:00+01:00');
+
+		expect(getTicketUnitPrice(TicketType.STANDARD, earlyBirdDate)).toBe(
+			TicketPrice.STANDARD_EARLY_BIRD
+		);
+		expect(getTicketUnitPrice(TicketType.STANDARD, standardDate)).toBe(TicketPrice.STANDARD);
+		expect(computeTotalAmountDue(TicketType.STANDARD, 2, earlyBirdDate)).toBe(60);
+		expect(computeTotalAmountDue(TicketType.GRAND_FEAST_PLUS, 3, earlyBirdDate)).toBe(195);
+	});
+
+	it('applies family discount to paid ticket purchases of five or more', () => {
+		const earlyBirdDate = new Date('2026-08-01T12:00:00+01:00');
+		const standardDate = new Date('2026-09-01T12:00:00+01:00');
+
+		expect(computeFamilyDiscountAmount(TicketType.STANDARD, 4, earlyBirdDate)).toBe(0);
+		expect(computeFamilyDiscountAmount(TicketType.STANDARD, 5, earlyBirdDate)).toBe(0);
+		expect(computeTotalAmountDue(TicketType.STANDARD, 5, earlyBirdDate)).toBe(150);
+		expect(computeFamilyDiscountAmount(TicketType.STANDARD, 4, standardDate)).toBe(0);
+		expect(computeFamilyDiscountAmount(TicketType.STANDARD, 5, standardDate)).toBe(17.5);
+		expect(computeTotalAmountDue(TicketType.STANDARD, 5, standardDate)).toBe(157.5);
+		expect(computeFamilyDiscountAmount(TicketType.GRAND_FEAST_PLUS, 5, earlyBirdDate)).toBe(32.5);
+		expect(computeTotalAmountDue(TicketType.GRAND_FEAST_PLUS, 5, earlyBirdDate)).toBe(292.5);
 	});
 
 	it('only allows unpaid bookings to be marked paid or cancelled', () => {

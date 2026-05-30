@@ -9,33 +9,26 @@ import { bookingService, ticketCounterService } from '$lib/server/http/services'
 
 export type ServerData = {
 	standardTicketCounter: TicketCounter;
-	vipTicketCounter: TicketCounter;
-	youthTicketCounter: TicketCounter;
+	grandFeastPlusTicketCounter: TicketCounter;
 };
 
 export const load = withKitErrors(async (): Promise<ServerData> => {
-	const [standardTicketCounter, vipTicketCounter, youthTicketCounter] = await Promise.all([
+	const [standardTicketCounter, grandFeastPlusTicketCounter] = await Promise.all([
 		ticketCounterService.getStandardTickets(),
-		ticketCounterService.getVipTickets(),
-		ticketCounterService.getYouthTickets()
+		ticketCounterService.getGrandFeastPlusTickets()
 	]);
 
 	if (!standardTicketCounter) throw new NotFoundError('standard ticket counter is missing');
-	if (!vipTicketCounter) throw new NotFoundError('vip ticket counter is missing');
-	if (!youthTicketCounter) throw new NotFoundError('youth ticket counter is missing');
+	if (!grandFeastPlusTicketCounter)
+		throw new NotFoundError('GrandFeast Plus ticket counter is missing');
 
-	if (
-		standardTicketCounter.available <= 0 &&
-		vipTicketCounter.available <= 0 &&
-		youthTicketCounter.available <= 0
-	) {
+	if (standardTicketCounter.available <= 0 && grandFeastPlusTicketCounter.available <= 0) {
 		throw redirect(303, publicRoutes.newBookingSoldOut);
 	}
 
 	return {
 		standardTicketCounter,
-		vipTicketCounter,
-		youthTicketCounter
+		grandFeastPlusTicketCounter
 	};
 });
 

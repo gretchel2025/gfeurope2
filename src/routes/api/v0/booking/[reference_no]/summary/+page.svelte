@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatTicketTypeLabel } from '$lib/domain/shared/enums';
 	import { adminRoutes } from '$lib/navigation/adminRoutes';
 	import type { ServerData } from './+page.server';
 
@@ -27,7 +28,7 @@
 						#{i + 1}: Ticket {ticketData.ticket.ticket_id}
 					</h2>
 					<p><strong>Name:</strong> {ticketData.ticket.name}</p>
-					<p><strong>Class:</strong> {ticketData.ticket.ticket_type}</p>
+					<p><strong>Class:</strong> {formatTicketTypeLabel(ticketData.ticket.ticket_type)}</p>
 					<p class="mt-3 font-semibold">QR Code:</p>
 					<img
 						src={ticketData.qrCodeData.imageData}
@@ -43,7 +44,8 @@
 				</h2>
 				<p>
 					{booking.ticket_ids.length}
-					{booking.ticket_type} tickets, €{booking.amount_total}, {booking.payment_status}
+					{formatTicketTypeLabel(booking.ticket_type)} tickets, €{booking.amount_total},
+					{booking.payment_status}
 				</p>
 
 				<div class="mt-4">
@@ -59,11 +61,11 @@
 			<div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md mb-6">
 				<h2 class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">Event Details</h2>
 				<ul class="list-disc pl-5 space-y-1">
-					<li>2025 EU and UK Grand Feast in Oslo</li>
-					<li>Date: September 20, 2024</li>
-					<li>Time: 1:00 PM to 5:00 PM CET</li>
-					<li>Venue: Lambertseter kirke</li>
-					<li>Address: Langbølgen 33, 1150 Oslo, Norway</li>
+					<li>2026 EU and UK Grand Feast in Dublin</li>
+					<li>Date: October 3, 2026</li>
+					<li>Time: 12:00 PM Registration, 12:30 PM Holy Mass, 1:30 PM Event Proper</li>
+					<li>Venue: St. Helen's Hotel</li>
+					<li>Address: Stillorgan Road, Blackrock, Ireland, Dublin A94 V6W3</li>
 				</ul>
 			</div>
 

@@ -10,10 +10,10 @@ describe('Supabase persistence mappers', () => {
 				name: 'Ada',
 				email: 'ada@example.com',
 				city: null,
-				ticket_type: 'VIP',
+				ticket_type: 'GRAND_FEAST_PLUS',
 				book_date: '2026-01-01T00:00:00.000Z',
 				payment_status: 'PAID',
-				amount_total: '55.00',
+				amount_total: '65.00',
 				guests: ['Ada'],
 				ticket_ids: ['T123']
 			})
@@ -22,10 +22,10 @@ describe('Supabase persistence mappers', () => {
 			name: 'Ada',
 			email: 'ada@example.com',
 			city: '',
-			ticket_type: TicketType.VIP,
+			ticket_type: TicketType.GRAND_FEAST_PLUS,
 			book_date: '2026-01-01T00:00:00.000Z',
 			payment_status: BookingPaymentStatus.PAID,
-			amount_total: 55,
+			amount_total: 65,
 			guests: ['Ada'],
 			ticket_ids: ['T123']
 		});

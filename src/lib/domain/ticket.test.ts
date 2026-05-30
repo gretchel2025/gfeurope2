@@ -45,8 +45,9 @@ function makeTicket(overrides: Partial<Ticket> = {}): Ticket {
 
 describe('ticket domain rules', () => {
 	it('normalizes known ticket type input and defaults unknown input to standard', () => {
-		expect(normalizeTicketType('vip')).toBe(TicketType.VIP);
-		expect(normalizeTicketType('YOUTH')).toBe(TicketType.YOUTH);
+		expect(normalizeTicketType('GRAND_FEAST_PLUS')).toBe(TicketType.GRAND_FEAST_PLUS);
+		expect(normalizeTicketType('vip')).toBe(TicketType.GRAND_FEAST_PLUS);
+		expect(normalizeTicketType('YOUTH')).toBe(TicketType.STANDARD);
 		expect(normalizeTicketType('surprise-me')).toBe(TicketType.STANDARD);
 	});
 

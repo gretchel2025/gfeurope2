@@ -22,14 +22,9 @@
 			counter: data.standardTicketCounter
 		},
 		{
-			title: 'VIP Tickets',
-			href: adminRoutes.ticketCounter.details('vip_tickets'),
-			counter: data.vipTicketCounter
-		},
-		{
-			title: 'Youth Tickets',
-			href: adminRoutes.ticketCounter.details('youth_tickets'),
-			counter: data.youthTicketCounter
+			title: 'GrandFeast Plus Tickets',
+			href: adminRoutes.ticketCounter.details('grand_feast_plus_tickets'),
+			counter: data.grandFeastPlusTicketCounter
 		}
 	];
 </script>
@@ -56,7 +51,7 @@
 	</div>
 
 	<AdminCard title="Ticket Counters" subtitle="Current inventory by ticket type.">
-		<div class="grid gap-4 md:grid-cols-3">
+		<div class="grid gap-4 md:grid-cols-2">
 			{#each counters as item}
 				<article class="rounded-md border border-slate-200 bg-slate-50 p-4">
 					<h3 class="font-semibold text-slate-950">{item.title}</h3>

@@ -6,7 +6,7 @@
 	import DetailRow from '$lib/components/admin/DetailRow.svelte';
 	import type { Booking } from '$lib/domain/booking';
 	import { canCancelBooking, canGenerateTickets, canMarkBookingPaid } from '$lib/domain/booking';
-	import { BookingPaymentStatus } from '$lib/domain/shared/enums';
+	import { BookingPaymentStatus, formatTicketTypeLabel } from '$lib/domain/shared/enums';
 	import { adminRoutes } from '$lib/navigation/adminRoutes';
 
 	export let data: { aRecord: Booking };
@@ -48,6 +48,7 @@
 				<DetailRow label="City" value={booking.city} />
 				<DetailRow label="Book Date" value={bookDate} />
 				<DetailRow label="Payment Status" value={booking.payment_status} />
+				<DetailRow label="Ticket Type" value={formatTicketTypeLabel(booking.ticket_type)} />
 				<DetailRow label="Amount Total" value={`EUR ${booking.amount_total}`} />
 				<DetailRow label="Guests">{booking.guests.join(', ')}</DetailRow>
 				<DetailRow label="Ticket IDs">

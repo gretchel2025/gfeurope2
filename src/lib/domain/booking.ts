@@ -7,83 +7,133 @@
  * rules here makes them reusable across routes, services, and future tests
  * without pulling in framework or persistence concerns.
  */
-import type { QRCode, Ticket } from "$lib/domain/ticket";
-import { BookingPaymentStatus, TicketPrice, TicketType } from "$lib/domain/shared/enums";
+import type { QRCode, Ticket } from '$lib/domain/ticket';
+import { BookingPaymentStatus, TicketPrice, TicketType } from '$lib/domain/shared/enums';
+
+export const STANDARD_EARLY_BIRD_DEADLINE = new Date('2026-08-31T23:59:59+01:00');
+export const FAMILY_DISCOUNT_THRESHOLD = 5;
+export const FAMILY_DISCOUNT_RATE = 0.1;
 
 /** Canonical booking shape used by the application layer. */
 export type Booking = {
-    reference_no: string;
-    name: string;
-    email: string;
-    city: string;
-    ticket_type: TicketType;
-    book_date: string;
-    payment_status: BookingPaymentStatus;
-    amount_total: number;
-    guests: string[];
-    ticket_ids: string[];
+	reference_no: string;
+	name: string;
+	email: string;
+	city: string;
+	ticket_type: TicketType;
+	book_date: string;
+	payment_status: BookingPaymentStatus;
+	amount_total: number;
+	guests: string[];
+	ticket_ids: string[];
 };
 
 /** Input required to create a booking before defaults and ids are added. */
 export type CreateBookingInput = {
-    name: string;
-    email: string;
-    city: string;
-    ticket_type: string;
-    quantity: number;
-    guests: string[];
+	name: string;
+	email: string;
+	city: string;
+	ticket_type: string;
+	quantity: number;
+	guests: string[];
 };
 
 /** Helper shape for admin/email views that need both ticket data and QR code data. */
 export type TicketWithQRCode = {
-    ticket: Ticket;
-    qrCodeData: QRCode;
+	ticket: Ticket;
+	qrCodeData: QRCode;
 };
 
 /** Reporting aggregate describing booking volume for a city. */
 export type CityStats = {
-    cityName: string;
-    totalBookings: number;
-    totalPaidBookings: number;
-    totalUnpaidBookings: number;
-    percentOfPaidBookings: number;
-    percentOfThisCitysBookingsOverAllBookings: number;
+	cityName: string;
+	totalBookings: number;
+	totalPaidBookings: number;
+	totalUnpaidBookings: number;
+	percentOfPaidBookings: number;
+	percentOfThisCitysBookingsOverAllBookings: number;
 };
 
 /** Whether an unpaid booking may still be cancelled. */
 export function canCancelBooking(booking: Booking): boolean {
-    return booking.payment_status === BookingPaymentStatus.UNPAID;
+	return booking.payment_status === BookingPaymentStatus.UNPAID;
 }
 
 /** Whether a booking is allowed to transition into the paid state. */
 export function canMarkBookingPaid(booking: Booking): boolean {
-    return booking.payment_status === BookingPaymentStatus.UNPAID;
+	return booking.payment_status === BookingPaymentStatus.UNPAID;
 }
 
 /** Whether a paid booking still needs tickets generated for its guests. */
 export function canGenerateTickets(booking: Booking): boolean {
-    const isPaid = booking.payment_status === BookingPaymentStatus.PAID;
-    const allTicketsGenerated = booking.ticket_ids.length >= booking.guests.length;
+	const isPaid = booking.payment_status === BookingPaymentStatus.PAID;
+	const allTicketsGenerated = booking.ticket_ids.length >= booking.guests.length;
 
-    return isPaid && !allTicketsGenerated;
+	return isPaid && !allTicketsGenerated;
 }
 
-/** Computes total price from ticket class and quantity. */
-export function computeTotalAmountDue(ticketType: TicketType, quantity: number): number {
-    switch (ticketType) {
-        case TicketType.VIP:
-            return TicketPrice.VIP * quantity;
-        case TicketType.YOUTH:
-            return TicketPrice.YOUTH * quantity;
-        case TicketType.STANDARD:
-        default:
-            return TicketPrice.STANDARD * quantity;
-    }
+/** Whether standard-ticket early bird pricing is still available. */
+export function isStandardEarlyBirdActive(now: Date = new Date()): boolean {
+	return now.getTime() <= STANDARD_EARLY_BIRD_DEADLINE.getTime();
+}
+
+/** Returns the unit price in EUR for the selected ticket class. */
+export function getTicketUnitPrice(ticketType: TicketType, now: Date = new Date()): number {
+	switch (ticketType) {
+		case TicketType.GRAND_FEAST_PLUS:
+			return TicketPrice.GRAND_FEAST_PLUS;
+		case TicketType.STANDARD:
+		default:
+			return isStandardEarlyBirdActive(now)
+				? TicketPrice.STANDARD_EARLY_BIRD
+				: TicketPrice.STANDARD;
+	}
+}
+
+/** Computes the pre-discount total for the selected ticket class and quantity. */
+export function computeSubtotalAmount(
+	ticketType: TicketType,
+	quantity: number,
+	now: Date = new Date()
+): number {
+	return getTicketUnitPrice(ticketType, now) * quantity;
+}
+
+/** Computes the family discount for paid ticket purchases of five or more. */
+export function computeFamilyDiscountAmount(
+	ticketType: TicketType,
+	quantity: number,
+	now: Date = new Date()
+): number {
+	if (quantity < FAMILY_DISCOUNT_THRESHOLD) {
+		return 0;
+	}
+	if (ticketType === TicketType.STANDARD && isStandardEarlyBirdActive(now)) {
+		return 0;
+	}
+
+	return roundCurrency(computeSubtotalAmount(ticketType, quantity, now) * FAMILY_DISCOUNT_RATE);
+}
+
+/** Computes total price from ticket class, promotions, family discount, and quantity. */
+export function computeTotalAmountDue(
+	ticketType: TicketType,
+	quantity: number,
+	now: Date = new Date()
+): number {
+	return roundCurrency(
+		computeSubtotalAmount(ticketType, quantity, now) -
+			computeFamilyDiscountAmount(ticketType, quantity, now)
+	);
+}
+
+function roundCurrency(value: number): number {
+	return Math.round(value * 100) / 100;
 }
 
 /** Sort helper used by admin screens to show newest bookings first. */
 export function sortBookingsByDateDescending(a: Booking, b: Booking): number {
-    return Date.parse(b.book_date) - Date.parse(a.book_date);
+	return Date.parse(b.book_date) - Date.parse(a.book_date);
 }
 
 /**
@@ -91,57 +141,58 @@ export function sortBookingsByDateDescending(a: Booking, b: Booking): number {
  * The small normalization rules here capture existing business cleanup for city names.
  */
 export function getTopCitiesByCountOfTicketsBooked(bookings: Booking[]): CityStats[] {
-    const cities: CityStats[] = bookings.reduce((accum: CityStats[], booking: Booking) => {
-        let cityName = booking.city.toLowerCase();
+	const cities: CityStats[] = bookings.reduce((accum: CityStats[], booking: Booking) => {
+		let cityName = booking.city.toLowerCase();
 
-        if (cityName === "belrin") {
-            cityName = "berlin";
-        }
-        if (cityName === "no" || cityName === "none") {
-            cityName = "none";
-        }
-        if (cityName === "bruxelles" || cityName === "feast brussels") {
-            cityName = "brussels";
-        }
+		if (cityName === 'belrin') {
+			cityName = 'berlin';
+		}
+		if (cityName === 'no' || cityName === 'none') {
+			cityName = 'none';
+		}
+		if (cityName === 'bruxelles' || cityName === 'feast brussels') {
+			cityName = 'brussels';
+		}
 
-        let cityIndex = accum.findIndex((city) => city.cityName === cityName);
-        if (cityIndex === -1) {
-            accum.push({
-                cityName,
-                totalBookings: 0,
-                totalPaidBookings: 0,
-                totalUnpaidBookings: 0,
-                percentOfPaidBookings: 0,
-                percentOfThisCitysBookingsOverAllBookings: 0,
-            });
-            cityIndex = accum.length - 1;
-        }
+		let cityIndex = accum.findIndex((city) => city.cityName === cityName);
+		if (cityIndex === -1) {
+			accum.push({
+				cityName,
+				totalBookings: 0,
+				totalPaidBookings: 0,
+				totalUnpaidBookings: 0,
+				percentOfPaidBookings: 0,
+				percentOfThisCitysBookingsOverAllBookings: 0
+			});
+			cityIndex = accum.length - 1;
+		}
 
-        const ticketsBooked = booking.guests.length;
-        accum[cityIndex].totalBookings += ticketsBooked;
+		const ticketsBooked = booking.guests.length;
+		accum[cityIndex].totalBookings += ticketsBooked;
 
-        switch (booking.payment_status) {
-            case BookingPaymentStatus.PAID:
-                accum[cityIndex].totalPaidBookings += ticketsBooked;
-                break;
-            case BookingPaymentStatus.UNPAID:
-                accum[cityIndex].totalUnpaidBookings += ticketsBooked;
-                break;
-            default:
-                accum[cityIndex].totalPaidBookings += ticketsBooked;
-                break;
-        }
+		switch (booking.payment_status) {
+			case BookingPaymentStatus.PAID:
+				accum[cityIndex].totalPaidBookings += ticketsBooked;
+				break;
+			case BookingPaymentStatus.UNPAID:
+				accum[cityIndex].totalUnpaidBookings += ticketsBooked;
+				break;
+			default:
+				accum[cityIndex].totalPaidBookings += ticketsBooked;
+				break;
+		}
 
-        return accum;
-    }, []);
+		return accum;
+	}, []);
 
-    const totalBookingsCount = cities.reduce((accum, city) => accum + city.totalBookings, 0);
-    return cities
-        .map((city) => ({
-            ...city,
-            percentOfPaidBookings: city.totalBookings > 0 ? city.totalPaidBookings / city.totalBookings : 0,
-            percentOfThisCitysBookingsOverAllBookings:
-                totalBookingsCount > 0 ? city.totalBookings / totalBookingsCount : 0,
-        }))
-        .sort((a, b) => b.totalBookings - a.totalBookings);
+	const totalBookingsCount = cities.reduce((accum, city) => accum + city.totalBookings, 0);
+	return cities
+		.map((city) => ({
+			...city,
+			percentOfPaidBookings:
+				city.totalBookings > 0 ? city.totalPaidBookings / city.totalBookings : 0,
+			percentOfThisCitysBookingsOverAllBookings:
+				totalBookingsCount > 0 ? city.totalBookings / totalBookingsCount : 0
+		}))
+		.sort((a, b) => b.totalBookings - a.totalBookings);
 }

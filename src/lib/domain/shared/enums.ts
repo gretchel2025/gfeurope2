@@ -9,28 +9,39 @@
  */
 /** Ticket pricing constants in EUR. */
 export enum TicketPrice {
-    STANDARD = 35.0,
-    VIP = 55.0,
-    YOUTH = 15.0,
+	STANDARD = 35.0,
+	STANDARD_EARLY_BIRD = 30.0,
+	GRAND_FEAST_PLUS = 65.0
 }
 
 /** The states a booking's payment lifecycle can be in. */
 export enum BookingPaymentStatus {
-    UNPAID = "UNPAID",
-    PAID = "PAID",
-    BOOKING_RESERVATION_CANCELLED = "BOOKING_RESERVATION_CANCELLED",
+	UNPAID = 'UNPAID',
+	PAID = 'PAID',
+	BOOKING_RESERVATION_CANCELLED = 'BOOKING_RESERVATION_CANCELLED'
 }
 
 /** The states a ticket can move through during event operations. */
 export enum TicketStatus {
-    CREATED = "CREATED",
-    CHECKED_IN = "CHECKED_IN",
-    CHECKED_OUT = "CHECKED_OUT",
+	CREATED = 'CREATED',
+	CHECKED_IN = 'CHECKED_IN',
+	CHECKED_OUT = 'CHECKED_OUT'
 }
 
 /** Supported ticket classes sold by the application. */
 export enum TicketType {
-    STANDARD = "STANDARD",
-    VIP = "VIP",
-    YOUTH = "YOUTH",
+	STANDARD = 'STANDARD',
+	GRAND_FEAST_PLUS = 'GRAND_FEAST_PLUS'
+}
+
+/** User-facing ticket labels. */
+export function formatTicketTypeLabel(ticketType: TicketType | string): string {
+	switch (ticketType) {
+		case TicketType.GRAND_FEAST_PLUS:
+			return 'GrandFeast Plus';
+		case TicketType.STANDARD:
+			return 'Standard';
+		default:
+			return String(ticketType);
+	}
 }

@@ -55,7 +55,7 @@ On startup, the app:
 
 - connects to the Supabase project in `PUBLIC_SUPABASE_URL`
 - uses `SUPABASE_SERVICE_ROLE_KEY` only on the server for app data
-- creates missing ticket counter records for standard, VIP, and youth tickets
+- creates missing ticket counter records for standard and GrandFeast Plus tickets
 
 Local seed data includes only ticket counters for `APP_EVENT_ID=gfeu2025`; it does not
 include real booking PII.

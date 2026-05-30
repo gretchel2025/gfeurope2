@@ -2,6 +2,7 @@
 	import AdminButton from '$lib/components/admin/AdminButton.svelte';
 	import AdminCard from '$lib/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import { formatTicketTypeLabel } from '$lib/domain/shared/enums';
 	import { adminRoutes } from '$lib/navigation/adminRoutes';
 	import type { ServerData } from './+page.server';
 
@@ -19,7 +20,7 @@
 						<p class="text-sm font-semibold text-slate-500">{index + 1}. {ticket.ticket_id}</p>
 						<h2 class="mt-1 text-lg font-semibold text-slate-950">{ticket.name}</h2>
 						<p class="mt-2 text-sm text-slate-600">
-							{ticket.ticket_type} | Status: {ticket.status}
+							{formatTicketTypeLabel(ticket.ticket_type)} | Status: {ticket.status}
 						</p>
 						<p class="mt-1 text-sm text-slate-600">
 							Booking Ref:
