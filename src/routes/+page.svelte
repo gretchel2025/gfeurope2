@@ -2,7 +2,7 @@
 	import CountdownTimer from '$lib/components/public/CountdownTimer.svelte';
 
 	let ticketsSection: HTMLElement;
-	const eventDate = new Date('2025-09-20T13:00:00+02:00');
+	const eventDate = new Date('2026-10-03T12:30:00+01:00');
 
 	const earlyBirdDeadline = new Date('2025-06-18T23:59:59');
 
@@ -26,26 +26,26 @@
 	<div class="max-w-5xl mx-auto">
 		<p class="text-center italic text-lg sm:text-xl text-blue-200 mb-6 px-4">
 			“Now to him who is able to do immeasurably more than all we ask or imagine, according to his
-			power that is at work within us.” — <span class="font-semibold text-yellow-300"
+			power that is at work within us.” — <span class="font-semibold text-green-300"
 				>Ephesians 3:20</span
 			>
 		</p>
 		<br />
 		<h1
-			class="text-6xl sm:text-7xl font-extrabold mb-4 text-yellow-400 tracking-wide animate-fadeInUp"
+			class="text-6xl sm:text-7xl font-extrabold mb-4 text-green-400 tracking-wide animate-fadeInUp"
 		>
-			Called To More
+			Together
 		</h1>
 
 		<h2
 			class="text-3xl sm:text-4xl md:text-5xl font-light mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-teal-200 to-white drop-shadow"
 		>
-			Grand Feast EU and UK 2025
+			GRAND FEAST EU AND UK 2026
 		</h2>
 		<br />
 		<div class="flex flex-wrap justify-center items-center gap-4 mb-4">
-			<p class="text-lg sm:text-xl md:text-2xl text-blue-100">September 20, 2025</p>
-			<span class="text-lg sm:text-xl md:text-2xl text-yellow-400">• Oslo, Norway</span>
+			<p class="text-lg sm:text-xl md:text-2xl text-blue-100">October 3, 2026</p>
+			<span class="text-lg sm:text-xl md:text-2xl text-green-400">• Dublin, Ireland</span>
 		</div>
 
 		<div class="mb-8">
@@ -76,31 +76,27 @@
 			<p class="italic text-blue-200 mb-6">
 				“Now to him who is able to do immeasurably more than all we ask or imagine, according to his
 				power that is at work within us.” —
-				<span class="font-bold text-yellow-300">Ephesians 3:20</span>
+				<span class="font-bold text-green-300">Ephesians 3:20</span>
 			</p>
 
-			<h3 class="text-3xl sm:text-4xl font-bold text-yellow-400 mb-4">Called To More</h3>
+			<h3 class="text-3xl sm:text-4xl font-bold text-green-400 mb-4">Together</h3>
 
 			<div class="space-y-4 text-blue-100 leading-relaxed">
 				<p>
-					Have you ever felt that there’s something greater waiting for you—beyond the daily grind,
-					beyond your comfort zone, beyond your doubts? That feeling is not an accident. It’s a
-					calling.
+					Together is an invitation to gather as one family of faith, bringing our stories,
+					prayers, and hopes into a shared day of worship, encouragement, and renewal.
 				</p>
 
 				<p>
-					"Called to More" is not just a theme—it’s a reminder that God is not done with you. No
-					matter where you are in life, He is calling you to a deeper purpose, stronger faith, and
-					bigger love. You were made for more than just survival. You were made to shine, to grow,
-					and to lead others closer to Him.
+					"Together" reminds us that we do not walk alone. God draws us closer to Him and to one
+					another, strengthening our faith through community, friendship, and love in action.
 				</p>
 
 				<p>
-					This September 20, join us for a special event as we welcome
+					This October 3, join us for a special event in Ireland as we welcome
 					<span class="text-white font-semibold">Bro. Bo Sanchez</span>, founder of Light of Jesus
-					(The Feast), to Norway. Together, let’s rediscover our God-given calling and say yes to
-					the more He has prepared for us. This is your time. This is your calling. You are Called
-					to More.
+					(The Feast). Come for Holy Mass, fellowship, and an event proper centered on growing
+					together in faith.
 				</p>
 
 				<div class="pt-6 text-sm text-blue-300">
@@ -121,7 +117,7 @@
 
 		<div class="bg-white/5 backdrop-blur-md border border-teal-500/20 rounded-2xl p-8 shadow-lg">
 			<h3 class="text-2xl md:text-3xl font-semibold text-center text-white mb-6">
-				2025 EU and UK Grand Feast in Oslo
+				2026 EU and UK Grand Feast in Dublin
 			</h3>
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -129,14 +125,15 @@
 					<div class="text-teal-300 text-2xl">🕒</div>
 					<div>
 						<h4 class="text-lg font-semibold text-teal-200">Time</h4>
-						<p class="text-white">1:00 PM to 5:00 PM</p>
+						<p class="text-white">12:30 PM Holy Mass</p>
+						<p class="text-white">1:30 PM Event Proper</p>
 					</div>
 				</div>
 				<div class="flex items-start gap-4">
 					<div class="text-teal-300 text-2xl">📅</div>
 					<div>
 						<h4 class="text-lg font-semibold text-teal-200">Date</h4>
-						<p class="text-white">September 20, 2025</p>
+						<p class="text-white">October 3, 2026</p>
 					</div>
 				</div>
 			</div>
@@ -145,14 +142,24 @@
 				<div class="text-teal-300 text-2xl">📍</div>
 				<div>
 					<h4 class="text-lg font-semibold text-teal-200">Location</h4>
-					<p class="text-white">Lambertseter kirke, Langbølgen 33, 1150 Oslo, Norway</p>
+					<p class="text-white">St. Helen's Hotel</p>
+					<p class="text-white">Stillorgan Road, Blackrock, Ireland</p>
+					<p class="text-white">Dublin A94 V6W3</p>
+					<a
+						href="https://maps.app.goo.gl/NrBmaQBgKgAZreERA"
+						rel="external nofollow noopener"
+						target="_blank"
+						class="mt-3 inline-block text-teal-200 underline underline-offset-4 transition hover:text-white"
+					>
+						View on Google Maps
+					</a>
 				</div>
 			</div>
 
 			<div class="mt-8 rounded-xl overflow-hidden shadow-md">
 				<iframe
-					src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2032.0893365937292!2d10.81919681592025!3d59.87363058187439!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46416e38178a0611%3A0x89b0e6220b7fce55!2sLambertseter%20kirke!5e0!3m2!1sen!2sno!4v1685232932978"
-					title="Lambertseter Kirke Location"
+					src="https://www.google.com/maps?q=St.%20Helen%27s%20Hotel%2C%20Stillorgan%20Road%2C%20Blackrock%2C%20Ireland%2C%20Dublin%20A94%20V6W3&output=embed"
+					title="St. Helen's Hotel Location"
 					width="100%"
 					height="400"
 					class="w-full rounded-xl border-none shadow-lg"
