@@ -30,6 +30,12 @@ export default {
 		});
 
 		const responseHeaders = new Headers(originResponse.headers);
+		const setCookies = originResponse.headers.getSetCookie?.() ?? [];
+		if (setCookies.length > 0) {
+			responseHeaders.delete('Set-Cookie');
+			setCookies.forEach((cookie) => responseHeaders.append('Set-Cookie', cookie));
+		}
+
 		const location = responseHeaders.get('Location');
 		if (location) {
 			responseHeaders.set('Location', location.replaceAll(netlifyOrigin, publicOrigin));

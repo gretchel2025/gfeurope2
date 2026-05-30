@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-30
 
+- Updated the Cloudflare dev proxy to preserve Supabase auth `Set-Cookie` headers
+  across the `dev.grandfeast.eu` proxy hop.
 - Applied live-dev Supabase schema updates for `payment_proof_url` and GrandFeast
   Plus ticket constraints, then repaired `77 Labs Test` migration history to match
   the local migration versions.

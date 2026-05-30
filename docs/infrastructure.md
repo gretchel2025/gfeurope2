@@ -359,6 +359,7 @@ Worker behavior:
 - Origin: `https://dev--grand-feast-uk-x-europe.netlify.app`
 - Keeps tester traffic uncached with `Cache-Control: no-store`
 - Rewrites Netlify-origin `Location` headers back to `https://dev.grandfeast.eu`
+- Preserves all `Set-Cookie` headers so Supabase SSR auth survives the proxy hop
 - Sends `X-Grandfeast-Public-Origin: https://dev.grandfeast.eu`
 
 Supabase handles the provider OAuth callback on the Supabase project domain. The app's
