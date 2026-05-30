@@ -36,6 +36,8 @@ export type CreateBookingInput = {
 	ticket_type: string;
 	quantity: number;
 	guests: string[];
+	payment_proof_url?: string;
+	payment_proof_filename?: string;
 };
 
 /** Helper shape for admin/email views that need both ticket data and QR code data. */

@@ -12,6 +12,9 @@ import type { BookingRepository, EmailSender, TicketRepository } from '$lib/appl
 import type { Booking } from '$lib/domain/booking';
 import { formatTicketTypeLabel } from '$lib/domain/shared/enums';
 
+const bankAccountName = 'LIGHT OF JESUS FAMILY IRELAND';
+const bankIban = 'IE12 BOFI 9000 1780 5681 80';
+
 /** Sends the user-facing emails associated with bookings and tickets. */
 export class NotificationService {
 	constructor(
@@ -20,11 +23,8 @@ export class NotificationService {
 		private readonly emailSender: EmailSender
 	) {}
 
-	/** Sends the initial reservation email with payment instructions. */
+	/** Sends the initial reservation email after payment proof has been submitted. */
 	async sendBookingConfirmation(booking: Booking): Promise<void> {
-		const paypalBaseUrl = 'https://paypal.me/TheFeastNorway';
-		const paypalUrl = `${paypalBaseUrl}/${booking.amount_total}?country.x=NO&locale.x=en_US&item_name=${booking.reference_no}`;
-		const amountNOK = Math.round(booking.amount_total * 11.52);
 		const ticketTypeLabel = formatTicketTypeLabel(booking.ticket_type);
 
 		await this.emailSender.send({
@@ -35,9 +35,9 @@ export class NotificationService {
                 <body>
                     <h1>Hello ${booking.name},</h1>
                     <h2>Greetings from the Grand Feast EU and UK!</h2>
-                    <p>Please complete your payment within <strong>24H</strong> and use reference <strong>${booking.reference_no}</strong>.</p>
-                    <p>PayPal link: <a href="${paypalUrl}">${paypalUrl}</a></p>
-                    <p>Approximate amount in NOK: ${amountNOK}</p>
+                    <p>We received your reservation and proof of bank transfer. Your payment is now awaiting verification.</p>
+                    <p>Booking reference: <strong>${booking.reference_no}</strong></p>
+                    <p>Bank account: <strong>${bankAccountName}</strong><br>IBAN: <strong>${bankIban}</strong></p>
                     <p>${booking.guests.length} ${ticketTypeLabel} ticket(s), total ${booking.amount_total} EUR.</p>
                 </body>
             </html>
@@ -91,9 +91,6 @@ export class NotificationService {
 			throw new NotFoundError('booking not found');
 		}
 
-		const paypalBaseUrl = 'https://paypal.me/TheFeastNorway';
-		const paypalUrl = `${paypalBaseUrl}/${booking.amount_total}?country.x=NO&locale.x=en_US&item_name=${booking.reference_no}`;
-
 		await this.emailSender.send({
 			to: booking.email,
 			subject: `Gentle Reminder: Your Ticket Reservation ${booking.reference_no} is Waiting`,
@@ -103,7 +100,7 @@ export class NotificationService {
                     <h1>Hello ${booking.name},</h1>
                     <h3>A gentle reminder that your ticket reservation is awaiting payment.</h3>
                     <p>Please make your payment and reference <strong>${booking.reference_no}</strong>.</p>
-                    <p>PayPal link: <a href="${paypalUrl}">${paypalUrl}</a></p>
+                    <p>Bank account: <strong>${bankAccountName}</strong><br>IBAN: <strong>${bankIban}</strong></p>
                 </body>
             </html>
             `

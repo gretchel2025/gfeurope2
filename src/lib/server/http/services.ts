@@ -19,6 +19,7 @@ import {
 } from '$lib/infrastructure/db/supabase/repositories';
 import { ResendEmailSender } from '$lib/infrastructure/email/resendEmailSender';
 import { CloudinaryImageStorage } from '$lib/infrastructure/media/cloudinaryImageStorage';
+import { CloudinaryPaymentProofStorage } from '$lib/infrastructure/media/cloudinaryPaymentProofStorage';
 import { DefaultQrCodeGenerator } from '$lib/infrastructure/media/qrCodeGenerator';
 import { PinoEventLogger } from '$lib/infrastructure/logging/eventLogger';
 import { InMemorySystemSettingsStore } from '$lib/infrastructure/system/inMemorySystemSettingsStore';
@@ -36,6 +37,7 @@ const ticketCounterRepository = new SupabaseTicketCounterRepository();
 /** Infrastructure adapters used by the service layer. */
 const emailSender = new ResendEmailSender();
 const imageStorage = new CloudinaryImageStorage();
+const paymentProofStorage = new CloudinaryPaymentProofStorage();
 const qrCodeGenerator = new DefaultQrCodeGenerator();
 const eventLogger = new PinoEventLogger();
 const systemSettingsStore = new InMemorySystemSettingsStore();
@@ -66,6 +68,7 @@ export const bookingService = new BookingService(
 );
 export const reportingService = new ReportingService();
 export const systemService = new SystemService(systemSettingsStore);
+export { paymentProofStorage };
 
 /** Raw repository exports for the occasional place that needs direct repository access. */
 export const repositories = {

@@ -27,7 +27,7 @@ For local Supabase development, make sure `.env` includes local values like:
 
 ```bash
 APP_BASE_URL=http://localhost:5173
-APP_EVENT_ID=gfeu2025
+APP_EVENT_ID=gfeu2026
 PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 PUBLIC_SUPABASE_PUBLISHABLE_KEY=<local anon/publishable key from supabase status>
 SUPABASE_SERVICE_ROLE_KEY=<local service_role key from supabase status>
@@ -57,7 +57,7 @@ On startup, the app:
 - uses `SUPABASE_SERVICE_ROLE_KEY` only on the server for app data
 - creates missing ticket counter records for standard and GrandFeast Plus tickets
 
-Local seed data includes only ticket counters for `APP_EVENT_ID=gfeu2025`; it does not
+Local seed data includes only ticket counters for `APP_EVENT_ID=gfeu2026`; it does not
 include real booking PII.
 
 ## Local Auth
@@ -159,7 +159,7 @@ Grand Feast app data also lives in Supabase. Hosted isolation is by project:
 
 App data lives in the `grandfeasteu` schema. Tables use clean domain names
 (`bookings`, `tickets`, `ticket_counters`) and include `event_id`, currently defaulting
-to `gfeu2025`. Repository queries always scope by `APP_EVENT_ID`. App-data tables have
+to `gfeu2026`. Repository queries always scope by `APP_EVENT_ID`. App-data tables have
 RLS enabled and no anon/authenticated policies; server code uses the service-role key.
 The `grandfeasteu` schema is exposed to Supabase's Data API only so the server-side
 service-role client can access it.

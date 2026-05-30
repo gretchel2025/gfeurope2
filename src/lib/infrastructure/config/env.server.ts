@@ -45,7 +45,7 @@ export const appConfig: AppConfig = {
 	supabaseUrl: readEnv('PUBLIC_SUPABASE_URL') || '',
 	supabasePublishableKey: readEnv('PUBLIC_SUPABASE_PUBLISHABLE_KEY') || '',
 	supabaseServiceRoleKey: readEnv('SUPABASE_SERVICE_ROLE_KEY') || '',
-	appEventId: readEnv('APP_EVENT_ID') || 'gfeu2025',
+	appEventId: readEnv('APP_EVENT_ID') || 'gfeu2026',
 	bootstrap: {
 		standardTicketsInitialAvailable: parsePositiveInt(
 			readEnv('STANDARD_TICKETS_INITIAL_AVAILABLE'),

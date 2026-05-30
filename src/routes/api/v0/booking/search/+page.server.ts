@@ -6,31 +6,27 @@ import { bookingService } from '$lib/server/http/services';
 export type ServerData = {
 	bookings: Booking[];
 	noneFound: boolean;
+	query: string;
 };
 
 export const load = async (event): Promise<ServerData> => {
-	const referenceNo = event.url.searchParams.get('reference_no');
-	if (!referenceNo) {
+	const rawQuery =
+		event.url.searchParams.get('query') ?? event.url.searchParams.get('reference_no') ?? '';
+	const query = rawQuery.trim();
+	if (!query) {
 		return {
 			bookings: [],
-			noneFound: false
+			noneFound: false,
+			query: ''
 		};
 	}
 
-	const aBooking = await bookingService.getById(referenceNo);
-	if (!aBooking) {
-		return {
-			bookings: [],
-			noneFound: true
-		};
-	}
-
-	// return result
-	const result: Booking[] = [aBooking];
+	const bookings = await bookingService.search(query);
 
 	return {
-		bookings: result,
-		noneFound: false
+		bookings,
+		noneFound: bookings.length === 0,
+		query
 	};
 };
 

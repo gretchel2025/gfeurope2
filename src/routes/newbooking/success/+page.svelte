@@ -11,7 +11,8 @@
 			<p class="conference-kicker">Reservation received</p>
 			<h1 class="mt-3 text-3xl font-black text-white sm:text-4xl">Successfully Booked</h1>
 			<h2 class="mt-3 text-lg text-[#fff3df]/75 sm:text-xl">
-				Please check your email for payment instructions.
+				Your reservation and proof of payment were received. Please check your email for
+				confirmation.
 			</h2>
 		</hgroup>
 

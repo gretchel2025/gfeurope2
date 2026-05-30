@@ -95,7 +95,7 @@ For Netlify `branch-deploy` context, use:
 
 ```txt
 APP_BASE_URL=https://dev.grandfeast.eu
-APP_EVENT_ID=gfeu2025
+APP_EVENT_ID=gfeu2026
 PUBLIC_SUPABASE_URL=<77 Labs Test Supabase URL>
 PUBLIC_SUPABASE_PUBLISHABLE_KEY=<77 Labs Test publishable key>
 SUPABASE_SERVICE_ROLE_KEY=<77 Labs Test service-role key>
@@ -128,7 +128,7 @@ App data tables:
 - `tickets`
 - `ticket_counters`
 
-All app data tables include `event_id text not null default 'gfeu2025'`, `created_at`,
+All app data tables include `event_id text not null default 'gfeu2026'`, `created_at`,
 and `updated_at`. The app scopes repository reads/writes by `APP_EVENT_ID`; prod/test
 separation comes from the selected Supabase project, not an `environment` column.
 
@@ -156,7 +156,7 @@ Relevant code paths:
 - `src/lib/infrastructure/bootstrap/bootstrap.ts`
 
 On startup, the app creates missing ticket counter records. Local `supabase/seed.sql`
-contains only initial counters for `event_id='gfeu2025'`; do not commit exported booking
+contains only initial counters for `event_id='gfeu2026'`; do not commit exported booking
 data or PII.
 
 Hosted authorization uses Supabase Auth `app_metadata.roles`. Do not use `user_metadata`

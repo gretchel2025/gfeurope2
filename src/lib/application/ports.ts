@@ -56,6 +56,11 @@ export interface ImageStorage {
 	uploadImage(imageData: string): Promise<string>;
 }
 
+/** Upload contract for visitor payment proof files. */
+export interface PaymentProofStorage {
+	uploadProof(file: File): Promise<string>;
+}
+
 /** QR code generation contract. */
 export interface QrCodeGenerator {
 	generate(url: string): Promise<string>;

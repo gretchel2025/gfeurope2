@@ -73,7 +73,9 @@ export class BookingService {
 		this.eventLogger.log('BOOKING_RESERVATION_CREATED', createdBooking.email, {
 			booking_reference_no: createdBooking.reference_no,
 			count: createdBooking.guests.length,
-			ticket_type: createdBooking.ticket_type
+			ticket_type: createdBooking.ticket_type,
+			payment_proof_url: input.payment_proof_url,
+			payment_proof_filename: input.payment_proof_filename
 		});
 
 		return createdBooking;
@@ -96,6 +98,40 @@ export class BookingService {
 	/** Returns all stored bookings for admin and reporting screens. */
 	async list(): Promise<Booking[]> {
 		return await this.bookingRepository.list();
+	}
+
+	/** Searches bookings by visitor-facing fields and exact ticket id. */
+	async search(query: string): Promise<Booking[]> {
+		const trimmedQuery = query.trim();
+		if (!trimmedQuery) {
+			return [];
+		}
+
+		const normalizedQuery = trimmedQuery.toLowerCase();
+		const matchesQuery = (value: string): boolean => value.toLowerCase().includes(normalizedQuery);
+		const resultsByReferenceNo = new Map<string, Booking>();
+
+		const bookings = await this.list();
+		for (const booking of bookings) {
+			if (
+				matchesQuery(booking.reference_no) ||
+				matchesQuery(booking.email) ||
+				matchesQuery(booking.name) ||
+				booking.guests.some(matchesQuery)
+			) {
+				resultsByReferenceNo.set(booking.reference_no, booking);
+			}
+		}
+
+		const ticket = await this.ticketService.getById(trimmedQuery);
+		if (ticket) {
+			const relatedBooking = await this.getById(ticket.booking_reference_no);
+			if (relatedBooking) {
+				resultsByReferenceNo.set(relatedBooking.reference_no, relatedBooking);
+			}
+		}
+
+		return Array.from(resultsByReferenceNo.values());
 	}
 
 	/** Marks an unpaid booking as paid and moves reserved inventory into sold inventory. */

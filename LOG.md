@@ -5,6 +5,34 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-30
 
+- Switched the active app event id defaults and local seed setup from `gfeu2025`
+  to `gfeu2026`.
+- Expanded admin booking search to support booking reference, email, booking
+  name, guest names, and exact ticket IDs.
+- Redesigned the booking form into a guided reservation flow with separated
+  country and city selection.
+- Simplified the booking city dropdown to collapse district-style variants into
+  the parent city name.
+- Hid ticket availability counts on booking cards unless a ticket type has ten
+  or fewer remaining.
+- Updated the Standard Early Bird card to show the regular price crossed out and
+  the promo end date.
+- Replaced booking country and city selects with searchable typeahead inputs.
+- Updated booking quantity to start at zero and validate a minimum of one ticket
+  when continuing.
+- Clarified booking ticket selection visuals so only the selected ticket type
+  shows a checkmark.
+- Removed the separate booking details name field and now use the first guest
+  name as the booking name.
+- Added explicit required and invalid email feedback on the booking details step.
+- Added bank-transfer instructions, required proof-of-payment upload validation,
+  and a non-refundable confirmation before booking submission.
+- Added Cloudinary upload for booking proof-of-payment files before booking
+  records are created.
+- Updated booking confirmation and reminder emails to use the Ireland bank
+  transfer details instead of the old PayPal payment copy.
+- Replaced the native non-refundable confirmation dialog with an in-page booking
+  confirmation modal.
 - Restyled the public website with the modern conference theme inspired by the
   Ireland Grand Feast visual direction.
 - Prevented the 5+ group discount from stacking with the Standard Early Bird promo.

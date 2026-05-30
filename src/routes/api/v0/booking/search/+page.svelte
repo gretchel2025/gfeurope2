@@ -7,22 +7,31 @@
 
 	export let data: ServerData;
 
-	let searchValue = '';
+	let loadedQuery = data.query;
+	let searchValue = data.query;
+
+	$: if (data.query !== loadedQuery) {
+		loadedQuery = data.query;
+		searchValue = data.query;
+	}
 </script>
 
-<AdminPage title="Search Bookings" subtitle="Find a booking by reference number.">
+<AdminPage
+	title="Search Bookings"
+	subtitle="Find bookings by reference, email, name, guest, or ticket number."
+>
 	<AdminCard>
 		<form
 			method="GET"
 			action={adminRoutes.booking.search()}
 			class="flex flex-col gap-3 sm:flex-row"
 		>
-			<label class="sr-only" for="reference_no">Booking reference number</label>
+			<label class="sr-only" for="query">Booking reference, email, name, or ticket number</label>
 			<input
-				id="reference_no"
-				name="reference_no"
+				id="query"
+				name="query"
 				type="text"
-				placeholder="Booking reference number"
+				placeholder="Reference, email, name, guest, or ticket number"
 				bind:value={searchValue}
 				class="min-h-10 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-950 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 			/>
@@ -33,7 +42,7 @@
 			<p
 				class="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800"
 			>
-				Booking reference number not found.
+				No booking found for that search.
 			</p>
 		{/if}
 	</AdminCard>
@@ -43,9 +52,30 @@
 			<div class="space-y-3">
 				{#each data.bookings as booking}
 					<article class="rounded-md border border-slate-200 bg-slate-50 p-4">
-						<p class="font-semibold text-slate-950">{booking.reference_no}</p>
-						<p class="mt-1 text-sm text-slate-600">{booking.name} - {booking.payment_status}</p>
-						<div class="mt-3">
+						<div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+							<div>
+								<p class="font-semibold text-slate-950">{booking.reference_no}</p>
+								<p class="mt-1 text-sm text-slate-700">{booking.name}</p>
+								<p class="mt-1 text-sm text-slate-600">{booking.email}</p>
+							</div>
+							<div class="text-sm text-slate-600 lg:text-right">
+								<p>
+									<span class="font-semibold text-slate-800">Payment:</span>
+									{booking.payment_status}
+								</p>
+								<p>
+									<span class="font-semibold text-slate-800">Guests:</span>
+									{booking.guests.length}
+								</p>
+							</div>
+						</div>
+						{#if booking.ticket_ids.length > 0}
+							<p class="mt-3 break-words text-sm text-slate-600">
+								<span class="font-semibold text-slate-800">Tickets:</span>
+								{booking.ticket_ids.join(', ')}
+							</p>
+						{/if}
+						<div class="mt-4">
 							<AdminButton
 								href={adminRoutes.booking.details(booking.reference_no)}
 								variant="secondary"
