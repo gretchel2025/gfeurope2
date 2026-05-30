@@ -25,9 +25,8 @@
 <section class="relative z-10 py-16 sm:py-20 px-4 text-center">
 	<div class="max-w-5xl mx-auto">
 		<p class="text-center italic text-lg sm:text-xl text-blue-200 mb-6 px-4">
-			“Now to him who is able to do immeasurably more than all we ask or imagine, according to his
-			power that is at work within us.” — <span class="font-semibold text-green-300"
-				>Ephesians 3:20</span
+			“In him the whole building is joined together and rises to become a holy temple in the Lord.”
+			— <span class="font-semibold text-green-300">Ephesians 2:21</span
 			>
 		</p>
 		<br />
@@ -67,41 +66,76 @@
 		<div class="md:w-1/2 w-full">
 			<img
 				src="https://res.cloudinary.com/dg2u7fmoc/image/upload/v1748121253/poster2_rdfj6w.png"
-				alt="Bo Sanchez"
+				alt="Grand Feast EU and UK 2026"
 				class="w-full h-auto shadow-lg"
 			/>
 		</div>
 
 		<div class="md:w-1/2 w-full">
-			<p class="italic text-blue-200 mb-6">
-				“Now to him who is able to do immeasurably more than all we ask or imagine, according to his
-				power that is at work within us.” —
-				<span class="font-bold text-green-300">Ephesians 3:20</span>
-			</p>
-
 			<h3 class="text-3xl sm:text-4xl font-bold text-green-400 mb-4">Together</h3>
 
 			<div class="space-y-4 text-blue-100 leading-relaxed">
 				<p>
-					Together is an invitation to gather as one family of faith, bringing our stories,
-					prayers, and hopes into a shared day of worship, encouragement, and renewal.
+					In a world that has mastered digital connection, we have somehow become more isolated
+					than ever. We scroll through crowded feeds yet wake up feeling unseen, carrying our
+					heaviest burdens in absolute silence.
 				</p>
 
 				<p>
-					"Together" reminds us that we do not walk alone. God draws us closer to Him and to one
-					another, strengthening our faith through community, friendship, and love in action.
+					If you have felt that ache lately, we want to remind you of a simple truth: You were
+					never meant to walk through this life alone.
 				</p>
 
 				<p>
-					This October 3, join us for a special event in Ireland as we welcome
-					<span class="text-white font-semibold">Bro. Bo Sanchez</span>, founder of Light of Jesus
-					(The Feast). Come for Holy Mass, fellowship, and an event proper centered on growing
-					together in faith.
+					When God designed humanity, He built us for communion—first with Him, and then with one
+					another. He designed a rhythm of life where your joy multiplies when shared, and your
+					sorrow divides when carried by a brother or sister. The Church isn't a building you
+					visit; it is a home. And this year, we are calling everyone back to the hearth.
+				</p>
+
+				<h4 class="text-xl font-bold text-green-300">The Theme: Together</h4>
+
+				<p>
+					Our focus for the Grand Feast 2026 is singular, profound, and urgent: Together.
+				</p>
+
+				<p class="italic text-blue-200">
+					“In him the whole building is joined together and rises to become a holy temple in the
+					Lord.” — <span class="font-bold text-green-300">Ephesians 2:21</span>
+				</p>
+
+				<p>
+					This is a sacred space where you don't have to pretend to have it all figured out. You
+					are invited to bring your whole self—your faith, your doubts, your victories, and your
+					weariness. When we gather, the walls that divide us crumble. We find wisdom in our shared
+					stories, wonder in His presence, and a unified voice of worship that shakes the heavens.
+				</p>
+
+				<h4 class="text-xl font-bold text-green-300">There is a Seat for You</h4>
+
+				<p>
+					Consider this your personal invitation. Whether you have been walking with the Lord for
+					decades, or you are just curious and taking your very first steps toward faith—there is a
+					seat at the table with your name on it.
+				</p>
+
+				<p>Come to be refreshed by stepping into an environment of pure worship.</p>
+
+				<p>Come to be connected to a community that will stand by you.</p>
+
+				<p>
+					Come to encounter Christ, the chief cornerstone who binds us all in love.
+				</p>
+
+				<p>
+					We are ready to heal, grow, and move forward—not in isolation, but as one body. Join us
+					for Together 2026. We are stronger, braver, and better when we are together.
 				</p>
 
 				<div class="pt-6 text-sm text-blue-300">
-					<p class="font-semibold text-white">Dindo Manuel</p>
-					<p>Feast Norway Planter</p>
+					<p>With open arms,</p>
+					<p class="font-semibold text-white">Bro Lando Patolilic</p>
+					<p>Feast Dublin Builder</p>
 				</div>
 			</div>
 		</div>
@@ -125,6 +159,7 @@
 					<div class="text-teal-300 text-2xl">🕒</div>
 					<div>
 						<h4 class="text-lg font-semibold text-teal-200">Time</h4>
+						<p class="text-white">12:00 PM Registration</p>
 						<p class="text-white">12:30 PM Holy Mass</p>
 						<p class="text-white">1:30 PM Event Proper</p>
 					</div>

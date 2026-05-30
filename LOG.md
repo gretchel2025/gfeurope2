@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-30
 
+- Updated the landing page anchor verse and speaker-section message for the 2026
+  Dublin event.
 - Converted the public FAQ page question-and-answer content into bulleted lists.
 
 ## 2026-05-29
