@@ -217,14 +217,16 @@ session picks up the updated `app_metadata`.
 
 ## Optional Integrations
 
-Resend and Cloudinary credentials can be left empty for local booting. Fill them in only
-when local email sending or QR image uploads need to work.
+Resend credentials can be left empty unless local email sending needs to work. Cloudinary
+credentials are required for local booting because booking payment proof uploads must go
+to Cloudinary instead of placeholder URLs.
 
 Relevant env vars:
 
 - `RESEND_API_KEY`
 - `EMAIL_FROM`
 - `EMAIL_REPLY_TO`
+- `CLOUDINARY_URL`
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`

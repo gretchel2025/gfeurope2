@@ -26,6 +26,7 @@ export type Booking = {
 	amount_total: number;
 	guests: string[];
 	ticket_ids: string[];
+	payment_proof_url?: string;
 };
 
 /** Input required to create a booking before defaults and ids are added. */
@@ -37,7 +38,6 @@ export type CreateBookingInput = {
 	quantity: number;
 	guests: string[];
 	payment_proof_url?: string;
-	payment_proof_filename?: string;
 };
 
 /** Helper shape for admin/email views that need both ticket data and QR code data. */

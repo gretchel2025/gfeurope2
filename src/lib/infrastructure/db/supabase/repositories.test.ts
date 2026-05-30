@@ -19,7 +19,8 @@ describe('Supabase repositories', () => {
 		payment_status: BookingPaymentStatus.UNPAID,
 		amount_total: 40,
 		guests: ['Ada Lovelace', 'Grace Hopper'],
-		ticket_ids: []
+		ticket_ids: [],
+		payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 	};
 	const ticket: Ticket = {
 		ticket_id: 'T123',
@@ -85,7 +86,8 @@ describe('Supabase repositories', () => {
 						payment_status: booking.payment_status,
 						amount_total: booking.amount_total,
 						guests: booking.guests,
-						ticket_ids: booking.ticket_ids
+						ticket_ids: booking.ticket_ids,
+						payment_proof_url: booking.payment_proof_url
 					},
 					error: null
 				};
@@ -108,7 +110,8 @@ describe('Supabase repositories', () => {
 					p_ticket_type: TicketType.STANDARD,
 					p_book_date: '2026-01-01T00:00:00.000Z',
 					p_amount_total: 40,
-					p_guests: ['Ada Lovelace', 'Grace Hopper']
+					p_guests: ['Ada Lovelace', 'Grace Hopper'],
+					p_payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 				}
 			]
 		]);

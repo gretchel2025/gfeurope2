@@ -1,155 +1,113 @@
 <script lang="ts">
 	import AdminCard from '$lib/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;
-	const topCities = data.topCities ?? [];
-	const ticketStateCharts = data.ticketStateCharts ?? [];
-	const pieSize = 132;
-	const pieRadius = 48;
-	const pieCircumference = 2 * Math.PI * pieRadius;
+	const topTicketSalesByCity = data.topTicketSalesByCity ?? [];
+	const unpaidBookingsByCity = data.unpaidBookingsByCity ?? [];
 
-	type TicketStateChart = ServerData['ticketStateCharts'][number];
-	type TicketStateSegment = TicketStateChart['segments'][number];
-
-	function getSegmentPercentage(segment: TicketStateSegment, total: number): number {
-		if (total === 0) {
-			return 0;
-		}
-
-		return (segment.value / total) * 100;
-	}
-
-	function getSegmentLength(segment: TicketStateSegment, total: number): number {
-		if (total === 0) {
-			return 0;
-		}
-
-		return (segment.value / total) * pieCircumference;
-	}
-
-	function getSegmentOffset(segments: TicketStateSegment[], index: number, total: number): number {
-		if (total === 0) {
-			return 0;
-		}
-
-		const priorValue = segments
-			.slice(0, index)
-			.reduce((sum, segment) => sum + segment.value, 0);
-
-		return -1 * ((priorValue / total) * pieCircumference);
+	function formatPercent(value: number): string {
+		return `${(value * 100).toFixed(1)}%`;
 	}
 </script>
 
-<AdminPage title="Top Ticket Sales" subtitle="By city">
-	<AdminCard title="Ticket Sales Distribution" subtitle="Available, reserved, and paid by ticket type.">
-		<div class="grid gap-4 lg:grid-cols-2">
-			{#each ticketStateCharts as chart}
-				<article class="rounded-md border border-slate-200 bg-slate-50 p-4">
-					<div class="flex flex-col gap-6 sm:flex-row sm:items-center">
-						<div class="relative mx-auto h-40 w-40 shrink-0">
-							<svg
-								viewBox={`0 0 ${pieSize} ${pieSize}`}
-								class="-rotate-90 overflow-visible"
-								role="img"
-								aria-label={`${chart.title} ticket state distribution`}
-							>
-								<circle
-									cx={pieSize / 2}
-									cy={pieSize / 2}
-									r={pieRadius}
-									stroke="currentColor"
-									stroke-width="24"
-									fill="none"
-									class="text-slate-200"
-								/>
-
-								{#if chart.total > 0}
-									{#each chart.segments as segment, index}
-										<circle
-											cx={pieSize / 2}
-											cy={pieSize / 2}
-											r={pieRadius}
-											stroke="currentColor"
-											stroke-width="24"
-											stroke-linecap="butt"
-											fill="none"
-											class={segment.colorClass}
-											stroke-dasharray={`${getSegmentLength(segment, chart.total)} ${pieCircumference}`}
-											stroke-dashoffset={getSegmentOffset(chart.segments, index, chart.total)}
-										/>
-									{/each}
-								{/if}
-							</svg>
-
-							<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-								<p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-									Total
-								</p>
-								<p class="text-3xl font-bold text-slate-950">{chart.total}</p>
-							</div>
+<AdminPage
+	title="Reports"
+	subtitle="City-level ticket sales and payment follow-up reports for the active event."
+>
+	<AdminCard title="Top Ticket Sales by City" subtitle="Ranked by paid tickets sold.">
+		<div class="space-y-3">
+			{#each topTicketSalesByCity as cityStat, index}
+				<article
+					class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200"
+				>
+					<div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+						<div>
+							<p class="text-xs font-black uppercase tracking-[0.18em] text-blue-700">
+								Rank {index + 1}
+							</p>
+							<h2 class="mt-1 text-xl font-black text-slate-950">{cityStat.cityName}</h2>
 						</div>
-
-						<div class="flex-1 space-y-3">
-							<div>
-								<h2 class="text-lg font-bold text-slate-950">{chart.title}</h2>
-								<p class="text-sm text-slate-600">Share of current inventory state.</p>
-							</div>
-
-							<ul class="space-y-2">
-								{#each chart.segments as segment}
-									<li
-										class="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
-									>
-										<div class="flex items-center gap-2">
-											<span class={`h-3 w-3 rounded-full ${segment.colorClass.replace('text-', 'bg-')}`}></span>
-											<span class="font-semibold text-slate-700">{segment.label}</span>
-										</div>
-										<div class="text-right">
-											<p class="font-semibold text-slate-950">{segment.value}</p>
-											<p class="text-xs text-slate-500">
-												{getSegmentPercentage(segment, chart.total).toFixed(0)}%
-											</p>
-										</div>
-									</li>
-								{/each}
-							</ul>
-						</div>
-					</div>
-				</article>
-			{/each}
-		</div>
-	</AdminCard>
-
-	<AdminCard>
-		<div class="space-y-4">
-			{#each topCities as cityStat, index}
-				<article class="rounded-md border border-slate-200 bg-slate-50 p-4">
-					<div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-						<h2 class="text-lg font-bold text-slate-950">{index + 1}. {cityStat.cityName}</h2>
-						<p class="text-sm font-semibold text-blue-700">
-							{(cityStat.percentOfThisCitysBookingsOverAllBookings * 100).toFixed(2)}% of all
-							bookings
+						<p class="rounded-full bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">
+							{formatPercent(cityStat.percentOfPaidTickets)} of paid tickets
 						</p>
 					</div>
-					<dl class="mt-3 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
-						<div>
-							<dt class="font-semibold text-slate-500">Tickets Booked</dt>
-							<dd>{cityStat.totalBookings}</dd>
+
+					<dl class="mt-4 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
+						<div class="rounded-md bg-slate-50 p-3">
+							<dt class="font-semibold text-slate-500">Tickets sold</dt>
+							<dd class="mt-1 text-2xl font-black text-slate-950">{cityStat.ticketsSold}</dd>
 						</div>
-						<div>
-							<dt class="font-semibold text-slate-500">Paid / Unpaid</dt>
-							<dd>{cityStat.totalPaidBookings} / {cityStat.totalUnpaidBookings}</dd>
+						<div class="rounded-md bg-slate-50 p-3">
+							<dt class="font-semibold text-slate-500">Paid bookings</dt>
+							<dd class="mt-1 text-2xl font-black text-slate-950">{cityStat.paidBookings}</dd>
 						</div>
-						<div>
-							<dt class="font-semibold text-slate-500">Sold</dt>
-							<dd>{(cityStat.percentOfPaidBookings * 100).toFixed(0)}%</dd>
+						<div class="rounded-md bg-slate-50 p-3">
+							<dt class="font-semibold text-slate-500">Paid amount</dt>
+							<dd class="mt-1 text-2xl font-black text-slate-950">
+								€{cityStat.amountPaid.toFixed(2)}
+							</dd>
 						</div>
 					</dl>
 				</article>
 			{:else}
-				<p class="text-sm text-slate-600">No report data available yet.</p>
+				<p class="rounded-md border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+					No paid ticket sales yet.
+				</p>
+			{/each}
+		</div>
+	</AdminCard>
+
+	<AdminCard
+		title="Unpaid Bookings by City"
+		subtitle="Use this for payment reminders and city-level follow-up."
+	>
+		<div class="space-y-4">
+			{#each unpaidBookingsByCity as cityStat}
+				<article class="rounded-lg border border-amber-200 bg-amber-50/60 p-4">
+					<div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+						<div>
+							<h2 class="text-xl font-black text-slate-950">{cityStat.cityName}</h2>
+							<p class="mt-1 text-sm text-slate-600">
+								{cityStat.unpaidBookings}
+								unpaid booking{cityStat.unpaidBookings === 1 ? '' : 's'}
+							</p>
+						</div>
+						<p class="rounded-full bg-white px-3 py-1 text-sm font-bold text-amber-700">
+							€{cityStat.amountPending.toFixed(2)} pending
+						</p>
+					</div>
+
+					<dl class="mt-4 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
+						<div class="rounded-md bg-white p-3">
+							<dt class="font-semibold text-slate-500">Unpaid tickets</dt>
+							<dd class="mt-1 text-2xl font-black text-slate-950">{cityStat.unpaidTickets}</dd>
+						</div>
+						<div class="rounded-md bg-white p-3">
+							<dt class="font-semibold text-slate-500">Unpaid bookings</dt>
+							<dd class="mt-1 text-2xl font-black text-slate-950">{cityStat.unpaidBookings}</dd>
+						</div>
+						<div class="rounded-md bg-white p-3">
+							<dt class="font-semibold text-slate-500">Booking refs</dt>
+							<dd class="mt-2 flex flex-wrap gap-2">
+								{#each cityStat.referenceNumbers as referenceNo}
+									<a
+										href={adminRoutes.booking.details(referenceNo)}
+										class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50"
+									>
+										{referenceNo}
+									</a>
+								{/each}
+							</dd>
+						</div>
+					</dl>
+				</article>
+			{:else}
+				<p class="rounded-md border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+					No unpaid bookings.
+				</p>
 			{/each}
 		</div>
 	</AdminCard>

@@ -44,8 +44,7 @@ export const actions: Actions = {
 		const paymentProofUrl = await paymentProofStorage.uploadProof(paymentProofFile);
 		await bookingService.createNew({
 			...input,
-			payment_proof_url: paymentProofUrl,
-			payment_proof_filename: paymentProofFile.name
+			payment_proof_url: paymentProofUrl
 		});
 		throw redirect(303, publicRoutes.newBookingSuccess);
 	})

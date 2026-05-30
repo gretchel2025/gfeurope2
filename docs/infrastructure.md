@@ -323,14 +323,16 @@ The primary transactional sender is `admin@grandfeast.eu`, with Resend configure
 in `eu-west-1` and MAIL FROM / bounce handling on `send.grandfeast.eu`.
 Live-dev and local development use `test@grandfeast.eu` for both sender and reply-to.
 
-Resend and Cloudinary can be left empty for local booting unless local email delivery or
-QR image uploads are being tested.
+Resend can be left empty unless local email delivery is being tested. Cloudinary must be
+configured because booking payment proof uploads are required and must not fall back to
+placeholder URLs.
 
 Important integration env vars:
 
 - `RESEND_API_KEY`
 - `EMAIL_FROM`
 - `EMAIL_REPLY_TO`
+- `CLOUDINARY_URL`
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
@@ -339,6 +341,7 @@ Relevant code paths:
 
 - `src/lib/infrastructure/email/resendEmailSender.ts`
 - `src/lib/infrastructure/media/cloudinaryImageStorage.ts`
+- `src/lib/infrastructure/media/cloudinaryPaymentProofStorage.ts`
 
 ## Cloudflare Worker
 

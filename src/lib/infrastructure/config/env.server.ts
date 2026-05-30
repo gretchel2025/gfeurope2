@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const fileEnv = loadDotEnvFile(path.resolve(process.cwd(), '.env'));
+const cloudinaryUrlConfig = parseCloudinaryUrl(readEnv('CLOUDINARY_URL'));
 
 /** Typed runtime configuration used by infrastructure and service composition. */
 export type AppConfig = {
@@ -60,11 +61,27 @@ export const appConfig: AppConfig = {
 		resendApiKey: readEnv('RESEND_API_KEY') || '',
 		emailFrom: readEnv('EMAIL_FROM') || '',
 		emailReplyTo: readEnv('EMAIL_REPLY_TO') || '',
-		cloudinaryCloudName: readEnv('CLOUDINARY_CLOUD_NAME') || '',
-		cloudinaryApiKey: readEnv('CLOUDINARY_API_KEY') || '',
-		cloudinaryApiSecret: readEnv('CLOUDINARY_API_SECRET') || ''
+		cloudinaryCloudName: readEnv('CLOUDINARY_CLOUD_NAME') || cloudinaryUrlConfig.cloudName || '',
+		cloudinaryApiKey: readEnv('CLOUDINARY_API_KEY') || cloudinaryUrlConfig.apiKey || '',
+		cloudinaryApiSecret: readEnv('CLOUDINARY_API_SECRET') || cloudinaryUrlConfig.apiSecret || ''
 	}
 };
+
+/** Fails startup when Cloudinary uploads cannot work. */
+export function assertCloudinaryConfigured(): void {
+	const missing = getMissingCloudinaryEnvVars();
+	if (missing.length > 0) {
+		throw new Error(`Cloudinary configuration is missing: ${missing.join(', ')}`);
+	}
+}
+
+function getMissingCloudinaryEnvVars(): string[] {
+	const missing: string[] = [];
+	if (!appConfig.integrations.cloudinaryCloudName) missing.push('CLOUDINARY_CLOUD_NAME');
+	if (!appConfig.integrations.cloudinaryApiKey) missing.push('CLOUDINARY_API_KEY');
+	if (!appConfig.integrations.cloudinaryApiSecret) missing.push('CLOUDINARY_API_SECRET');
+	return missing;
+}
 
 /** Parses a non-negative integer with a sensible fallback. */
 function parsePositiveInt(raw: string | undefined, fallback: number): number {
@@ -83,6 +100,27 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
 /** Reads an env value from process.env first, then from the local .env file snapshot. */
 function readEnv(key: string): string | undefined {
 	return process.env[key] ?? fileEnv[key];
+}
+
+function parseCloudinaryUrl(raw: string | undefined) {
+	if (!raw) {
+		return {};
+	}
+
+	try {
+		const parsed = new URL(raw);
+		if (parsed.protocol !== 'cloudinary:') {
+			return {};
+		}
+
+		return {
+			cloudName: parsed.hostname,
+			apiKey: decodeURIComponent(parsed.username),
+			apiSecret: decodeURIComponent(parsed.password)
+		};
+	} catch {
+		return {};
+	}
 }
 
 /** Minimal .env parser used to support local development without extra runtime tooling. */

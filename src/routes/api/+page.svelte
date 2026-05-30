@@ -42,7 +42,10 @@
 		</AdminCard>
 
 		<AdminCard title="Tickets" subtitle="Inspect generated tickets and QR links.">
-			<AdminButton href={adminRoutes.ticket.list}>List tickets</AdminButton>
+			<div class="flex flex-wrap gap-2">
+				<AdminButton href={adminRoutes.ticket.list}>List tickets</AdminButton>
+				<AdminButton href={adminRoutes.booking.search()} variant="secondary">Search</AdminButton>
+			</div>
 		</AdminCard>
 
 		<AdminCard title="Reports" subtitle="Review sales and booking breakdowns.">

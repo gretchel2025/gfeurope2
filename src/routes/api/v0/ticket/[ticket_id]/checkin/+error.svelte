@@ -1,21 +1,23 @@
 <script lang="ts">
-    function refreshPage(){
-        location.reload();
-    }
+	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
+
+	function refreshPage() {
+		location.reload();
+	}
 </script>
 
-
-<main class="container">
-
-    <article>
-        <hgroup>
-            <h1>Server Busy</h1>
-            <h2>Refresh and Retry</h2>
-        </hgroup>
-
-        <button type="button" on:click={refreshPage}>Refresh</button>
-    </article>
-
-    <a href="/api">admin home</a>
-
-</main>
+<AdminPage title="Server Busy" subtitle="Refresh and retry the ticket check-in request.">
+	<section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+		<div class="flex flex-wrap items-center gap-4">
+			<button
+				type="button"
+				class="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
+				on:click={refreshPage}>Refresh</button
+			>
+			<a href={adminRoutes.home} class="text-sm font-semibold text-blue-700 hover:underline">
+				Admin home
+			</a>
+		</div>
+	</section>
+</AdminPage>

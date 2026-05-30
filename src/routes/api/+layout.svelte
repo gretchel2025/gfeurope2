@@ -10,25 +10,25 @@
 	}
 </script>
 
-<nav
-	class="relative z-10 border-y border-slate-700 bg-slate-950/90 px-4 py-3 text-sm text-slate-100"
->
+<nav class="admin-nav border-b border-slate-200/80 px-4 py-3 text-sm text-slate-700">
 	<div class="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 		<div class="flex flex-wrap gap-x-4 gap-y-2 font-semibold">
-			<a href={adminRoutes.home} class="hover:text-white">Dashboard</a>
-			<a href={adminRoutes.booking.list} class="hover:text-white">Bookings</a>
-			<a href={adminRoutes.booking.search()} class="hover:text-white">Search</a>
-			<a href={adminRoutes.ticket.list} class="hover:text-white">Tickets</a>
-			<a href={adminRoutes.reports} class="hover:text-white">Reports</a>
-			<a href={adminRoutes.system} class="hover:text-white">System</a>
+			<a href={adminRoutes.home} class="hover:text-slate-950">Dashboard</a>
+			<a href={adminRoutes.booking.list} class="hover:text-slate-950">Bookings</a>
+			<a href={adminRoutes.booking.search()} class="hover:text-slate-950">Search</a>
+			<a href={adminRoutes.ticket.list} class="hover:text-slate-950">Tickets</a>
+			<a href={adminRoutes.reports} class="hover:text-slate-950">Reports</a>
+			<a href={adminRoutes.system} class="hover:text-slate-950">System</a>
 		</div>
 
 		{#if $page.data.session?.user}
-			<div class="flex flex-wrap items-center gap-3 text-slate-300">
-				<a href={publicRoutes.signin} class="hover:text-white">{$page.data.session.user.email}</a>
+			<div class="flex flex-wrap items-center gap-3 text-slate-600">
+				<a href={publicRoutes.signin} class="hover:text-slate-950"
+					>{$page.data.session.user.email}</a
+				>
 				<button
 					type="button"
-					class="font-semibold text-red-200 hover:text-red-100"
+					class="font-semibold text-red-700 hover:text-red-800"
 					on:click={signOutCurrentUser}
 				>
 					Sign out

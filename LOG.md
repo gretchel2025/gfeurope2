@@ -5,6 +5,12 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-30
 
+- Removed the public aurora treatment from the admin shell, added a subtle light
+  admin background treatment, and styled admin success/error pages.
+- Focused admin reports on paid ticket sales by city and unpaid bookings by city.
+- Made Cloudinary configuration required at startup so booking proof uploads cannot
+  silently fall back to local placeholder URLs.
+- Added persistence and admin preview support for booking proof-of-payment URLs.
 - Switched the active app event id defaults and local seed setup from `gfeu2025`
   to `gfeu2026`.
 - Expanded admin booking search to support booking reference, email, booking

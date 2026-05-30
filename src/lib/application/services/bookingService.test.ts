@@ -40,7 +40,7 @@ function makeTicket(overrides: Partial<Ticket> = {}): Ticket {
 
 function makeService(bookings: Booking[], tickets: Ticket[] = []) {
 	const bookingRepository = {
-		insertReservation: vi.fn(),
+		insertReservation: vi.fn(async (booking: Booking) => booking),
 		findByReferenceNo: vi.fn(
 			async (referenceNo: string) =>
 				bookings.find((booking) => booking.reference_no === referenceNo) ?? null
@@ -56,12 +56,23 @@ function makeService(bookings: Booking[], tickets: Ticket[] = []) {
 			async (ticketId: string) => tickets.find((ticket) => ticket.ticket_id === ticketId) ?? null
 		)
 	} as unknown as TicketService;
+	const ticketCounterService = {
+		getByTicketType: vi.fn(async () => ({
+			_id: 'standard_tickets',
+			available: 10,
+			reserved: 0,
+			sold: 0
+		}))
+	} as unknown as TicketCounterService;
+	const notificationService = {
+		sendBookingConfirmation: vi.fn()
+	} as unknown as NotificationService;
 
 	const service = new BookingService(
 		bookingRepository,
-		{} as TicketCounterService,
+		ticketCounterService,
 		ticketService,
-		{} as NotificationService,
+		notificationService,
 		{ log: vi.fn() } satisfies EventLogger,
 		() => 'ABC'
 	);
@@ -125,5 +136,28 @@ describe('BookingService.search', () => {
 		await expect(service.search('   ')).resolves.toEqual([]);
 		expect(bookingRepository.list).not.toHaveBeenCalled();
 		await expect(service.search('not-present')).resolves.toEqual([]);
+	});
+});
+
+describe('BookingService.createNew', () => {
+	it('persists the uploaded payment proof URL with the booking', async () => {
+		const { service, bookingRepository } = makeService([]);
+
+		const booking = await service.createNew({
+			name: 'Ada Lovelace',
+			email: 'ada@example.com',
+			city: 'Dublin',
+			ticket_type: TicketType.STANDARD,
+			quantity: 1,
+			guests: ['Ada Lovelace'],
+			payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
+		});
+
+		expect(booking.payment_proof_url).toBe('https://res.cloudinary.com/demo/proof.pdf');
+		expect(bookingRepository.insertReservation).toHaveBeenCalledWith(
+			expect.objectContaining({
+				payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
+			})
+		);
 	});
 });

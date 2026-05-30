@@ -64,7 +64,8 @@ export class BookingService {
 			payment_status: BookingPaymentStatus.UNPAID,
 			amount_total: computeTotalAmountDue(ticketType, input.guests.length),
 			guests: input.guests,
-			ticket_ids: []
+			ticket_ids: [],
+			payment_proof_url: input.payment_proof_url
 		};
 
 		const createdBooking = await this.bookingRepository.insertReservation(booking);
@@ -74,8 +75,7 @@ export class BookingService {
 			booking_reference_no: createdBooking.reference_no,
 			count: createdBooking.guests.length,
 			ticket_type: createdBooking.ticket_type,
-			payment_proof_url: input.payment_proof_url,
-			payment_proof_filename: input.payment_proof_filename
+			payment_proof_url: input.payment_proof_url
 		});
 
 		return createdBooking;

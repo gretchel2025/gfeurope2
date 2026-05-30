@@ -25,7 +25,8 @@ export class SupabaseBookingRepository implements BookingRepository {
 			p_ticket_type: booking.ticket_type,
 			p_book_date: booking.book_date,
 			p_amount_total: booking.amount_total,
-			p_guests: booking.guests
+			p_guests: booking.guests,
+			p_payment_proof_url: booking.payment_proof_url ?? null
 		});
 
 		if (error) throwSupabaseError('booking reservation insert failed', error);

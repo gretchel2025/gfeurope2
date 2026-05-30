@@ -24,6 +24,9 @@
 		dateStyle: 'medium',
 		timeStyle: 'short'
 	}).format(new Date(booking.book_date));
+	const proofUrl = booking.payment_proof_url ?? '';
+	const proofUrlPath = proofUrl.split('?')[0].toLowerCase();
+	const isImageProof = /\.(png|jpe?g|gif|webp|avif)$/.test(proofUrlPath);
 </script>
 
 <AdminPage
@@ -70,45 +73,81 @@
 			</dl>
 		</AdminCard>
 
-		<AdminCard title="Actions" subtitle="Use these when the booking changes state.">
-			<div class="space-y-3">
-				{#if canSendPaymentReminderEmail}
-					<form action="?/sendPaymentReminderEmail" method="POST">
-						<AdminButton type="submit" variant="warning" fullWidth
-							>Send payment reminder</AdminButton
+		<div class="lg:col-span-2">
+			<AdminCard title="Payment Proof" subtitle="Uploaded bank-transfer receipt.">
+				{#if booking.payment_proof_url}
+					<div class="space-y-4">
+						<div class="overflow-hidden rounded-md border border-slate-200 bg-white">
+							{#if isImageProof}
+								<img
+									src={booking.payment_proof_url}
+									alt={`Payment proof for ${booking.reference_no}`}
+									class="max-h-[40rem] w-full object-contain"
+								/>
+							{:else}
+								<iframe
+									src={booking.payment_proof_url}
+									title={`Payment proof for ${booking.reference_no}`}
+									class="h-[28rem] w-full"
+								/>
+							{/if}
+						</div>
+						<a
+							href={booking.payment_proof_url}
+							target="_blank"
+							rel="noreferrer"
+							class="inline-flex w-full items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+						>
+							Open proof in new tab
+						</a>
+					</div>
+				{:else}
+					<p class="text-sm text-slate-600">No proof has been uploaded.</p>
+				{/if}
+			</AdminCard>
+		</div>
+
+		<div class="lg:col-span-2">
+			<AdminCard title="Actions" subtitle="Use these when the booking changes state.">
+				<div class="space-y-3">
+					{#if canSendPaymentReminderEmail}
+						<form action="?/sendPaymentReminderEmail" method="POST">
+							<AdminButton type="submit" variant="warning" fullWidth
+								>Send payment reminder</AdminButton
+							>
+						</form>
+					{/if}
+
+					<form action="?/markPaid" method="POST">
+						<AdminButton type="submit" variant="success" disabled={!canMarkAsPaid} fullWidth
+							>Mark paid</AdminButton
 						>
 					</form>
-				{/if}
 
-				<form action="?/markPaid" method="POST">
-					<AdminButton type="submit" variant="success" disabled={!canMarkAsPaid} fullWidth
-						>Mark paid</AdminButton
-					>
-				</form>
+					{#if canGenerateTicketsAction}
+						<form action="?/generateTickets" method="POST">
+							<AdminButton type="submit" fullWidth>Generate tickets</AdminButton>
+						</form>
+					{/if}
 
-				{#if canGenerateTicketsAction}
-					<form action="?/generateTickets" method="POST">
-						<AdminButton type="submit" fullWidth>Generate tickets</AdminButton>
-					</form>
-				{/if}
+					{#if canSendTicketsEmail}
+						<form action="?/sendTicketsEmail" method="POST">
+							<AdminButton type="submit" fullWidth>Email tickets</AdminButton>
+						</form>
+					{/if}
 
-				{#if canSendTicketsEmail}
-					<form action="?/sendTicketsEmail" method="POST">
-						<AdminButton type="submit" fullWidth>Email tickets</AdminButton>
-					</form>
-				{/if}
-
-				{#if canCancel}
-					<AdminButton
-						href={adminRoutes.booking.cancel(booking.reference_no)}
-						variant="danger"
-						fullWidth
-					>
-						Cancel reservation
-					</AdminButton>
-				{/if}
-			</div>
-		</AdminCard>
+					{#if canCancel}
+						<AdminButton
+							href={adminRoutes.booking.cancel(booking.reference_no)}
+							variant="danger"
+							fullWidth
+						>
+							Cancel reservation
+						</AdminButton>
+					{/if}
+				</div>
+			</AdminCard>
+		</div>
 	</div>
 
 	<BackLinks

@@ -7,7 +7,7 @@
  * repositories. That makes local setup, empty-database handling, and future
  * initialization logic easier to reason about.
  */
-import { appConfig } from '$lib/infrastructure/config/env.server';
+import { appConfig, assertCloudinaryConfigured } from '$lib/infrastructure/config/env.server';
 import { logger } from '$lib/infrastructure/logging/logger';
 import { ticketCounterService } from '$lib/server/http/services';
 
@@ -15,6 +15,7 @@ import { ticketCounterService } from '$lib/server/http/services';
 export async function bootstrapApplication(): Promise<void> {
 	logger.info('[INFO] bootstrapApplication() initializing app...');
 
+	assertCloudinaryConfigured();
 	await ensureCounters();
 
 	logger.info('[INFO] bootstrapApplication() initialization done');

@@ -1,15 +1,13 @@
 <script lang="ts">
+	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import { adminRoutes } from '$lib/navigation/adminRoutes';
 </script>
 
-<main class="container">
-
-    <article>
-        <h1>Booking Cancelled</h1>
-
-        <a href="/api/v0/booking/list">bookings list</a>
-
-    </article>
-
-    <a href="/api">admin home</a>
-</main>
-
+<AdminPage title="Booking Cancelled" subtitle="The reservation has been cancelled.">
+	<section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+		<div class="flex flex-wrap gap-4 text-sm font-semibold">
+			<a href={adminRoutes.booking.list} class="text-blue-700 hover:underline">Bookings list</a>
+			<a href={adminRoutes.home} class="text-blue-700 hover:underline">Admin home</a>
+		</div>
+	</section>
+</AdminPage>

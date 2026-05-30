@@ -5,7 +5,7 @@
 	export let backLabel = 'Admin home';
 </script>
 
-<main class="min-h-screen bg-slate-100 px-4 py-8 text-slate-900">
+<main class="admin-page-surface min-h-screen px-4 py-8 text-slate-900">
 	<section class="mx-auto flex w-full max-w-5xl flex-col gap-6">
 		<header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 			<div>

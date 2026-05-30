@@ -12,19 +12,19 @@
 	}
 </script>
 
-<main class="min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-white px-4 py-8">
+<main class="min-h-screen bg-white px-4 py-8 text-gray-800">
 	{#if booking}
 		<section class="max-w-4xl mx-auto">
 			<div class="text-center mb-8">
-				<h1 class="text-3xl sm:text-4xl font-bold text-yellow-600 dark:text-yellow-400">
+				<h1 class="text-3xl sm:text-4xl font-bold text-yellow-600">
 					Booking Reference: {booking.reference_no}
 				</h1>
-				<hr class="my-4 border-yellow-400 dark:border-yellow-600" />
+				<hr class="my-4 border-yellow-400" />
 			</div>
 
 			{#each ticketsData as ticketData, i}
-				<div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
-					<h2 class="text-xl font-semibold text-blue-600 dark:text-blue-300 mb-2">
+				<div class="bg-gray-100 rounded-lg p-4 mb-6 shadow-sm">
+					<h2 class="text-xl font-semibold text-blue-600 mb-2">
 						#{i + 1}: Ticket {ticketData.ticket.ticket_id}
 					</h2>
 					<p><strong>Name:</strong> {ticketData.ticket.name}</p>
@@ -38,10 +38,8 @@
 				</div>
 			{/each}
 
-			<div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md mb-6">
-				<h2 class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">
-					Booking Summary
-				</h2>
+			<div class="bg-white rounded-lg p-6 shadow-md mb-6">
+				<h2 class="text-2xl font-bold text-yellow-600 mb-4">Booking Summary</h2>
 				<p>
 					{booking.ticket_ids.length}
 					{formatTicketTypeLabel(booking.ticket_type)} tickets, €{booking.amount_total},
@@ -58,8 +56,8 @@
 				</div>
 			</div>
 
-			<div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md mb-6">
-				<h2 class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">Event Details</h2>
+			<div class="bg-white rounded-lg p-6 shadow-md mb-6">
+				<h2 class="text-2xl font-bold text-yellow-600 mb-4">Event Details</h2>
 				<ul class="list-disc pl-5 space-y-1">
 					<li>2026 EU and UK Grand Feast in Dublin</li>
 					<li>Date: October 3, 2026</li>
@@ -69,7 +67,7 @@
 				</ul>
 			</div>
 
-			<div class="text-center text-sm text-gray-600 dark:text-gray-300">
+			<div class="text-center text-sm text-gray-600">
 				<p>We hope you have a great time at the event!</p>
 				<p class="mt-1">Have a blessed day!</p>
 				<p>The Grand Feast EU and UK Team</p>
