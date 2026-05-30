@@ -8,7 +8,7 @@
  * easier to follow and gives routes a thin adapter role.
  */
 import { NotFoundError, ValidationError } from '$lib/application/errors';
-import type { BookingRepository, EventLogger } from '$lib/application/ports';
+import type { BookingRepository, EventLogger, EventRepository } from '$lib/application/ports';
 import type { Booking, CreateBookingInput, TicketWithQRCode } from '$lib/domain/booking';
 import {
 	canCancelBooking,
@@ -28,6 +28,7 @@ import type { NotificationService } from '$lib/application/services/notification
 export class BookingService {
 	constructor(
 		private readonly bookingRepository: BookingRepository,
+		private readonly eventRepository: EventRepository,
 		private readonly ticketCounterService: TicketCounterService,
 		private readonly ticketService: TicketService,
 		private readonly notificationService: NotificationService,
@@ -46,6 +47,11 @@ export class BookingService {
 			throw new ValidationError('validation failed: guest count must match quantity');
 		}
 
+		const event = await this.eventRepository.findById(input.event_id);
+		if (!event) {
+			throw new NotFoundError('event not found');
+		}
+
 		const counter = await this.ticketCounterService.getByTicketType(ticketType);
 		if (!counter) {
 			throw new NotFoundError('ticket counter is missing');
@@ -55,6 +61,7 @@ export class BookingService {
 		}
 
 		const booking: Booking = {
+			event_id: input.event_id,
 			reference_no: this.generateBookingReferenceNo(),
 			name: input.name,
 			email: input.email,

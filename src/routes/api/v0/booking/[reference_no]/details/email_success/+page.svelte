@@ -16,10 +16,10 @@
 		></div>
 		<p class="text-xs font-black uppercase tracking-[0.22em] text-[#005b72]">Booking Email</p>
 		<h1 id="email-sent-title" class="mt-4 text-3xl font-black tracking-tight text-slate-950">
-			Tickets Email Sent
+			Booking Email Sent
 		</h1>
 		<p class="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600">
-			The ticket email was sent successfully. You can return to this booking or continue managing
+			The email was sent successfully. You can return to this booking or continue managing
 			reservations.
 		</p>
 

@@ -1,9 +1,11 @@
 import type { Booking } from '$lib/domain/booking';
+import type { Event } from '$lib/domain/event';
 import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter } from '$lib/domain/ticketCounter';
 
 export type SupabaseBookingRow = {
+	event_id: string;
 	reference_no: string;
 	name: string;
 	email: string;
@@ -15,6 +17,16 @@ export type SupabaseBookingRow = {
 	guests: string[] | null;
 	ticket_ids: string[] | null;
 	payment_proof_url?: string | null;
+};
+
+export type SupabaseEventRow = {
+	event_id: string;
+	title: string;
+	short_description: string;
+	country: string;
+	venue: string;
+	datetime: string;
+	timezone: string;
 };
 
 export type SupabaseTicketRow = {
@@ -37,6 +49,7 @@ export type SupabaseTicketCounterRow = {
 
 export function mapBooking(row: SupabaseBookingRow): Booking {
 	return {
+		event_id: row.event_id,
 		reference_no: row.reference_no,
 		name: row.name,
 		email: row.email,
@@ -48,6 +61,18 @@ export function mapBooking(row: SupabaseBookingRow): Booking {
 		guests: row.guests ?? [],
 		ticket_ids: row.ticket_ids ?? [],
 		payment_proof_url: row.payment_proof_url ?? undefined
+	};
+}
+
+export function mapEvent(row: SupabaseEventRow): Event {
+	return {
+		event_id: row.event_id,
+		title: row.title,
+		short_description: row.short_description,
+		country: row.country,
+		venue: row.venue,
+		datetime: new Date(row.datetime).toISOString(),
+		timezone: row.timezone
 	};
 }
 

@@ -8,6 +8,7 @@
  * and easier to read because the dependencies are described by capability.
  */
 import type { Booking } from '$lib/domain/booking';
+import type { Event } from '$lib/domain/event';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
 import type { TicketStatus } from '$lib/domain/shared/enums';
@@ -27,6 +28,11 @@ export interface BookingRepository {
 	markPaid(referenceNo: string): Promise<void>;
 	cancelReservation(referenceNo: string): Promise<void>;
 	appendTicketId(referenceNo: string, ticketId: string): Promise<void>;
+}
+
+/** Persistence contract for event records. */
+export interface EventRepository {
+	findById(eventId: string): Promise<Event | null>;
 }
 
 /** Persistence contract for ticket records. */

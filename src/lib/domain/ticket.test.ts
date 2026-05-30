@@ -15,6 +15,7 @@ import {
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
 	return {
+		event_id: 'gfeu2026',
 		reference_no: 'BTEST001',
 		name: 'Ada Lovelace',
 		email: 'ada@example.com',

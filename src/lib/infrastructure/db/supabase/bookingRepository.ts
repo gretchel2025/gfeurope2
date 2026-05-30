@@ -17,7 +17,7 @@ export class SupabaseBookingRepository implements BookingRepository {
 
 	async insertReservation(booking: Booking): Promise<Booking> {
 		const { data, error } = await this.schema.rpc('create_booking_reservation', {
-			p_event_id: this.eventId,
+			p_event_id: booking.event_id,
 			p_reference_no: booking.reference_no,
 			p_name: booking.name,
 			p_email: booking.email,

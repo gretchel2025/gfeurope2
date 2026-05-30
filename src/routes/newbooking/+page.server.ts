@@ -2,6 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { NotFoundError } from '$lib/application/errors';
 import type { TicketCounter } from '$lib/domain/ticketCounter';
+import { appConfig } from '$lib/infrastructure/config/env.server';
 import { publicRoutes } from '$lib/navigation/adminRoutes';
 import { parseCreateBookingForm, parsePaymentProofFile } from '$lib/server/http/forms';
 import { kitAction, withKitErrors } from '$lib/server/http/handlers';
@@ -44,6 +45,7 @@ export const actions: Actions = {
 		const paymentProofUrl = await paymentProofStorage.uploadProof(paymentProofFile);
 		await bookingService.createNew({
 			...input,
+			event_id: appConfig.appEventId,
 			payment_proof_url: paymentProofUrl
 		});
 		throw redirect(303, publicRoutes.newBookingSuccess);

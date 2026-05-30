@@ -5,6 +5,10 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-30
 
+- Added a timeout around Resend email delivery so stalled provider requests do not leave
+  admin booking actions spinning indefinitely.
+- Added first-class Grand Feast event records in Supabase and booking validation against
+  the configured `APP_EVENT_ID`.
 - Added a `do-test-booking` Codex skill for preparing local two-ticket test
   bookings up to the final user-owned confirmation step.
 - Documented that Supabase schema changes must go through checked-in migration files

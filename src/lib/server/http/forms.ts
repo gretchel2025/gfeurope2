@@ -12,8 +12,10 @@ import type { CreateBookingInput } from '$lib/domain/booking';
 const allowedPaymentProofTypes = new Set(['application/pdf', 'image/png', 'image/jpeg']);
 const maxPaymentProofSizeBytes = 10 * 1024 * 1024;
 
+export type CreateBookingFormInput = Omit<CreateBookingInput, 'event_id'>;
+
 /** Parses the public booking form into the application's booking input shape. */
-export async function parseCreateBookingForm(formData: FormData): Promise<CreateBookingInput> {
+export async function parseCreateBookingForm(formData: FormData): Promise<CreateBookingFormInput> {
 	const name = readRequiredString(formData, 'name');
 	const email = readRequiredString(formData, 'email');
 	readRequiredString(formData, 'country');

@@ -16,6 +16,7 @@ export const FAMILY_DISCOUNT_RATE = 0.1;
 
 /** Canonical booking shape used by the application layer. */
 export type Booking = {
+	event_id: string;
 	reference_no: string;
 	name: string;
 	email: string;
@@ -31,6 +32,7 @@ export type Booking = {
 
 /** Input required to create a booking before defaults and ids are added. */
 export type CreateBookingInput = {
+	event_id: string;
 	name: string;
 	email: string;
 	city: string;

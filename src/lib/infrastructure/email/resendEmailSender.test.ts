@@ -29,6 +29,7 @@ describe('ResendEmailSender', () => {
 	});
 
 	afterEach(() => {
+		vi.useRealTimers();
 		Object.assign(appConfig.integrations, originalIntegrations);
 	});
 
@@ -109,5 +110,30 @@ describe('ResendEmailSender', () => {
 			code: 'EMAIL_ERROR',
 			status: 422
 		});
+	});
+
+	it('times out stalled Resend sends', async () => {
+		vi.useFakeTimers();
+		Object.assign(appConfig.integrations, {
+			resendApiKey: 're_test',
+			emailFrom: 'Grand Feast EU and UK <help@grandfeast.eu>',
+			emailReplyTo: ''
+		});
+		const send = vi.fn(
+			() =>
+				new Promise<never>(() => {
+					// Simulates a provider request that never resolves.
+				})
+		);
+
+		const sendPromise = new ResendEmailSender(() => ({ emails: { send } }), 25).send(message);
+		const expectedRejection = expect(sendPromise).rejects.toMatchObject({
+			code: 'EMAIL_ERROR',
+			status: 504,
+			message: 'email svc: timed out sending email to ada@example.com'
+		});
+
+		await vi.advanceTimersByTimeAsync(25);
+		await expectedRejection;
 	});
 });

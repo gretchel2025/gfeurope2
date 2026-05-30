@@ -14,6 +14,7 @@ import { TicketCounterService } from '$lib/application/services/ticketCounterSer
 import { TicketService } from '$lib/application/services/ticketService';
 import {
 	SupabaseBookingRepository,
+	SupabaseEventRepository,
 	SupabaseTicketCounterRepository,
 	SupabaseTicketRepository
 } from '$lib/infrastructure/db/supabase/repositories';
@@ -31,6 +32,7 @@ const randomIdGenerator = customAlphabet('23456789ABCDEFGHJKLMNPRSTUVWXYZ', 10);
 
 /** Repository implementations used by the service layer. */
 const bookingRepository = new SupabaseBookingRepository();
+const eventRepository = new SupabaseEventRepository();
 const ticketRepository = new SupabaseTicketRepository();
 const ticketCounterRepository = new SupabaseTicketCounterRepository();
 
@@ -60,6 +62,7 @@ export const ticketService = new TicketService(
 );
 export const bookingService = new BookingService(
 	bookingRepository,
+	eventRepository,
 	ticketCounterService,
 	ticketService,
 	notificationService,
@@ -73,6 +76,7 @@ export { paymentProofStorage };
 /** Raw repository exports for the occasional place that needs direct repository access. */
 export const repositories = {
 	bookingRepository,
+	eventRepository,
 	ticketRepository,
 	ticketCounterRepository
 };

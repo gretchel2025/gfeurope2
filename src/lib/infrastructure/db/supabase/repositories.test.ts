@@ -4,12 +4,14 @@ import type { Booking } from '$lib/domain/booking';
 import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 import { SupabaseBookingRepository } from '$lib/infrastructure/db/supabase/bookingRepository';
+import { SupabaseEventRepository } from '$lib/infrastructure/db/supabase/eventRepository';
 import { SupabaseTicketCounterRepository } from '$lib/infrastructure/db/supabase/ticketCounterRepository';
 import { SupabaseTicketRepository } from '$lib/infrastructure/db/supabase/ticketRepository';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 describe('Supabase repositories', () => {
 	const booking: Booking = {
+		event_id: 'event-test',
 		reference_no: 'B123',
 		name: 'Ada Lovelace',
 		email: 'ada@example.com',
@@ -77,6 +79,7 @@ describe('Supabase repositories', () => {
 				calls.push([name, params]);
 				return {
 					data: {
+						event_id: booking.event_id,
 						reference_no: booking.reference_no,
 						name: booking.name,
 						email: booking.email,
@@ -212,6 +215,51 @@ describe('Supabase repositories', () => {
 				}
 			]
 		]);
+	});
+
+	it('looks up events in the app schema by event id', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			select: (value: string) => {
+				calls.push(['select', value]);
+				return query;
+			},
+			eq: (key: string, value: unknown) => {
+				calls.push([key, value]);
+				return query;
+			},
+			maybeSingle: async () => ({
+				data: {
+					event_id: 'event-test',
+					title: 'Test Event',
+					short_description: 'A test event.',
+					country: 'Ireland',
+					venue: 'Test Venue',
+					datetime: '2026-10-03T12:00:00+01:00',
+					timezone: 'Europe/Dublin'
+				},
+				error: null
+			})
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseEventRepository(client);
+		await expect(repository.findById('event-test')).resolves.toEqual(
+			expect.objectContaining({ event_id: 'event-test', timezone: 'Europe/Dublin' })
+		);
+
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'events']);
+		expect(calls).toContainEqual(['event_id', 'event-test']);
 	});
 
 	it('scopes ticket counter lookups to the app schema and event id', async () => {

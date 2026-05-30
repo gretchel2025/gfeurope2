@@ -124,13 +124,15 @@ App data schema: `grandfeasteu`
 
 App data tables:
 
+- `events`
 - `bookings`
 - `tickets`
 - `ticket_counters`
 
-All app data tables include `event_id text not null default 'gfeu2026'`, `created_at`,
-and `updated_at`. The app scopes repository reads/writes by `APP_EVENT_ID`; prod/test
-separation comes from the selected Supabase project, not an `environment` column.
+The `events` table is keyed by `event_id`. `bookings`, `tickets`, and `ticket_counters`
+include `event_id text not null default 'gfeu2026'`, `created_at`, and `updated_at`.
+The app scopes repository reads/writes by `APP_EVENT_ID`; prod/test separation comes
+from the selected Supabase project, not an `environment` column.
 
 RLS is enabled on all `grandfeasteu` schema tables with no anon/authenticated policies.
 The schema is exposed to Supabase's Data API for server-side service-role access only.

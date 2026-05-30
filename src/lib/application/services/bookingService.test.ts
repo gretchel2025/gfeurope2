@@ -3,13 +3,15 @@ import { BookingService } from '$lib/application/services/bookingService';
 import type { NotificationService } from '$lib/application/services/notificationService';
 import type { TicketCounterService } from '$lib/application/services/ticketCounterService';
 import type { TicketService } from '$lib/application/services/ticketService';
-import type { BookingRepository, EventLogger } from '$lib/application/ports';
+import type { BookingRepository, EventLogger, EventRepository } from '$lib/application/ports';
 import type { Booking } from '$lib/domain/booking';
+import type { Event } from '$lib/domain/event';
 import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
 	return {
+		event_id: 'gfeu2026',
 		reference_no: 'BREF001',
 		name: 'Ada Lovelace',
 		email: 'ada@example.com',
@@ -38,7 +40,20 @@ function makeTicket(overrides: Partial<Ticket> = {}): Ticket {
 	};
 }
 
-function makeService(bookings: Booking[], tickets: Ticket[] = []) {
+function makeEvent(overrides: Partial<Event> = {}): Event {
+	return {
+		event_id: 'gfeu2026',
+		title: 'Together 2026',
+		short_description: 'A Grand Feast event.',
+		country: 'Ireland',
+		venue: "St. Helen's Hotel",
+		datetime: '2026-10-03T11:00:00.000Z',
+		timezone: 'Europe/Dublin',
+		...overrides
+	};
+}
+
+function makeService(bookings: Booking[], tickets: Ticket[] = [], events: Event[] = [makeEvent()]) {
 	const bookingRepository = {
 		insertReservation: vi.fn(async (booking: Booking) => booking),
 		findByReferenceNo: vi.fn(
@@ -50,6 +65,12 @@ function makeService(bookings: Booking[], tickets: Ticket[] = []) {
 		cancelReservation: vi.fn(),
 		appendTicketId: vi.fn()
 	} satisfies BookingRepository;
+
+	const eventRepository = {
+		findById: vi.fn(
+			async (eventId: string) => events.find((event) => event.event_id === eventId) ?? null
+		)
+	} satisfies EventRepository;
 
 	const ticketService = {
 		getById: vi.fn(
@@ -70,6 +91,7 @@ function makeService(bookings: Booking[], tickets: Ticket[] = []) {
 
 	const service = new BookingService(
 		bookingRepository,
+		eventRepository,
 		ticketCounterService,
 		ticketService,
 		notificationService,
@@ -80,6 +102,7 @@ function makeService(bookings: Booking[], tickets: Ticket[] = []) {
 	return {
 		service,
 		bookingRepository,
+		eventRepository,
 		ticketService: ticketService as TicketService & { getById: ReturnType<typeof vi.fn> }
 	};
 }
@@ -144,6 +167,7 @@ describe('BookingService.createNew', () => {
 		const { service, bookingRepository } = makeService([]);
 
 		const booking = await service.createNew({
+			event_id: 'gfeu2026',
 			name: 'Ada Lovelace',
 			email: 'ada@example.com',
 			city: 'Dublin',
@@ -156,8 +180,28 @@ describe('BookingService.createNew', () => {
 		expect(booking.payment_proof_url).toBe('https://res.cloudinary.com/demo/proof.pdf');
 		expect(bookingRepository.insertReservation).toHaveBeenCalledWith(
 			expect.objectContaining({
+				event_id: 'gfeu2026',
 				payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 			})
 		);
+	});
+
+	it('fails before reserving inventory when the event does not exist', async () => {
+		const { service, bookingRepository, eventRepository } = makeService([], [], []);
+
+		await expect(
+			service.createNew({
+				event_id: 'missing-event',
+				name: 'Ada Lovelace',
+				email: 'ada@example.com',
+				city: 'Dublin',
+				ticket_type: TicketType.STANDARD,
+				quantity: 1,
+				guests: ['Ada Lovelace']
+			})
+		).rejects.toThrow('event not found');
+
+		expect(eventRepository.findById).toHaveBeenCalledWith('missing-event');
+		expect(bookingRepository.insertReservation).not.toHaveBeenCalled();
 	});
 });
