@@ -164,6 +164,13 @@ RLS enabled and no anon/authenticated policies; server code uses the service-rol
 The `grandfeasteu` schema is exposed to Supabase's Data API only so the server-side
 service-role client can access it.
 
+Local schema changes must still use the repository migration workflow. Create migrations
+with `npx supabase migration new <descriptive_name>`, edit the generated SQL file, apply
+with `npx supabase migration up --local`, and verify with `npx supabase migration list
+--local` plus a focused query. Do not rely on direct dashboard edits, hosted SQL editor
+changes, or one-off local schema queries unless the same change is captured in a checked-in
+file under `supabase/migrations/`.
+
 ## Access Roles
 
 Access is controlled by Supabase Auth `app_metadata.roles`. The app recognizes these

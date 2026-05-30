@@ -57,6 +57,25 @@ Local auth failure map:
 - App page says signed in but access unavailable: grant roles with
   `make grant-local-roles EMAIL=...`, then refresh the session by signing out and back in.
 
+## Database Migration Workflow
+
+All Supabase schema changes must be made through checked-in migration files in
+`supabase/migrations/` and applied with Supabase migration commands. Do not make schema
+changes directly in hosted dashboards, ad hoc SQL consoles, or one-off local queries
+unless the same change is first captured in a migration file.
+
+For a new schema change:
+
+1. Create the migration with `npx supabase migration new <descriptive_name>`.
+2. Write the SQL in the generated file under `supabase/migrations/`.
+3. Apply locally with `npx supabase migration up --local`.
+4. Verify with `npx supabase migration list --local` and a focused schema/data query.
+5. Commit the migration with the application code that depends on it.
+
+For existing migrations, apply missed local migrations with `npx supabase migration up
+--local`; do not repair or manually edit migration history unless reconciling a known
+history mismatch.
+
 ## Build, Test, and Development Commands
 
 - `make install` or `npm install`: install dependencies.

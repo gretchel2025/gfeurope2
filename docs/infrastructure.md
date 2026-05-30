@@ -137,6 +137,14 @@ The schema is exposed to Supabase's Data API for server-side service-role access
 App data access uses the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose that key
 to browser code.
 
+Schema changes must be represented as checked-in SQL files under `supabase/migrations/`
+and applied through Supabase migration commands. Do not change schemas directly in the
+Supabase dashboard, hosted SQL editor, or ad hoc local queries without first creating the
+matching migration. Create new migrations with `npx supabase migration new
+<descriptive_name>`, apply locally with `npx supabase migration up --local`, verify with
+`npx supabase migration list --local` and a focused query, then deploy/apply the same
+migration through the normal environment workflow.
+
 Important database env vars:
 
 - `APP_EVENT_ID`
