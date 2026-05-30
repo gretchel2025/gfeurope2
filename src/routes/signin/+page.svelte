@@ -13,8 +13,11 @@
 	let localUsername = data.allowLocalPasswordAuth ? 'admin' : '';
 	let localPassword = data.allowLocalPasswordAuth ? 'password' : '';
 	let localSignInLoading = false;
+	let googleSignInLoading = false;
+	let signOutLoading = false;
 
 	async function signOutCurrentUser() {
+		signOutLoading = true;
 		await signOutAuth($page.data.supabaseAuth);
 		await invalidateAll();
 		await goto('/signin', { invalidateAll: true });
@@ -22,6 +25,7 @@
 
 	async function signInWithGoogle() {
 		signInError = '';
+		googleSignInLoading = true;
 		const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(
 			data.callbackURL
 		)}`;
@@ -35,6 +39,7 @@
 
 		if (error) {
 			signInError = 'Unable to start Google sign-in. Please try again.';
+			googleSignInLoading = false;
 		}
 	}
 
@@ -79,9 +84,14 @@
 				</p>
 				<button
 					on:click={signOutCurrentUser}
-					class="w-full bg-[#d64b55] px-6 py-3 font-bold text-white transition hover:brightness-110"
+					disabled={signOutLoading}
+					aria-busy={signOutLoading}
+					class={`inline-flex w-full items-center justify-center gap-2 bg-[#d64b55] px-6 py-3 font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 ${
+						signOutLoading ? 'is-loading' : ''
+					}`}
 				>
-					Sign Out
+					<span class="button-spinner" aria-hidden="true"></span>
+					<span>{signOutLoading ? 'Signing out...' : 'Sign Out'}</span>
 				</button>
 
 				<a href={data.callbackURL} class="conference-button px-4 py-3 text-sm"> Continue </a>
@@ -97,8 +107,16 @@
 				{/if}
 
 				{#if data.hasGoogleAuth}
-					<button on:click={signInWithGoogle} class="conference-button w-full px-6 py-3 text-sm">
-						Sign in with Google
+					<button
+						on:click={signInWithGoogle}
+						disabled={googleSignInLoading}
+						aria-busy={googleSignInLoading}
+						class={`conference-button w-full px-6 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${
+							googleSignInLoading ? 'is-loading' : ''
+						}`}
+					>
+						<span class="button-spinner" aria-hidden="true"></span>
+						<span>{googleSignInLoading ? 'Opening Google...' : 'Sign in with Google'}</span>
 					</button>
 				{/if}
 
@@ -142,9 +160,13 @@
 						<button
 							type="submit"
 							disabled={localSignInLoading}
-							class="conference-button w-full px-6 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+							aria-busy={localSignInLoading}
+							class={`conference-button w-full px-6 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${
+								localSignInLoading ? 'is-loading' : ''
+							}`}
 						>
-							{localSignInLoading ? 'Signing in...' : 'Sign in locally'}
+							<span class="button-spinner" aria-hidden="true"></span>
+							<span>{localSignInLoading ? 'Signing in...' : 'Sign in locally'}</span>
 						</button>
 					</form>
 				{/if}

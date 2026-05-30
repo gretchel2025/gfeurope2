@@ -6,7 +6,10 @@
 
 	export let data: PageData;
 
+	let signOutLoading = false;
+
 	async function signOutCurrentUser() {
+		signOutLoading = true;
 		await signOutAuth($page.data.supabaseAuth);
 		await invalidateAll();
 		await goto('/signin', { invalidateAll: true });
@@ -29,9 +32,14 @@
 		<div class="mt-6 space-y-3">
 			<button
 				on:click={signOutCurrentUser}
-				class="w-full bg-[#d64b55] px-6 py-3 font-bold text-white transition hover:brightness-110"
+				disabled={signOutLoading}
+				aria-busy={signOutLoading}
+				class={`inline-flex w-full items-center justify-center gap-2 bg-[#d64b55] px-6 py-3 font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 ${
+					signOutLoading ? 'is-loading' : ''
+				}`}
 			>
-				Sign Out
+				<span class="button-spinner" aria-hidden="true"></span>
+				<span>{signOutLoading ? 'Signing out...' : 'Sign Out'}</span>
 			</button>
 			<a href="/" class="conference-button px-4 py-3 text-sm"> Go Home </a>
 		</div>

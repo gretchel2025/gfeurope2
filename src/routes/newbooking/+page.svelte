@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { City, Country } from 'country-state-city';
 	import {
 		computeFamilyDiscountAmount,
 		computeSubtotalAmount,
@@ -23,17 +23,27 @@
 	type CountryOption = {
 		isoCode: string;
 		name: string;
+		searchKey: string;
 	};
 
 	type CityOption = {
 		label: string;
 		value: string;
+		searchKey: string;
 	};
 
-	const MAX_TYPEAHEAD_OPTIONS = 80;
+	const MAX_TYPEAHEAD_OPTIONS = 40;
 	const steps = ['Ticket', 'Details', 'Guests', 'Review'];
 	const now = new Date();
 	const earlyBirdActive = isStandardEarlyBirdActive(now);
+	const countries: CountryOption[] = Country.getAllCountries()
+		.map((country) => ({
+			isoCode: country.isoCode,
+			name: country.name,
+			searchKey: normalizeTypeaheadValue(country.name)
+		}))
+		.sort((a, b) => a.name.localeCompare(b.name));
+	const cityOptionsByCountry = new Map<string, CityOption[]>();
 
 	const ticketOptions: TicketOption[] = [
 		{
@@ -72,10 +82,8 @@
 	let countryIso = '';
 	let countryName = '';
 	let previousCountryIso = '';
-	let countries: CountryOption[] = [];
 	let cities: CityOption[] = [];
 	let citySearch = '';
-	let citiesLoading = false;
 	let paymentProofFileName = '';
 	let paymentProofError = '';
 	let paymentProofSelected = false;
@@ -83,13 +91,7 @@
 	let bookingForm: HTMLFormElement;
 	let showNonRefundableModal = false;
 	let confirmedNonRefundable = false;
-
-	onMount(async () => {
-		const { Country } = await import('country-state-city');
-		countries = Country.getAllCountries()
-			.map((country) => ({ isoCode: country.isoCode, name: country.name }))
-			.sort((a, b) => a.name.localeCompare(b.name));
-	});
+	let isSubmitting = false;
 
 	$: selectedTicketOption = ticketOptions.find((option) => option.value === ticketType);
 	$: availableTickets = selectedTicketOption?.available ?? 0;
@@ -105,15 +107,15 @@
 		? computeTotalAmountDue(selectedTicketOption.value, quantity, now)
 		: 0;
 	$: isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-	$: selectedCountry = findCountryByName(countrySearch);
+	$: selectedCountry = findCountryByName(countrySearch, countries);
 	$: countryIso = selectedCountry?.isoCode ?? '';
 	$: countryName = selectedCountry?.name ?? '';
 	$: selectedCityName = citySearch.trim();
 	$: primaryGuestName = guests[0]?.trim() ?? '';
 	$: bookingLocation =
 		selectedCityName && countryName ? `${selectedCityName}, ${countryName}` : selectedCityName;
-	$: filteredCountries = filterCountryOptions(countrySearch);
-	$: filteredCities = filterCityOptions(citySearch);
+	$: filteredCountries = filterCountryOptions(countrySearch, countries);
+	$: filteredCities = filterCityOptions(citySearch, cities);
 	$: emailValidationMessage = getEmailValidationMessage(email, detailsStepSubmitted);
 	$: canContinueTicket =
 		Boolean(selectedTicketOption) && quantity > 0 && quantity <= availableTickets;
@@ -131,21 +133,25 @@
 	$: if (countryIso !== previousCountryIso) {
 		previousCountryIso = countryIso;
 		citySearch = '';
-		void loadCities(countryIso);
+		loadCities(countryIso);
 	}
 
 	$: if (quantity > maxQuantity && maxQuantity > 0) {
 		quantity = maxQuantity;
 	}
 
-	async function loadCities(isoCode: string) {
+	function loadCities(isoCode: string) {
 		cities = [];
 		if (!isoCode) {
 			return;
 		}
 
-		citiesLoading = true;
-		const { City } = await import('country-state-city');
+		const cachedOptions = cityOptionsByCountry.get(isoCode);
+		if (cachedOptions) {
+			cities = cachedOptions;
+			return;
+		}
+
 		const seen = new Set<string>();
 		const cityNames = (City.getCitiesOfCountry(isoCode) ?? [])
 			.map((city) => city.name.trim())
@@ -164,10 +170,16 @@
 			return isDistrictVariant ? names : [...names, cityName];
 		}, []);
 
-		cities = simplifiedNames
+		const cityOptions = simplifiedNames
 			.sort((a, b) => a.localeCompare(b))
-			.map((cityName) => ({ label: cityName, value: cityName }));
-		citiesLoading = false;
+			.map((cityName) => ({
+				label: cityName,
+				value: cityName,
+				searchKey: normalizeTypeaheadValue(cityName)
+			}));
+
+		cityOptionsByCountry.set(isoCode, cityOptions);
+		cities = cityOptions;
 	}
 
 	function isCityDistrictVariant(cityName: string, parentName: string) {
@@ -176,45 +188,42 @@
 		return city !== parent && (city.startsWith(`${parent} `) || city.startsWith(`${parent}-`));
 	}
 
-	function findCountryByName(value: string) {
+	function findCountryByName(value: string, countryOptions: CountryOption[]) {
 		const normalizedValue = normalizeTypeaheadValue(value);
-		return countries.find((country) => normalizeTypeaheadValue(country.name) === normalizedValue);
+		return countryOptions.find((country) => country.searchKey === normalizedValue);
 	}
 
-	function filterCountryOptions(search: string) {
+	function filterCountryOptions(search: string, countryOptions: CountryOption[]) {
 		const normalizedSearch = normalizeTypeaheadValue(search);
 		const options = normalizedSearch
-			? countries.filter((country) =>
-					normalizeTypeaheadValue(country.name).includes(normalizedSearch)
-				)
-			: countries;
+			? countryOptions.filter((country) => country.searchKey.includes(normalizedSearch))
+			: countryOptions;
 
 		return [...options]
 			.sort(
 				(a, b) =>
-					rankTypeaheadOption(a.name, normalizedSearch) -
-					rankTypeaheadOption(b.name, normalizedSearch)
+					rankTypeaheadKey(a.searchKey, normalizedSearch) -
+					rankTypeaheadKey(b.searchKey, normalizedSearch)
 			)
 			.slice(0, MAX_TYPEAHEAD_OPTIONS);
 	}
 
-	function filterCityOptions(search: string) {
+	function filterCityOptions(search: string, cityOptions: CityOption[]) {
 		const normalizedSearch = normalizeTypeaheadValue(search);
 		const options = normalizedSearch
-			? cities.filter((city) => normalizeTypeaheadValue(city.label).includes(normalizedSearch))
-			: cities;
+			? cityOptions.filter((city) => city.searchKey.includes(normalizedSearch))
+			: cityOptions;
 
 		return [...options]
 			.sort(
 				(a, b) =>
-					rankTypeaheadOption(a.label, normalizedSearch) -
-					rankTypeaheadOption(b.label, normalizedSearch)
+					rankTypeaheadKey(a.searchKey, normalizedSearch) -
+					rankTypeaheadKey(b.searchKey, normalizedSearch)
 			)
 			.slice(0, MAX_TYPEAHEAD_OPTIONS);
 	}
 
-	function rankTypeaheadOption(label: string, search: string) {
-		const normalizedLabel = normalizeTypeaheadValue(label);
+	function rankTypeaheadKey(normalizedLabel: string, search: string) {
 		if (!search) return 0;
 		if (normalizedLabel === search) return 0;
 		if (normalizedLabel.startsWith(search)) return 1;
@@ -296,6 +305,7 @@
 	function handleSubmit(event: SubmitEvent) {
 		if (currentStep !== 4 || !canReserve) {
 			event.preventDefault();
+			isSubmitting = false;
 			if (!paymentProofSelected) {
 				paymentProofError = 'Please upload your proof of payment before submitting.';
 			}
@@ -304,18 +314,24 @@
 
 		if (!confirmedNonRefundable) {
 			event.preventDefault();
+			isSubmitting = false;
 			showNonRefundableModal = true;
+			return;
 		}
+
+		isSubmitting = true;
 	}
 
 	function cancelNonRefundableConfirmation() {
 		showNonRefundableModal = false;
 		confirmedNonRefundable = false;
+		isSubmitting = false;
 	}
 
 	function confirmNonRefundableAndSubmit() {
 		showNonRefundableModal = false;
 		confirmedNonRefundable = true;
+		isSubmitting = true;
 		bookingForm.requestSubmit();
 	}
 
@@ -559,15 +575,11 @@
 									id="city"
 									type="text"
 									list="city-options"
-									placeholder={countryIso
-										? citiesLoading
-											? 'Loading cities...'
-											: 'Type city, e.g. Berlin'
-										: 'Choose country first'}
+									placeholder={countryIso ? 'Type city, e.g. Berlin' : 'Choose country first'}
 									bind:value={citySearch}
 									autocomplete="off"
 									class="w-full px-4 py-3"
-									disabled={!countryIso || citiesLoading}
+									disabled={!countryIso}
 								/>
 								<datalist id="city-options">
 									{#each filteredCities as city}
@@ -691,9 +703,9 @@
 						type="button"
 						class="conference-button-secondary px-6 py-3 text-sm"
 						on:click={() => (currentStep = Math.max(1, currentStep - 1))}
-						disabled={currentStep === 1}
-					>
-						Back
+					disabled={currentStep === 1}
+				>
+					Back
 					</button>
 
 					{#if currentStep < 4}
@@ -709,10 +721,14 @@
 					{:else}
 						<button
 							type="submit"
-							class="conference-button px-8 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-							disabled={!canReserve}
+							class={`conference-button px-8 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${
+								isSubmitting ? 'is-loading' : ''
+							}`}
+							disabled={!canReserve || isSubmitting}
+							aria-busy={isSubmitting}
 						>
-							Reserve Now
+							<span class="button-spinner" aria-hidden="true"></span>
+							<span>{isSubmitting ? 'Submitting...' : 'Reserve Now'}</span>
 						</button>
 					{/if}
 				</div>
@@ -786,15 +802,19 @@
 							type="button"
 							class="conference-button-secondary px-6 py-3 text-sm"
 							on:click={cancelNonRefundableConfirmation}
+							disabled={isSubmitting}
 						>
 							Cancel
 						</button>
 						<button
 							type="button"
-							class="conference-button px-6 py-3 text-sm"
+							class={`conference-button px-6 py-3 text-sm ${isSubmitting ? 'is-loading' : ''}`}
+							aria-busy={isSubmitting}
+							disabled={isSubmitting}
 							on:click={confirmNonRefundableAndSubmit}
 						>
-							Yes, Submit Booking
+							<span class="button-spinner" aria-hidden="true"></span>
+							<span>{isSubmitting ? 'Submitting...' : 'Yes, Submit Booking'}</span>
 						</button>
 					</div>
 				</div>

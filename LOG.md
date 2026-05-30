@@ -5,6 +5,14 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-30
 
+- Added visible loading states to booking, sign-in, error recovery, and shared
+  admin action buttons to reduce duplicate submissions during long-running work.
+- Simplified booking country and city option loading so typeahead data is available
+  synchronously and city lists are cached per selected country.
+- Fixed Supabase ticket type constraints so GrandFeast Plus bookings can be created
+  under the 2026 ticket model.
+- Restyled booking reservation, payment reminder, and eTicket emails with richer
+  event details and updated sender identity.
 - Removed the public aurora treatment from the admin shell, added a subtle light
   admin background treatment, and styled admin success/error pages.
 - Focused admin reports on paid ticket sales by city and unpaid bookings by city.
@@ -65,9 +73,8 @@ test sends, site availability checks, or command-only housekeeping.
   access-policy diagrams for maintainers.
 - Migrated transactional email delivery from Postmark to Resend using the verified
   `grandfeast.eu` sending domain.
-- Configured Resend environment variables for live dev and production, with live
-  dev/local mail sent from `test@grandfeast.eu` and production mail sent from
-  `admin@grandfeast.eu`.
+- Configured Resend environment variables for live dev and production, with mail sent
+  from `Grand Feast EU and UK <help@grandfeast.eu>`.
 - Redeployed live dev from the `dev` branch after the Resend migration.
 - Added local Supabase Google OAuth provider configuration using env-based client
   credentials.

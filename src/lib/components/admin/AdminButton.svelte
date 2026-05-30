@@ -4,6 +4,10 @@
 	export let variant: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' = 'primary';
 	export let disabled = false;
 	export let fullWidth = false;
+	export let loading = false;
+	export let loadingText = 'Working...';
+
+	let clickedLoading = false;
 
 	const variants = {
 		primary: 'bg-blue-700 text-white hover:bg-blue-800',
@@ -13,21 +17,40 @@
 		danger: 'bg-red-700 text-white hover:bg-red-800'
 	};
 
+	$: isLoading = loading || clickedLoading;
+	$: isDisabled = disabled || isLoading;
 	$: classes = [
-		'inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold shadow-sm transition',
+		'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold shadow-sm transition',
 		fullWidth ? 'w-full' : '',
-		disabled ? 'cursor-not-allowed opacity-50' : variants[variant]
+		isDisabled ? 'cursor-not-allowed opacity-50' : variants[variant],
+		isLoading ? 'is-loading' : ''
 	]
 		.filter(Boolean)
 		.join(' ');
+
+	function handleClick() {
+		if (type === 'submit' && !isDisabled) {
+			clickedLoading = true;
+		}
+	}
 </script>
 
 {#if href}
-	<a class={classes} href={disabled ? undefined : href} aria-disabled={disabled}>
-		<slot />
+	<a class={classes} href={isDisabled ? undefined : href} aria-disabled={isDisabled}>
+		{#if isLoading}
+			<span class="button-spinner" aria-hidden="true"></span>
+			<span>{loadingText}</span>
+		{:else}
+			<slot />
+		{/if}
 	</a>
 {:else}
-	<button class={classes} {type} {disabled}>
-		<slot />
+	<button class={classes} {type} disabled={isDisabled} aria-busy={isLoading} on:click={handleClick}>
+		{#if isLoading}
+			<span class="button-spinner" aria-hidden="true"></span>
+			<span>{loadingText}</span>
+		{:else}
+			<slot />
+		{/if}
 	</button>
 {/if}

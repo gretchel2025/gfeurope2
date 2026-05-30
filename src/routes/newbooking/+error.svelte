@@ -1,5 +1,8 @@
 <script lang="ts">
+	let refreshing = false;
+
 	function refreshPage() {
+		refreshing = true;
 		location.reload();
 	}
 </script>
@@ -13,8 +16,17 @@
 		</hgroup>
 
 		<div class="flex flex-col justify-center gap-4 sm:flex-row">
-			<button type="button" on:click={refreshPage} class="conference-button px-6 py-3 text-sm">
-				Refresh
+			<button
+				type="button"
+				on:click={refreshPage}
+				disabled={refreshing}
+				aria-busy={refreshing}
+				class={`conference-button px-6 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${
+					refreshing ? 'is-loading' : ''
+				}`}
+			>
+				<span class="button-spinner" aria-hidden="true"></span>
+				<span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
 			</button>
 
 			<a href="/" class="conference-button-secondary px-6 py-3 text-center text-sm"> Home </a>
