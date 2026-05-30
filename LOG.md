@@ -5,6 +5,9 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-30
 
+- Applied live-dev Supabase schema updates for `payment_proof_url` and GrandFeast
+  Plus ticket constraints, then repaired `77 Labs Test` migration history to match
+  the local migration versions.
 - Added visible loading states to booking, sign-in, error recovery, and shared
   admin action buttons to reduce duplicate submissions during long-running work.
 - Simplified booking country and city option loading so typeahead data is available
