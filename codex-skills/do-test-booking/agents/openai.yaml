@@ -1,0 +1,4 @@
+interface:
+  display_name: "Do Test Booking"
+  short_description: "Prepare a local Grand Feast test booking"
+  default_prompt: "Use $do-test-booking to prepare a local two-ticket test booking."

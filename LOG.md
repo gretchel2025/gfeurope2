@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-30
 
+- Added a `do-test-booking` Codex skill for preparing local two-ticket test
+  bookings up to the final user-owned confirmation step.
 - Documented that Supabase schema changes must go through checked-in migration files
   and Supabase migration commands before being applied locally or to hosted projects.
 - Updated the Cloudflare dev proxy to preserve Supabase auth `Set-Cookie` headers
