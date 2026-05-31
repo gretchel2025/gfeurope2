@@ -7,6 +7,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 - Made public ticket selection more reliable on mobile by forcing homepage ticket links
   to use full navigation and changing booking ticket cards to native radio inputs.
+- Added default favicon and Apple touch icon static files so mobile browsers do not
+  request missing icon routes through SvelteKit.
 - Added a live-dev-only Supabase email/password sign-in path for Codex service-account
   testing, with local-only `.env` password storage and a setup helper for `77 Labs Test`.
 - Documented that agents should check for missing database migrations after `git pull`
