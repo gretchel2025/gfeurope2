@@ -4,6 +4,22 @@ import type { PublicSession } from '$lib/infrastructure/auth/session';
 
 // See https://kit.svelte.dev/docs/types#app for information about these interfaces
 declare global {
+	interface Window {
+		__grandfeastLastClientError?: {
+			type?: string;
+			name?: string;
+			message?: string;
+			path?: string;
+			timestamp?: string;
+			filename?: string;
+			lineno?: number;
+			colno?: number;
+			resource?: string;
+			stack?: string;
+			userAgent?: string;
+		};
+	}
+
 	namespace App {
 		interface Error {
 			message: string;

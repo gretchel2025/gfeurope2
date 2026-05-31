@@ -5,6 +5,85 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png" />
 		<meta name="viewport" content="width=device-width" />
+		<script>
+			(function () {
+				var storageKey = 'grandfeast:last-client-error';
+
+				function serializeError(input) {
+					if (!input) return {};
+					if (input instanceof Error) {
+						return {
+							name: input.name,
+							message: input.message,
+							stack: input.stack
+						};
+					}
+					if (typeof input === 'object') {
+						return {
+							name: input.name,
+							message: input.message || String(input),
+							stack: input.stack
+						};
+					}
+					return {
+						message: String(input)
+					};
+				}
+
+				function record(payload) {
+					var diagnostic = Object.assign(
+						{
+							timestamp: new Date().toISOString(),
+							path: location.pathname,
+							userAgent: navigator.userAgent
+						},
+						payload
+					);
+
+					window.__grandfeastLastClientError = diagnostic;
+					try {
+						sessionStorage.setItem(storageKey, JSON.stringify(diagnostic));
+					} catch (_) {
+						// Best effort only; private browsing/storage limits must not create another error.
+					}
+				}
+
+				window.addEventListener('error', function (event) {
+					var resourceTarget = event.target;
+					var isResourceError =
+						resourceTarget &&
+						resourceTarget !== window &&
+						(resourceTarget.src || resourceTarget.href);
+
+					if (isResourceError) {
+						record({
+							type: 'resource-error',
+							message: 'Resource failed to load',
+							resource: resourceTarget.src || resourceTarget.href
+						});
+						return;
+					}
+
+					record(
+						Object.assign(serializeError(event.error), {
+							type: 'window-error',
+							message: event.message,
+							filename: event.filename,
+							lineno: event.lineno,
+							colno: event.colno
+						})
+					);
+				});
+
+				window.addEventListener('unhandledrejection', function (event) {
+					record(
+						Object.assign(serializeError(event.reason), {
+							type: 'unhandled-rejection'
+						})
+					);
+				});
+			})();
+		</script>
 		%sveltekit.head%
 		<title>Grand Feast EU & UK</title>
 		<script src="https://cdn.tailwindcss.com"></script>

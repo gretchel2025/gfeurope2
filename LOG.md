@@ -11,6 +11,8 @@ test sends, site availability checks, or command-only housekeeping.
   and identity payloads are not serialized into SvelteKit page data.
 - Added live-dev/local error diagnostics to public error pages so browser-visible 500s
   include status, path, message, and stack details without exposing them in production.
+- Added early client-side error capture so live-dev browser 500 pages can display
+  hydration/runtime failures that do not reach server logs.
 - Made public ticket selection more reliable on mobile by forcing homepage ticket links
   to use full navigation and changing booking ticket cards to native radio inputs.
 - Added default favicon and Apple touch icon static files so mobile browsers do not
