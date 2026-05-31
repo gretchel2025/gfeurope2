@@ -23,7 +23,7 @@
 			<h1 class="text-3xl font-black text-white">You are signed in</h1>
 			<p class="text-[#fff3df]/75">
 				Your account
-				<span class="font-semibold text-white">{data.session.user.email}</span>
+				<span class="font-semibold text-white">{data.session?.user.email}</span>
 				does not have permission to access this page.
 			</p>
 			<p class="text-[#fff3df]/75">Please contact an admin if you need access.</p>

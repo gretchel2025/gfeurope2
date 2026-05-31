@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { AppSession } from './session';
-import { getAuthSession, getSessionRoles } from './session';
+import { getAuthSession, getSessionRoles, toPublicSession } from './session';
 import { getSessionUser } from './sessionUser';
 
 vi.mock('$lib/infrastructure/logging/logger', () => ({
@@ -72,6 +72,23 @@ describe('Supabase session mapping', () => {
 			[]
 		);
 		expect(getSessionRoles(sessionWith({ email: 'admin@example.com', roles: null }))).toEqual([]);
+	});
+
+	it('only exposes minimal session data to browser pages', () => {
+		expect(
+			toPublicSession(
+				sessionWith({
+					email: 'Admin@Example.com',
+					name: 'Admin User',
+					roles: ['tester', 'admin']
+				})
+			)
+		).toEqual({
+			user: {
+				email: 'Admin@Example.com'
+			}
+		});
+		expect(toPublicSession(null)).toBeNull();
 	});
 
 	it('treats failed session lookup as signed out', async () => {

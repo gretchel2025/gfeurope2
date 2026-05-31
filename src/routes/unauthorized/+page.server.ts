@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { getAuthSession } from '$lib/infrastructure/auth/session';
+import { getAuthSession, toPublicSession } from '$lib/infrastructure/auth/session';
 
 export const load: PageServerLoad = async (event) => {
 	const session = await getAuthSession(event);
@@ -10,6 +10,6 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	return {
-		session
+		session: toPublicSession(session)
 	};
 };

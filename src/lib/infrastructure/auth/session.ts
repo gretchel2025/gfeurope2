@@ -4,6 +4,11 @@ import { normalizeUserRoles, type UserRole } from '$lib/domain/user';
 import { logger } from '$lib/infrastructure/logging/logger';
 
 export type AppSession = Session;
+export type PublicSession = {
+	user: {
+		email: string | null;
+	};
+};
 
 export async function getAuthSession(event: RequestEvent): Promise<AppSession | null> {
 	let sessionResult;
@@ -34,4 +39,16 @@ export async function getAuthSession(event: RequestEvent): Promise<AppSession | 
 
 export function getSessionRoles(session: AppSession | null): UserRole[] {
 	return normalizeUserRoles(session?.user?.app_metadata?.roles);
+}
+
+export function toPublicSession(session: AppSession | null): PublicSession | null {
+	if (!session) {
+		return null;
+	}
+
+	return {
+		user: {
+			email: session.user.email ?? null
+		}
+	};
 }

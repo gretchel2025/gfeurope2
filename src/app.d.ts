@@ -1,5 +1,6 @@
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 import type { SupabaseBrowserConfig } from '$lib/infrastructure/auth/authClient';
+import type { PublicSession } from '$lib/infrastructure/auth/session';
 
 // See https://kit.svelte.dev/docs/types#app for information about these interfaces
 declare global {
@@ -10,7 +11,7 @@ declare global {
 			safeGetSession(): Promise<{ session: Session | null; user: User | null }>;
 		}
 		interface PageData {
-			session?: Session | null;
+			session?: PublicSession | null;
 			supabaseAuth?: SupabaseBrowserConfig;
 		}
 		// interface Platform {}
