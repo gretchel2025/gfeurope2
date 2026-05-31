@@ -298,7 +298,9 @@
 					</li>
 				</ul>
 
-				<a href="/newbooking" class="conference-button px-5 py-3 text-sm"> Select </a>
+				<a href="/newbooking" data-sveltekit-reload class="conference-button px-5 py-3 text-sm">
+					Select
+				</a>
 			</div>
 
 			<div
@@ -336,7 +338,9 @@
 							: 'Family discount where eligible'}
 					</li>
 				</ul>
-				<a href="/newbooking" class="conference-button px-5 py-3 text-sm"> Select </a>
+				<a href="/newbooking" data-sveltekit-reload class="conference-button px-5 py-3 text-sm">
+					Select
+				</a>
 			</div>
 			<div
 				class="ticket-card p-6 flex flex-col transition-transform duration-300 ease-in-out hover:-translate-y-1"

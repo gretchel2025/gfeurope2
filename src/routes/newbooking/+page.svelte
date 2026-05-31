@@ -401,19 +401,25 @@
 
 						<div class="grid gap-4 md:grid-cols-2">
 							{#each ticketOptions as option}
-								<button
-									type="button"
-									class={`conference-card p-5 text-left transition ${
+								<label
+									class={`conference-card block p-5 text-left transition focus-within:ring-2 focus-within:ring-[#f3c15f]/40 ${
 										ticketType === option.ticket_type_id
 											? 'border-[#f3c15f] ring-2 ring-[#f3c15f]/35'
 											: option.available < 1
 												? 'cursor-not-allowed opacity-55'
-												: 'hover:border-[#f3c15f]/55'
+												: 'cursor-pointer hover:border-[#f3c15f]/55'
 									}`}
-									aria-pressed={ticketType === option.ticket_type_id}
-									disabled={option.available < 1}
-									on:click={() => selectTicket(option.ticket_type_id)}
+									aria-disabled={option.available < 1}
 								>
+									<input
+										type="radio"
+										name="ticket-option"
+										value={option.ticket_type_id}
+										checked={ticketType === option.ticket_type_id}
+										disabled={option.available < 1}
+										class="sr-only"
+										on:change={() => selectTicket(option.ticket_type_id)}
+									/>
 									<div class="flex items-start justify-between gap-4">
 										<div>
 											<p class="text-2xl font-black text-white">{option.label}</p>
@@ -461,7 +467,7 @@
 												: 'Currently sold out'}
 										</p>
 									{/if}
-								</button>
+								</label>
 							{/each}
 						</div>
 
