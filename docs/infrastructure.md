@@ -82,6 +82,8 @@ Important deployment-related env vars:
 - `PUBLIC_SUPABASE_URL`
 - `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `ENABLE_LIVE_DEV_PASSWORD_AUTH`, branch-deploy only, enables the live-dev
+  email/password form for service-account testing
 - `SECRETS_SCAN_OMIT_KEYS`, set to `SUPABASE_SERVICE_ROLE_KEY` so Netlify does not block
   deploys on legitimate server-side references to the secret env var name
 - `CONTEXT` and `BRANCH`, supplied by Netlify
@@ -99,6 +101,7 @@ APP_EVENT_ID=gfeu2026
 PUBLIC_SUPABASE_URL=<77 Labs Test Supabase URL>
 PUBLIC_SUPABASE_PUBLISHABLE_KEY=<77 Labs Test publishable key>
 SUPABASE_SERVICE_ROLE_KEY=<77 Labs Test service-role key>
+ENABLE_LIVE_DEV_PASSWORD_AUTH=true
 ```
 
 The `dev` branch deploy is rebuilt automatically when `dev` is pushed. After changing
@@ -198,6 +201,31 @@ Expected role combinations:
 
 For `dev.grandfeast.eu`, `jonathangersam@gmail.com` currently needs all three roles:
 `admin`, `superuser`, and `tester`.
+
+Live-dev service-account password auth:
+
+- `77 Labs Test` may enable Supabase email/password auth for automation-friendly
+  service accounts. Production should remain Google-only.
+- Netlify branch deploys use `ENABLE_LIVE_DEV_PASSWORD_AUTH=true` to show the password
+  form on live-dev. Production ignores this flag.
+- Service account passwords are not Netlify env vars and are never committed. Store them
+  only in each developer's untracked local `.env` or password manager.
+- Local `.env` may define:
+
+  ```bash
+  LIVE_DEV_CODEX_TESTER_EMAIL=codex-tester@grandfeast.eu
+  LIVE_DEV_CODEX_TESTER_PASSWORD=
+  LIVE_DEV_CODEX_ADMIN_EMAIL=codex-admin@grandfeast.eu
+  LIVE_DEV_CODEX_ADMIN_PASSWORD=
+  LIVE_DEV_SUPABASE_URL=https://guoqhigzyfisvtnlrbjw.supabase.co
+  LIVE_DEV_SUPABASE_SERVICE_ROLE_KEY=
+  ```
+
+- Run `make setup-live-dev-service-accounts` to create or update the live-dev accounts.
+  The helper refuses any Supabase URL except `77 Labs Test`, confirms the emails, and
+  writes roles to `app_metadata`.
+- `codex-tester@grandfeast.eu` gets `tester`. `codex-admin@grandfeast.eu` gets
+  `tester` plus `admin`.
 
 Local Supabase role setup:
 

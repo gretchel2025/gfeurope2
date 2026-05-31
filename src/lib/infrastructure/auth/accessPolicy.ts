@@ -2,6 +2,7 @@ import type { UserRole } from '$lib/domain/user';
 
 export type RuntimeAccessMode = 'local' | 'production' | 'live-dev';
 export type AccessDenialReason = 'sign-in-required' | 'permission-denied';
+export type PasswordAuthMode = 'none' | 'local' | 'live-dev';
 
 export type RuntimeAccessInput = {
 	dev: boolean;
@@ -54,6 +55,22 @@ export function getRuntimeAccessMode(input: RuntimeAccessInput): RuntimeAccessMo
 	}
 
 	return 'production';
+}
+
+export function getPasswordAuthMode(input: {
+	mode: RuntimeAccessMode;
+	supabaseUrl: string;
+	enableLiveDevPasswordAuth: boolean;
+}): PasswordAuthMode {
+	if (input.mode === 'local' && isLocalSupabaseUrl(input.supabaseUrl)) {
+		return 'local';
+	}
+
+	if (input.mode === 'live-dev' && input.enableLiveDevPasswordAuth) {
+		return 'live-dev';
+	}
+
+	return 'none';
 }
 
 export function getRequiredAccess(input: {
@@ -111,6 +128,19 @@ export function evaluateAccess(input: {
 
 export function isLiveDevHost(hostname: string): boolean {
 	return liveDevHostnames.has(normalizeHostname(hostname));
+}
+
+export function isLocalSupabaseUrl(value: string): boolean {
+	try {
+		const url = new URL(value);
+		return (
+			url.protocol === 'http:' &&
+			(url.hostname === '127.0.0.1' || url.hostname === 'localhost') &&
+			url.port === '54321'
+		);
+	} catch {
+		return false;
+	}
 }
 
 export function isAdminPath(pathname: string): boolean {

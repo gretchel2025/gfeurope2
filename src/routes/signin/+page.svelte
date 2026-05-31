@@ -9,10 +9,12 @@
 
 	export let data: ServerData;
 
+	$: hasPasswordAuth = data.passwordAuthMode !== 'none';
+	$: isLocalPasswordAuth = data.passwordAuthMode === 'local';
 	let signInError = '';
-	let localUsername = data.allowLocalPasswordAuth ? 'admin' : '';
-	let localPassword = data.allowLocalPasswordAuth ? 'password' : '';
-	let localSignInLoading = false;
+	let passwordAuthEmail = data.passwordAuthMode === 'local' ? 'admin' : '';
+	let passwordAuthPassword = data.passwordAuthMode === 'local' ? 'password' : '';
+	let passwordSignInLoading = false;
 	let googleSignInLoading = false;
 	let signOutLoading = false;
 
@@ -43,22 +45,22 @@
 		}
 	}
 
-	async function signInWithLocalPassword() {
-		if (!data.allowLocalPasswordAuth) {
+	async function signInWithPassword() {
+		if (!hasPasswordAuth) {
 			return;
 		}
 
 		signInError = '';
-		localSignInLoading = true;
+		passwordSignInLoading = true;
 		const supabase = createAuthClient($page.data.supabaseAuth);
 		const { error } = await supabase.auth.signInWithPassword({
-			email: normalizeLocalLogin(localUsername),
-			password: localPassword
+			email: normalizePasswordAuthLogin(passwordAuthEmail),
+			password: passwordAuthPassword
 		});
-		localSignInLoading = false;
+		passwordSignInLoading = false;
 
 		if (error) {
-			signInError = 'Unable to sign in with local credentials.';
+			signInError = 'Unable to sign in with these credentials.';
 			return;
 		}
 
@@ -66,9 +68,9 @@
 		await goto(data.callbackURL, { invalidateAll: true });
 	}
 
-	function normalizeLocalLogin(value: string) {
+	function normalizePasswordAuthLogin(value: string) {
 		const trimmed = value.trim().toLowerCase();
-		return trimmed === 'admin' ? 'admin@example.test' : trimmed;
+		return isLocalPasswordAuth && trimmed === 'admin' ? 'admin@example.test' : trimmed;
 	}
 </script>
 
@@ -120,23 +122,25 @@
 					</button>
 				{/if}
 
-				{#if data.allowLocalPasswordAuth}
+				{#if hasPasswordAuth}
 					<form
 						class="public-form-card space-y-3 text-left"
-						on:submit|preventDefault={signInWithLocalPassword}
+						on:submit|preventDefault={signInWithPassword}
 					>
-						<p class="bg-[#d99a32]/20 px-3 py-2 text-sm font-bold text-[#f3c15f]">
-							Local dev: use admin / password.
-						</p>
+						{#if isLocalPasswordAuth}
+							<p class="bg-[#d99a32]/20 px-3 py-2 text-sm font-bold text-[#f3c15f]">
+								Local dev: use admin / password.
+							</p>
+						{/if}
 
 						<div class="space-y-1">
-							<label for="local-username" class="block text-sm font-bold text-white">
-								Local dev username
+							<label for="password-auth-email" class="block text-sm font-bold text-white">
+								{isLocalPasswordAuth ? 'Local dev username' : 'Email'}
 							</label>
 							<input
-								id="local-username"
+								id="password-auth-email"
 								type="text"
-								bind:value={localUsername}
+								bind:value={passwordAuthEmail}
 								autocomplete="username"
 								required
 								class="w-full px-3 py-2"
@@ -144,13 +148,13 @@
 						</div>
 
 						<div class="space-y-1">
-							<label for="local-password" class="block text-sm font-bold text-white">
-								Local dev password
+							<label for="password-auth-password" class="block text-sm font-bold text-white">
+								Password
 							</label>
 							<input
-								id="local-password"
+								id="password-auth-password"
 								type="password"
-								bind:value={localPassword}
+								bind:value={passwordAuthPassword}
 								autocomplete="current-password"
 								required
 								class="w-full px-3 py-2"
@@ -159,19 +163,19 @@
 
 						<button
 							type="submit"
-							disabled={localSignInLoading}
-							aria-busy={localSignInLoading}
+							disabled={passwordSignInLoading}
+							aria-busy={passwordSignInLoading}
 							class={`conference-button w-full px-6 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${
-								localSignInLoading ? 'is-loading' : ''
+								passwordSignInLoading ? 'is-loading' : ''
 							}`}
 						>
 							<span class="button-spinner" aria-hidden="true"></span>
-							<span>{localSignInLoading ? 'Signing in...' : 'Sign in locally'}</span>
+							<span>{passwordSignInLoading ? 'Signing in...' : 'Sign in with password'}</span>
 						</button>
 					</form>
 				{/if}
 
-				{#if !data.hasGoogleAuth && !data.allowLocalPasswordAuth}
+				{#if !data.hasGoogleAuth && !hasPasswordAuth}
 					<p class="text-sm text-red-200">
 						No auth provider is configured for this environment. Configure Supabase Auth environment
 						variables.

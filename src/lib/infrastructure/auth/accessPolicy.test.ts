@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	evaluateAccess,
+	getPasswordAuthMode,
 	getRequiredAccess,
 	getRuntimeAccessMode,
 	isAuthBypassPath
@@ -140,5 +141,49 @@ describe('access policy', () => {
 		expect(isAuthBypassPath('/_app/immutable/entry/app.js')).toBe(true);
 		expect(isAuthBypassPath('/favicon.png')).toBe(true);
 		expect(isAuthBypassPath('/api/v0/booking/list')).toBe(false);
+	});
+
+	it('enables password auth only for local Supabase or flagged live dev', () => {
+		expect(
+			getPasswordAuthMode({
+				mode: 'local',
+				supabaseUrl: 'http://127.0.0.1:54321',
+				enableLiveDevPasswordAuth: false
+			})
+		).toBe('local');
+
+		expect(
+			getPasswordAuthMode({
+				mode: 'live-dev',
+				supabaseUrl: 'https://guoqhigzyfisvtnlrbjw.supabase.co',
+				enableLiveDevPasswordAuth: true
+			})
+		).toBe('live-dev');
+	});
+
+	it('keeps password auth disabled outside the approved modes', () => {
+		expect(
+			getPasswordAuthMode({
+				mode: 'live-dev',
+				supabaseUrl: 'https://guoqhigzyfisvtnlrbjw.supabase.co',
+				enableLiveDevPasswordAuth: false
+			})
+		).toBe('none');
+
+		expect(
+			getPasswordAuthMode({
+				mode: 'production',
+				supabaseUrl: 'https://erhrykkyhsygnonyfbis.supabase.co',
+				enableLiveDevPasswordAuth: true
+			})
+		).toBe('none');
+
+		expect(
+			getPasswordAuthMode({
+				mode: 'local',
+				supabaseUrl: 'https://guoqhigzyfisvtnlrbjw.supabase.co',
+				enableLiveDevPasswordAuth: true
+			})
+		).toBe('none');
 	});
 });

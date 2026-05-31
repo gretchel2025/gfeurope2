@@ -23,6 +23,7 @@ export type AppConfig = {
 	supabasePublishableKey: string;
 	supabaseServiceRoleKey: string;
 	appEventId: string;
+	enableLiveDevPasswordAuth: boolean;
 	bootstrap: {
 		standardTicketsInitialAvailable: number;
 		grandFeastPlusTicketsInitialAvailable: number;
@@ -47,6 +48,7 @@ export const appConfig: AppConfig = {
 	supabasePublishableKey: readEnv('PUBLIC_SUPABASE_PUBLISHABLE_KEY') || '',
 	supabaseServiceRoleKey: readEnv('SUPABASE_SERVICE_ROLE_KEY') || '',
 	appEventId: readEnv('APP_EVENT_ID') || 'gfeu2026',
+	enableLiveDevPasswordAuth: parseBoolean(readEnv('ENABLE_LIVE_DEV_PASSWORD_AUTH')),
 	bootstrap: {
 		standardTicketsInitialAvailable: parsePositiveInt(
 			readEnv('STANDARD_TICKETS_INITIAL_AVAILABLE'),
@@ -95,6 +97,14 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
 	}
 
 	return parsed;
+}
+
+function parseBoolean(raw: string | undefined): boolean {
+	if (!raw) {
+		return false;
+	}
+
+	return ['1', 'true', 'yes', 'on'].includes(raw.trim().toLowerCase());
 }
 
 /** Reads an env value from process.env first, then from the local .env file snapshot. */

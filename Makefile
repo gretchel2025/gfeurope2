@@ -35,6 +35,9 @@ grant-local-roles:
 setup-local-auth:
 	node scripts/setup-local-auth.mjs "$(EMAIL)" "$(PASSWORD)" "$(ROLES)"
 
+setup-live-dev-service-accounts:
+	node scripts/setup-live-dev-service-accounts.mjs
+
 lint:
 	npm run lint
 

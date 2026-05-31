@@ -78,6 +78,12 @@ Supabase service-role key, refuses non-local Supabase URLs, creates or updates t
 email/password user, confirms the email, and writes roles to `app_metadata`. The default
 browser login is `admin` / `password`, backed by Supabase user `admin@example.test`.
 
+For live-dev automation, service account passwords may also live in the local untracked
+`.env` as `LIVE_DEV_*` values. These values are for setup and Codex/browser testing only;
+they are not read by the public app, are not Netlify env vars, and must not be committed.
+Use `make setup-live-dev-service-accounts` to create or rotate the live-dev Supabase Auth
+users in `77 Labs Test`.
+
 ## First-Time Local Auth Setup
 
 1. Copy `.env.example` to `.env`.
