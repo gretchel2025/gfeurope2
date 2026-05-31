@@ -1,33 +1,53 @@
 <script lang="ts">
-	import { City, Country } from 'country-state-city';
 	import { computeTicketPricing, isEarlyBirdDiscountActive } from '$lib/domain/ticketType';
 	import type { BookingTicketOption, ServerData } from './+page.server';
 
 	export let data: ServerData;
 
 	type CountryOption = {
-		isoCode: string;
 		name: string;
-		searchKey: string;
-	};
-
-	type CityOption = {
-		label: string;
-		value: string;
 		searchKey: string;
 	};
 
 	const MAX_TYPEAHEAD_OPTIONS = 40;
 	const steps = ['Ticket', 'Details', 'Guests', 'Review'];
 	const now = new Date();
-	const countries: CountryOption[] = Country.getAllCountries()
-		.map((country) => ({
-			isoCode: country.isoCode,
-			name: country.name,
-			searchKey: normalizeTypeaheadValue(country.name)
-		}))
-		.sort((a, b) => a.name.localeCompare(b.name));
-	const cityOptionsByCountry = new Map<string, CityOption[]>();
+	const countrySuggestions = [
+		'Ireland',
+		'United Kingdom',
+		'Germany',
+		'Norway',
+		'France',
+		'Netherlands',
+		'Belgium',
+		'Spain',
+		'Italy',
+		'Sweden',
+		'Denmark',
+		'Finland',
+		'Portugal',
+		'Poland',
+		'Switzerland',
+		'Austria',
+		'Czech Republic',
+		'United States',
+		'Canada'
+	];
+	const citySuggestionsByCountry = new Map<string, string[]>([
+		['ireland', ['Dublin', 'Cork', 'Galway', 'Limerick', 'Waterford']],
+		['united kingdom', ['London', 'Birmingham', 'Manchester', 'Leeds', 'Glasgow', 'Cardiff']],
+		['germany', ['Berlin', 'Hamburg', 'Munich', 'Cologne', 'Frankfurt']],
+		['norway', ['Oslo', 'Bergen', 'Trondheim', 'Stavanger']],
+		['france', ['Paris', 'Lyon', 'Marseille', 'Toulouse']],
+		['netherlands', ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht']],
+		['belgium', ['Brussels', 'Antwerp', 'Ghent', 'Bruges']],
+		['spain', ['Madrid', 'Barcelona', 'Valencia', 'Seville']],
+		['italy', ['Rome', 'Milan', 'Naples', 'Turin']]
+	]);
+	const countries: CountryOption[] = countrySuggestions.map((name) => ({
+		name,
+		searchKey: normalizeTypeaheadValue(name)
+	}));
 
 	const ticketOptions: BookingTicketOption[] = data.ticketOptions;
 
@@ -39,10 +59,6 @@
 	let detailsStepSubmitted = false;
 	let email = '';
 	let countrySearch = '';
-	let countryIso = '';
-	let countryName = '';
-	let previousCountryIso = '';
-	let cities: CityOption[] = [];
 	let citySearch = '';
 	let paymentProofFileName = '';
 	let paymentProofError = '';
@@ -64,15 +80,13 @@
 	$: discountAmount = selectedPricing?.discountAmount ?? 0;
 	$: totalAmount = selectedPricing?.totalAmount ?? 0;
 	$: isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-	$: selectedCountry = findCountryByName(countrySearch, countries);
-	$: countryIso = selectedCountry?.isoCode ?? '';
-	$: countryName = selectedCountry?.name ?? '';
+	$: countryName = countrySearch.trim();
 	$: selectedCityName = citySearch.trim();
 	$: primaryGuestName = guests[0]?.trim() ?? '';
 	$: bookingLocation =
 		selectedCityName && countryName ? `${selectedCityName}, ${countryName}` : selectedCityName;
 	$: filteredCountries = filterCountryOptions(countrySearch, countries);
-	$: filteredCities = filterCityOptions(citySearch, cities);
+	$: filteredCities = filterCityOptions(citySearch, countryName);
 	$: emailValidationMessage = getEmailValidationMessage(email, detailsStepSubmitted);
 	$: canContinueTicket =
 		Boolean(selectedTicketOption) && quantity > 0 && quantity <= availableTickets;
@@ -87,67 +101,8 @@
 		previousQuantity = quantity;
 	}
 
-	$: if (countryIso !== previousCountryIso) {
-		previousCountryIso = countryIso;
-		citySearch = '';
-		loadCities(countryIso);
-	}
-
 	$: if (quantity > maxQuantity && maxQuantity > 0) {
 		quantity = maxQuantity;
-	}
-
-	function loadCities(isoCode: string) {
-		cities = [];
-		if (!isoCode) {
-			return;
-		}
-
-		const cachedOptions = cityOptionsByCountry.get(isoCode);
-		if (cachedOptions) {
-			cities = cachedOptions;
-			return;
-		}
-
-		const seen = new Set<string>();
-		const cityNames = (City.getCitiesOfCountry(isoCode) ?? [])
-			.map((city) => city.name.trim())
-			.filter((name) => {
-				const key = name.toLowerCase();
-				if (seen.has(key)) return false;
-				seen.add(key);
-				return true;
-			})
-			.sort((a, b) => a.length - b.length || a.localeCompare(b));
-
-		const simplifiedNames = cityNames.reduce<string[]>((names, cityName) => {
-			const isDistrictVariant = names.some((parentName) =>
-				isCityDistrictVariant(cityName, parentName)
-			);
-			return isDistrictVariant ? names : [...names, cityName];
-		}, []);
-
-		const cityOptions = simplifiedNames
-			.sort((a, b) => a.localeCompare(b))
-			.map((cityName) => ({
-				label: cityName,
-				value: cityName,
-				searchKey: normalizeTypeaheadValue(cityName)
-			}));
-
-		cityOptionsByCountry.set(isoCode, cityOptions);
-		cities = cityOptions;
-	}
-
-	function isCityDistrictVariant(cityName: string, parentName: string) {
-		const city = cityName.toLowerCase();
-		const parent = parentName.toLowerCase();
-		return city !== parent && (city.startsWith(`${parent} `) || city.startsWith(`${parent}-`));
-	}
-
-	function findCountryByName(value: string, countryOptions: CountryOption[]) {
-		const normalizedValue = normalizeTypeaheadValue(value);
-		return countryOptions.find((country) => country.searchKey === normalizedValue);
 	}
 
 	function filterCountryOptions(search: string, countryOptions: CountryOption[]) {
@@ -165,8 +120,14 @@
 			.slice(0, MAX_TYPEAHEAD_OPTIONS);
 	}
 
-	function filterCityOptions(search: string, cityOptions: CityOption[]) {
+	function filterCityOptions(search: string, country: string) {
 		const normalizedSearch = normalizeTypeaheadValue(search);
+		const cityOptions =
+			citySuggestionsByCountry.get(normalizeTypeaheadValue(country))?.map((city) => ({
+				label: city,
+				value: city,
+				searchKey: normalizeTypeaheadValue(city)
+			})) ?? [];
 		const options = normalizedSearch
 			? cityOptions.filter((city) => city.searchKey.includes(normalizedSearch))
 			: cityOptions;
@@ -567,11 +528,6 @@
 										<option value={country.name}></option>
 									{/each}
 								</datalist>
-								{#if countrySearch && !countryIso}
-									<p class="text-sm font-semibold text-[#f3c15f]">
-										Choose an exact country from the suggestions.
-									</p>
-								{/if}
 							</div>
 
 							<div class="grid gap-2">
@@ -580,11 +536,10 @@
 									id="city"
 									type="text"
 									list="city-options"
-									placeholder={countryIso ? 'Type city, e.g. Berlin' : 'Choose country first'}
+									placeholder="Type city, e.g. Berlin"
 									bind:value={citySearch}
 									autocomplete="off"
 									class="w-full px-4 py-3"
-									disabled={!countryIso}
 								/>
 								<datalist id="city-options">
 									{#each filteredCities as city}
