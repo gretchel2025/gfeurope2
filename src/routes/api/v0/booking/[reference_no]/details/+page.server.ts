@@ -17,10 +17,12 @@ export const actions: Actions = {
 	markPaid: adminAction(async ({ params }) => {
 		const referenceNo = requireRouteParam(params, 'reference_no');
 		await bookingService.markPaid(referenceNo);
+		throw redirect(303, adminRoutes.booking.details(referenceNo));
 	}),
 	generateTickets: adminAction(async ({ params }) => {
 		const referenceNo = requireRouteParam(params, 'reference_no');
 		await bookingService.generateRelatedTickets(referenceNo);
+		throw redirect(303, adminRoutes.booking.details(referenceNo));
 	}),
 	sendTicketsEmail: adminAction(async ({ params }) => {
 		const referenceNo = requireRouteParam(params, 'reference_no');

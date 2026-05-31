@@ -12,11 +12,13 @@ import { ReportingService } from '$lib/application/services/reportingService';
 import { SystemService } from '$lib/application/services/systemService';
 import { TicketCounterService } from '$lib/application/services/ticketCounterService';
 import { TicketService } from '$lib/application/services/ticketService';
+import { TicketTypeService } from '$lib/application/services/ticketTypeService';
 import {
 	SupabaseBookingRepository,
 	SupabaseEventRepository,
 	SupabaseTicketCounterRepository,
-	SupabaseTicketRepository
+	SupabaseTicketRepository,
+	SupabaseTicketTypeRepository
 } from '$lib/infrastructure/db/supabase/repositories';
 import { ResendEmailSender } from '$lib/infrastructure/email/resendEmailSender';
 import { CloudinaryImageStorage } from '$lib/infrastructure/media/cloudinaryImageStorage';
@@ -35,6 +37,7 @@ const bookingRepository = new SupabaseBookingRepository();
 const eventRepository = new SupabaseEventRepository();
 const ticketRepository = new SupabaseTicketRepository();
 const ticketCounterRepository = new SupabaseTicketCounterRepository();
+const ticketTypeRepository = new SupabaseTicketTypeRepository();
 
 /** Infrastructure adapters used by the service layer. */
 const emailSender = new ResendEmailSender();
@@ -46,6 +49,7 @@ const systemSettingsStore = new InMemorySystemSettingsStore();
 
 /** Ready-to-use application services imported by SvelteKit routes. */
 export const ticketCounterService = new TicketCounterService(ticketCounterRepository);
+export const ticketTypeService = new TicketTypeService(ticketTypeRepository);
 export const notificationService = new NotificationService(
 	bookingRepository,
 	ticketRepository,
@@ -64,6 +68,7 @@ export const bookingService = new BookingService(
 	bookingRepository,
 	eventRepository,
 	ticketCounterService,
+	ticketTypeService,
 	ticketService,
 	notificationService,
 	eventLogger,
@@ -78,5 +83,6 @@ export const repositories = {
 	bookingRepository,
 	eventRepository,
 	ticketRepository,
-	ticketCounterRepository
+	ticketCounterRepository,
+	ticketTypeRepository
 };

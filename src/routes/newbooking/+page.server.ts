@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { NotFoundError } from '$lib/application/errors';
-import type { TicketCounter } from '$lib/domain/ticketCounter';
+import type { TicketTypeConfig } from '$lib/domain/ticketType';
 import { appConfig } from '$lib/infrastructure/config/env.server';
 import { publicRoutes } from '$lib/navigation/adminRoutes';
 import { parseCreateBookingForm, parsePaymentProofFile } from '$lib/server/http/forms';
@@ -9,31 +9,40 @@ import { kitAction, withKitErrors } from '$lib/server/http/handlers';
 import {
 	bookingService,
 	paymentProofStorage,
-	ticketCounterService
+	ticketCounterService,
+	ticketTypeService
 } from '$lib/server/http/services';
 
+export type BookingTicketOption = TicketTypeConfig & {
+	available: number;
+	notes: string[];
+};
+
 export type ServerData = {
-	standardTicketCounter: TicketCounter;
-	grandFeastPlusTicketCounter: TicketCounter;
+	ticketOptions: BookingTicketOption[];
 };
 
 export const load = withKitErrors(async (): Promise<ServerData> => {
-	const [standardTicketCounter, grandFeastPlusTicketCounter] = await Promise.all([
-		ticketCounterService.getStandardTickets(),
-		ticketCounterService.getGrandFeastPlusTickets()
-	]);
+	const ticketTypes = await ticketTypeService.listActive(appConfig.appEventId);
+	const ticketOptions = await Promise.all(
+		ticketTypes.map(async (ticketType) => {
+			const counter = await ticketCounterService.getById(ticketType.ticket_type_id);
+			if (!counter) throw new NotFoundError(`${ticketType.label} ticket counter is missing`);
 
-	if (!standardTicketCounter) throw new NotFoundError('standard ticket counter is missing');
-	if (!grandFeastPlusTicketCounter)
-		throw new NotFoundError('GrandFeast Plus ticket counter is missing');
+			return {
+				...ticketType,
+				available: counter.available,
+				notes: getTicketNotes(ticketType)
+			};
+		})
+	);
 
-	if (standardTicketCounter.available <= 0 && grandFeastPlusTicketCounter.available <= 0) {
+	if (ticketOptions.every((option) => option.available <= 0)) {
 		throw redirect(303, publicRoutes.newBookingSoldOut);
 	}
 
 	return {
-		standardTicketCounter,
-		grandFeastPlusTicketCounter
+		ticketOptions
 	};
 });
 
@@ -51,3 +60,31 @@ export const actions: Actions = {
 		throw redirect(303, publicRoutes.newBookingSuccess);
 	})
 };
+
+function getTicketNotes(ticketType: TicketTypeConfig): string[] {
+	const notes = [ticketType.description];
+
+	if (ticketType.early_bird_discount_available_until) {
+		notes.push('No extra group discount during Early Bird');
+	}
+	if (ticketType.bulk_purchase_discount_min_quantity) {
+		notes.push(
+			`${formatDiscount(ticketType)} group discount for ${ticketType.bulk_purchase_discount_min_quantity}+ tickets`
+		);
+	}
+	if (ticketType.ticket_type_id === 'GRAND_FEAST_PLUS') {
+		notes.push('Our Lady of Knock pilgrimage', 'Oct 4 sightseeing');
+	}
+
+	return notes.filter(Boolean);
+}
+
+function formatDiscount(ticketType: TicketTypeConfig): string {
+	if (ticketType.bulk_purchase_discount_rate !== undefined) {
+		return `${Math.round(ticketType.bulk_purchase_discount_rate * 100)}%`;
+	}
+	if (ticketType.bulk_purchase_discount_amount !== undefined) {
+		return `${ticketType.bulk_purchase_discount_amount} ${ticketType.currency}`;
+	}
+	return '';
+}

@@ -18,12 +18,12 @@
 	const counters: CounterSummary[] = [
 		{
 			title: 'Standard Tickets',
-			href: adminRoutes.ticketCounter.details('standard_tickets'),
+			href: adminRoutes.ticketCounter.details('STANDARD'),
 			counter: data.standardTicketCounter
 		},
 		{
 			title: 'GrandFeast Plus Tickets',
-			href: adminRoutes.ticketCounter.details('grand_feast_plus_tickets'),
+			href: adminRoutes.ticketCounter.details('GRAND_FEAST_PLUS'),
 			counter: data.grandFeastPlusTicketCounter
 		}
 	];

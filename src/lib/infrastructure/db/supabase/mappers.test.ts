@@ -4,7 +4,8 @@ import {
 	mapBooking,
 	mapEvent,
 	mapTicket,
-	mapTicketCounter
+	mapTicketCounter,
+	mapTicketType
 } from '$lib/infrastructure/db/supabase/mappers';
 
 describe('Supabase persistence mappers', () => {
@@ -87,16 +88,50 @@ describe('Supabase persistence mappers', () => {
 
 		expect(
 			mapTicketCounter({
-				counter_id: 'standard_tickets',
+				counter_id: 'STANDARD',
 				available: 10,
 				reserved: 2,
 				sold: 3
 			})
 		).toEqual({
-			_id: 'standard_tickets',
+			_id: 'STANDARD',
 			available: 10,
 			reserved: 2,
 			sold: 3
+		});
+	});
+
+	it('maps ticket type rows into DB-backed pricing config', () => {
+		expect(
+			mapTicketType({
+				event_id: 'gfeu2026',
+				ticket_type_id: 'STANDARD',
+				label: 'Standard',
+				description: null,
+				base_price: '35.00',
+				currency: 'EUR',
+				available_from: null,
+				available_until: null,
+				early_bird_discount_available_until: '2026-08-31T23:59:59+01:00',
+				early_bird_discount_rate: null,
+				early_bird_discount_amount: '5.00',
+				bulk_purchase_discount_min_quantity: null,
+				bulk_purchase_discount_rate: null,
+				bulk_purchase_discount_amount: null,
+				sort_order: 10,
+				is_active: true
+			})
+		).toEqual({
+			event_id: 'gfeu2026',
+			ticket_type_id: 'STANDARD',
+			label: 'Standard',
+			description: '',
+			base_price: 35,
+			currency: 'EUR',
+			early_bird_discount_available_until: '2026-08-31T23:59:59+01:00',
+			early_bird_discount_amount: 5,
+			sort_order: 10,
+			is_active: true
 		});
 	});
 });

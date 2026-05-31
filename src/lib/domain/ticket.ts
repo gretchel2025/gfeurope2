@@ -60,10 +60,11 @@ export function normalizeTicketType(input: string): TicketType {
 		case TicketType.STANDARD:
 			return TicketType.STANDARD;
 		case TicketType.GRAND_FEAST_PLUS:
-		case 'VIP':
 			return TicketType.GRAND_FEAST_PLUS;
-		case 'YOUTH':
-			return TicketType.STANDARD;
+		case TicketType.VIP:
+			return TicketType.VIP;
+		case TicketType.YOUTH:
+			return TicketType.YOUTH;
 		default:
 			return TicketType.STANDARD;
 	}

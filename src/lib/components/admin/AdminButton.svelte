@@ -30,7 +30,9 @@
 
 	function handleClick() {
 		if (type === 'submit' && !isDisabled) {
-			clickedLoading = true;
+			window.setTimeout(() => {
+				clickedLoading = true;
+			}, 0);
 		}
 	}
 </script>

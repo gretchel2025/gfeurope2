@@ -3,13 +3,10 @@ import {
 	canCancelBooking,
 	canGenerateTickets,
 	canMarkBookingPaid,
-	computeFamilyDiscountAmount,
-	computeTotalAmountDue,
-	getTicketUnitPrice,
 	getTopCitiesByCountOfTicketsBooked,
 	type Booking
 } from '$lib/domain/booking';
-import { BookingPaymentStatus, TicketPrice, TicketType } from '$lib/domain/shared/enums';
+import { BookingPaymentStatus, TicketType } from '$lib/domain/shared/enums';
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
 	return {
@@ -21,7 +18,7 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 		ticket_type: TicketType.STANDARD,
 		book_date: '2026-01-01T00:00:00.000Z',
 		payment_status: BookingPaymentStatus.UNPAID,
-		amount_total: TicketPrice.STANDARD,
+		amount_total: 35,
 		guests: ['Ada'],
 		ticket_ids: [],
 		...overrides
@@ -29,32 +26,6 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 }
 
 describe('booking domain rules', () => {
-	it('computes totals from ticket type and quantity', () => {
-		const earlyBirdDate = new Date('2026-08-01T12:00:00+01:00');
-		const standardDate = new Date('2026-09-01T12:00:00+01:00');
-
-		expect(getTicketUnitPrice(TicketType.STANDARD, earlyBirdDate)).toBe(
-			TicketPrice.STANDARD_EARLY_BIRD
-		);
-		expect(getTicketUnitPrice(TicketType.STANDARD, standardDate)).toBe(TicketPrice.STANDARD);
-		expect(computeTotalAmountDue(TicketType.STANDARD, 2, earlyBirdDate)).toBe(60);
-		expect(computeTotalAmountDue(TicketType.GRAND_FEAST_PLUS, 3, earlyBirdDate)).toBe(195);
-	});
-
-	it('applies family discount to paid ticket purchases of five or more', () => {
-		const earlyBirdDate = new Date('2026-08-01T12:00:00+01:00');
-		const standardDate = new Date('2026-09-01T12:00:00+01:00');
-
-		expect(computeFamilyDiscountAmount(TicketType.STANDARD, 4, earlyBirdDate)).toBe(0);
-		expect(computeFamilyDiscountAmount(TicketType.STANDARD, 5, earlyBirdDate)).toBe(0);
-		expect(computeTotalAmountDue(TicketType.STANDARD, 5, earlyBirdDate)).toBe(150);
-		expect(computeFamilyDiscountAmount(TicketType.STANDARD, 4, standardDate)).toBe(0);
-		expect(computeFamilyDiscountAmount(TicketType.STANDARD, 5, standardDate)).toBe(17.5);
-		expect(computeTotalAmountDue(TicketType.STANDARD, 5, standardDate)).toBe(157.5);
-		expect(computeFamilyDiscountAmount(TicketType.GRAND_FEAST_PLUS, 5, earlyBirdDate)).toBe(32.5);
-		expect(computeTotalAmountDue(TicketType.GRAND_FEAST_PLUS, 5, earlyBirdDate)).toBe(292.5);
-	});
-
 	it('only allows unpaid bookings to be marked paid or cancelled', () => {
 		const unpaidBooking = makeBooking({ payment_status: BookingPaymentStatus.UNPAID });
 		const paidBooking = makeBooking({ payment_status: BookingPaymentStatus.PAID });

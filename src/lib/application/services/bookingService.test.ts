@@ -3,11 +3,13 @@ import { BookingService } from '$lib/application/services/bookingService';
 import type { NotificationService } from '$lib/application/services/notificationService';
 import type { TicketCounterService } from '$lib/application/services/ticketCounterService';
 import type { TicketService } from '$lib/application/services/ticketService';
+import type { TicketTypeService } from '$lib/application/services/ticketTypeService';
 import type { BookingRepository, EventLogger, EventRepository } from '$lib/application/ports';
 import type { Booking } from '$lib/domain/booking';
 import type { Event } from '$lib/domain/event';
 import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
+import { computeTicketPricing, type TicketTypeConfig } from '$lib/domain/ticketType';
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
 	return {
@@ -53,7 +55,26 @@ function makeEvent(overrides: Partial<Event> = {}): Event {
 	};
 }
 
-function makeService(bookings: Booking[], tickets: Ticket[] = [], events: Event[] = [makeEvent()]) {
+function makeTicketType(overrides: Partial<TicketTypeConfig> = {}): TicketTypeConfig {
+	return {
+		event_id: 'gfeu2026',
+		ticket_type_id: TicketType.STANDARD,
+		label: 'Standard',
+		description: 'General admission',
+		base_price: 35,
+		currency: 'EUR',
+		sort_order: 10,
+		is_active: true,
+		...overrides
+	};
+}
+
+function makeService(
+	bookings: Booking[],
+	tickets: Ticket[] = [],
+	events: Event[] = [makeEvent()],
+	ticketTypes: TicketTypeConfig[] = [makeTicketType()]
+) {
 	const bookingRepository = {
 		insertReservation: vi.fn(async (booking: Booking) => booking),
 		findByReferenceNo: vi.fn(
@@ -79,12 +100,25 @@ function makeService(bookings: Booking[], tickets: Ticket[] = [], events: Event[
 	} as unknown as TicketService;
 	const ticketCounterService = {
 		getByTicketType: vi.fn(async () => ({
-			_id: 'standard_tickets',
+			_id: 'STANDARD',
 			available: 10,
 			reserved: 0,
 			sold: 0
 		}))
 	} as unknown as TicketCounterService;
+	const ticketTypeService = {
+		getAvailableForBooking: vi.fn(async (eventId: string, ticketTypeId: string) => {
+			const ticketType = ticketTypes.find(
+				(candidate) => candidate.event_id === eventId && candidate.ticket_type_id === ticketTypeId
+			);
+			if (!ticketType) throw new Error('ticket type not found');
+			if (!ticketType.is_active) throw new Error('ticket type is not available');
+			return ticketType;
+		}),
+		computePricing: vi.fn((ticketType: TicketTypeConfig, quantity: number) =>
+			computeTicketPricing(ticketType, quantity)
+		)
+	} as unknown as TicketTypeService;
 	const notificationService = {
 		sendBookingConfirmation: vi.fn()
 	} as unknown as NotificationService;
@@ -93,6 +127,7 @@ function makeService(bookings: Booking[], tickets: Ticket[] = [], events: Event[
 		bookingRepository,
 		eventRepository,
 		ticketCounterService,
+		ticketTypeService,
 		ticketService,
 		notificationService,
 		{ log: vi.fn() } satisfies EventLogger,
@@ -103,6 +138,9 @@ function makeService(bookings: Booking[], tickets: Ticket[] = [], events: Event[
 		service,
 		bookingRepository,
 		eventRepository,
+		ticketTypeService: ticketTypeService as TicketTypeService & {
+			getAvailableForBooking: ReturnType<typeof vi.fn>;
+		},
 		ticketService: ticketService as TicketService & { getById: ReturnType<typeof vi.fn> }
 	};
 }
@@ -186,6 +224,36 @@ describe('BookingService.createNew', () => {
 		);
 	});
 
+	it('uses DB-backed ticket type pricing when creating the booking', async () => {
+		const { service, bookingRepository } = makeService(
+			[],
+			[],
+			[makeEvent()],
+			[
+				makeTicketType({
+					early_bird_discount_available_until: '2099-08-31T23:59:59+01:00',
+					early_bird_discount_amount: 5
+				})
+			]
+		);
+
+		await service.createNew({
+			event_id: 'gfeu2026',
+			name: 'Ada Lovelace',
+			email: 'ada@example.com',
+			city: 'Dublin',
+			ticket_type: TicketType.STANDARD,
+			quantity: 2,
+			guests: ['Ada Lovelace', 'Grace Hopper']
+		});
+
+		expect(bookingRepository.insertReservation).toHaveBeenCalledWith(
+			expect.objectContaining({
+				amount_total: 60
+			})
+		);
+	});
+
 	it('fails before reserving inventory when the event does not exist', async () => {
 		const { service, bookingRepository, eventRepository } = makeService([], [], []);
 
@@ -202,6 +270,57 @@ describe('BookingService.createNew', () => {
 		).rejects.toThrow('event not found');
 
 		expect(eventRepository.findById).toHaveBeenCalledWith('missing-event');
+		expect(bookingRepository.insertReservation).not.toHaveBeenCalled();
+	});
+
+	it('fails before reserving inventory when the ticket type is missing', async () => {
+		const { service, bookingRepository, ticketTypeService } = makeService(
+			[],
+			[],
+			[makeEvent()],
+			[]
+		);
+
+		await expect(
+			service.createNew({
+				event_id: 'gfeu2026',
+				name: 'Ada Lovelace',
+				email: 'ada@example.com',
+				city: 'Dublin',
+				ticket_type: TicketType.STANDARD,
+				quantity: 1,
+				guests: ['Ada Lovelace']
+			})
+		).rejects.toThrow('ticket type not found');
+
+		expect(ticketTypeService.getAvailableForBooking).toHaveBeenCalledWith(
+			'gfeu2026',
+			TicketType.STANDARD,
+			expect.any(Date)
+		);
+		expect(bookingRepository.insertReservation).not.toHaveBeenCalled();
+	});
+
+	it('fails before reserving inventory when the ticket type is inactive', async () => {
+		const { service, bookingRepository } = makeService(
+			[],
+			[],
+			[makeEvent()],
+			[makeTicketType({ is_active: false })]
+		);
+
+		await expect(
+			service.createNew({
+				event_id: 'gfeu2026',
+				name: 'Ada Lovelace',
+				email: 'ada@example.com',
+				city: 'Dublin',
+				ticket_type: TicketType.STANDARD,
+				quantity: 1,
+				guests: ['Ada Lovelace']
+			})
+		).rejects.toThrow('ticket type is not available');
+
 		expect(bookingRepository.insertReservation).not.toHaveBeenCalled();
 	});
 });

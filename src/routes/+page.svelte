@@ -1,17 +1,25 @@
 <script lang="ts">
 	import CountdownTimer from '$lib/components/public/CountdownTimer.svelte';
-	import { isStandardEarlyBirdActive, STANDARD_EARLY_BIRD_DEADLINE } from '$lib/domain/booking';
+	import { computeTicketPricing, isEarlyBirdDiscountActive } from '$lib/domain/ticketType';
+	import type { ServerData } from './+page.server';
+
+	export let data: ServerData;
 
 	let ticketsSection: HTMLElement;
 	const eventDate = new Date('2026-10-03T12:30:00+01:00');
-	const earlyBirdDeadline = STANDARD_EARLY_BIRD_DEADLINE;
-
 	const now = new Date();
-	let earlyBirdActive = isStandardEarlyBirdActive(now);
-
+	const standardTicket = data.ticketTypes.find((ticket) => ticket.ticket_type_id === 'STANDARD');
+	const grandFeastPlusTicket = data.ticketTypes.find(
+		(ticket) => ticket.ticket_type_id === 'GRAND_FEAST_PLUS'
+	);
+	const standardPricing = standardTicket ? computeTicketPricing(standardTicket, 1, now) : null;
+	const grandFeastPlusPricing = grandFeastPlusTicket
+		? computeTicketPricing(grandFeastPlusTicket, 1, now)
+		: null;
+	let earlyBirdActive = Boolean(standardTicket && isEarlyBirdDiscountActive(standardTicket, now));
 	let countdown = '';
-	if (earlyBirdActive) {
-		const diff = earlyBirdDeadline.getTime() - now.getTime();
+	if (earlyBirdActive && standardTicket?.early_bird_discount_available_until) {
+		const diff = Date.parse(standardTicket.early_bird_discount_available_until) - now.getTime();
 		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 		const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
 		countdown = `${days}d ${hours}h left`;
@@ -19,6 +27,30 @@
 
 	function scrollToTickets() {
 		ticketsSection?.scrollIntoView({ behavior: 'smooth' });
+	}
+
+	function formatMoney(value: number, currency = 'EUR') {
+		if (currency !== 'EUR') {
+			return `${value.toFixed(2)} ${currency}`;
+		}
+		return `${value.toFixed(0)} €`;
+	}
+
+	function formatDate(value: string) {
+		const [dateOnly] = value.split('T');
+		if (dateOnly) {
+			return new Intl.DateTimeFormat('en', {
+				month: 'long',
+				day: 'numeric',
+				timeZone: 'UTC'
+			}).format(new Date(`${dateOnly}T00:00:00Z`));
+		}
+
+		return new Intl.DateTimeFormat('en', {
+			month: 'long',
+			day: 'numeric',
+			timeZone: 'UTC'
+		}).format(new Date(value));
 	}
 </script>
 
@@ -227,20 +259,28 @@
 			<div
 				class="ticket-card p-6 flex flex-col transition-transform duration-300 ease-in-out hover:-translate-y-1"
 			>
-				<h3 class="text-2xl font-bold mb-2 text-white">Standard</h3>
+				<h3 class="text-2xl font-bold mb-2 text-white">{standardTicket?.label ?? 'Standard'}</h3>
 
-				{#if earlyBirdActive}
+				{#if earlyBirdActive && standardTicket && standardPricing}
 					<div class="conference-pill mb-2 px-2 py-1">
 						Early Bird <span class="ml-2 text-xs text-[#fff3df]/80">{countdown}</span>
 					</div>
-					<p class="mb-3 text-sm text-[#fff3df]/70">Until August 31 only</p>
+					<p class="mb-3 text-sm text-[#fff3df]/70">
+						Until {formatDate(standardTicket.early_bird_discount_available_until ?? '')} only
+					</p>
 
 					<div class="mb-6">
-						<div class="text-2xl text-[#fff3df]/45 line-through">35 €</div>
-						<div class="text-4xl font-black text-[#f3c15f]">30 €</div>
+						<div class="text-2xl text-[#fff3df]/45 line-through">
+							{formatMoney(standardTicket.base_price, standardTicket.currency)}
+						</div>
+						<div class="text-4xl font-black text-[#f3c15f]">
+							{formatMoney(standardPricing.unitPrice, standardTicket.currency)}
+						</div>
 					</div>
 				{:else}
-					<div class="text-4xl font-black mb-6 text-[#f3c15f]">35 €</div>
+					<div class="text-4xl font-black mb-6 text-[#f3c15f]">
+						{formatMoney(standardTicket?.base_price ?? 35, standardTicket?.currency)}
+					</div>
 				{/if}
 
 				<ul class="mb-8 flex-grow text-[#fff3df]/80 space-y-3">
@@ -265,9 +305,16 @@
 				class="ticket-card p-6 flex flex-col relative border-[#d99a32]/70 shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 md:-mt-4"
 			>
 				<div class="conference-pill mb-4 w-fit px-3 py-1">PLUS EXPERIENCE</div>
-				<h3 class="text-2xl font-bold mb-2 text-white">GrandFeast Plus</h3>
+				<h3 class="text-2xl font-bold mb-2 text-white">
+					{grandFeastPlusTicket?.label ?? 'GrandFeast Plus'}
+				</h3>
 
-				<div class="text-4xl font-black mb-2 text-[#f3c15f]">65 €</div>
+				<div class="text-4xl font-black mb-2 text-[#f3c15f]">
+					{formatMoney(
+						grandFeastPlusPricing?.unitPrice ?? grandFeastPlusTicket?.base_price ?? 65,
+						grandFeastPlusTicket?.currency
+					)}
+				</div>
 
 				<p class="text-[#f3c15f] text-sm mb-4">
 					Includes pilgrimage to Our Lady of Knock on Oct 4 plus sightseeing
@@ -283,7 +330,10 @@
 						<span class="text-[#f3c15f] mr-2">🗺</span>Oct 4 sightseeing
 					</li>
 					<li class="flex items-center">
-						<span class="text-[#f3c15f] mr-2">✔</span>10% family discount for 5+ tickets
+						<span class="text-[#f3c15f] mr-2">✔</span>
+						{grandFeastPlusTicket?.bulk_purchase_discount_rate
+							? `${Math.round(grandFeastPlusTicket.bulk_purchase_discount_rate * 100)}% family discount for ${grandFeastPlusTicket.bulk_purchase_discount_min_quantity}+ tickets`
+							: 'Family discount where eligible'}
 					</li>
 				</ul>
 				<a href="/newbooking" class="conference-button px-5 py-3 text-sm"> Select </a>

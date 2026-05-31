@@ -14,8 +14,8 @@ import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounte
 import { TicketType } from '$lib/domain/shared/enums';
 
 /** Stable ids for the inventory counters stored in Supabase. */
-const STANDARD_TICKETS_ID = 'standard_tickets';
-const GRAND_FEAST_PLUS_TICKETS_ID = 'grand_feast_plus_tickets';
+const STANDARD_TICKETS_ID = TicketType.STANDARD;
+const GRAND_FEAST_PLUS_TICKETS_ID = TicketType.GRAND_FEAST_PLUS;
 
 /** Application service for ticket inventory counters. */
 export class TicketCounterService {
@@ -58,6 +58,9 @@ export class TicketCounterService {
 				return await this.getStandardTickets();
 			case TicketType.GRAND_FEAST_PLUS:
 				return await this.getGrandFeastPlusTickets();
+			case TicketType.VIP:
+			case TicketType.YOUTH:
+				return await this.getById(ticketType);
 			default:
 				throw new ValidationError(`Invalid ticket type ${ticketType}`);
 		}
@@ -85,6 +88,9 @@ export class TicketCounterService {
 				return await this.incrementStandardTickets(delta);
 			case TicketType.GRAND_FEAST_PLUS:
 				return await this.incrementGrandFeastPlusTickets(delta);
+			case TicketType.VIP:
+			case TicketType.YOUTH:
+				return await this.incrementTickets(booking.ticket_type, delta);
 			default:
 				throw new ValidationError(
 					`Invalid ticket type ${booking.ticket_type} on booking ${booking.reference_no}`

@@ -11,6 +11,7 @@ import type { Booking } from '$lib/domain/booking';
 import type { Event } from '$lib/domain/event';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
+import type { TicketTypeConfig } from '$lib/domain/ticketType';
 import type { TicketStatus } from '$lib/domain/shared/enums';
 
 /** A transport-friendly representation of an outbound email. */
@@ -50,6 +51,12 @@ export interface TicketCounterRepository {
 	findById(id: string): Promise<TicketCounter | null>;
 	set(id: string, values: TicketCounterDelta): Promise<void>;
 	increment(id: string, values: TicketCounterDelta): Promise<void>;
+}
+
+/** Persistence contract for ticket type configuration. */
+export interface TicketTypeRepository {
+	findById(eventId: string, ticketTypeId: string): Promise<TicketTypeConfig | null>;
+	listActive(eventId: string): Promise<TicketTypeConfig[]>;
 }
 
 /** Outbound email delivery contract. */

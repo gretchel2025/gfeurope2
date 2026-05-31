@@ -3,6 +3,7 @@ import type { Event } from '$lib/domain/event';
 import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter } from '$lib/domain/ticketCounter';
+import type { TicketTypeConfig } from '$lib/domain/ticketType';
 
 export type SupabaseBookingRow = {
 	event_id: string;
@@ -45,6 +46,25 @@ export type SupabaseTicketCounterRow = {
 	available: number;
 	reserved: number;
 	sold: number;
+};
+
+export type SupabaseTicketTypeRow = {
+	event_id: string;
+	ticket_type_id: string;
+	label: string;
+	description: string | null;
+	base_price: number | string;
+	currency: string;
+	available_from: string | null;
+	available_until: string | null;
+	early_bird_discount_available_until: string | null;
+	early_bird_discount_rate: number | string | null;
+	early_bird_discount_amount: number | string | null;
+	bulk_purchase_discount_min_quantity: number | null;
+	bulk_purchase_discount_rate: number | string | null;
+	bulk_purchase_discount_amount: number | string | null;
+	sort_order: number;
+	is_active: boolean;
 };
 
 export function mapBooking(row: SupabaseBookingRow): Booking {
@@ -95,6 +115,35 @@ export function mapTicketCounter(row: SupabaseTicketCounterRow): TicketCounter {
 		available: Number(row.available),
 		reserved: Number(row.reserved),
 		sold: Number(row.sold)
+	};
+}
+
+export function mapTicketType(row: SupabaseTicketTypeRow): TicketTypeConfig {
+	return {
+		event_id: row.event_id,
+		ticket_type_id: row.ticket_type_id,
+		label: row.label,
+		description: row.description ?? '',
+		base_price: Number(row.base_price),
+		currency: row.currency,
+		available_from: row.available_from ?? undefined,
+		available_until: row.available_until ?? undefined,
+		early_bird_discount_available_until: row.early_bird_discount_available_until ?? undefined,
+		early_bird_discount_rate:
+			row.early_bird_discount_rate === null ? undefined : Number(row.early_bird_discount_rate),
+		early_bird_discount_amount:
+			row.early_bird_discount_amount === null ? undefined : Number(row.early_bird_discount_amount),
+		bulk_purchase_discount_min_quantity: row.bulk_purchase_discount_min_quantity ?? undefined,
+		bulk_purchase_discount_rate:
+			row.bulk_purchase_discount_rate === null
+				? undefined
+				: Number(row.bulk_purchase_discount_rate),
+		bulk_purchase_discount_amount:
+			row.bulk_purchase_discount_amount === null
+				? undefined
+				: Number(row.bulk_purchase_discount_amount),
+		sort_order: Number(row.sort_order),
+		is_active: row.is_active
 	};
 }
 

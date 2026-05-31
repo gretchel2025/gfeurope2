@@ -53,14 +53,14 @@ flowchart TB
         hooks["hooks.server.ts\nbootstrap, CSRF, Supabase SSR, access policy"]
         routes["src/routes\nSvelteKit loads, actions, and callback route"]
         http["src/lib/server/http\nservice composition, guards, form parsing, error mapping"]
-        appServices["src/lib/application/services\nbooking, events, tickets, counters, notifications, reports, system"]
+        appServices["src/lib/application/services\nbooking, events, ticket types, tickets, counters, notifications, reports, system"]
         domain["src/lib/domain\nbusiness rules and domain types"]
         infra["src/lib/infrastructure\nSupabase, auth, email, media, logging, config, bootstrap"]
     end
 
     subgraph supabase["Supabase"]
         auth["Auth\nsessions and app_metadata.roles"]
-        data["Postgres Data API\ngrandfeasteu events, bookings, tickets, ticket_counters"]
+        data["Postgres Data API\ngrandfeasteu events, ticket_types, bookings, tickets, ticket_counters"]
         rpc["Postgres RPC\nreservation, payment, cancellation, ticket append"]
     end
 

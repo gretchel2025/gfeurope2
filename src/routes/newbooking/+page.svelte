@@ -1,24 +1,9 @@
 <script lang="ts">
 	import { City, Country } from 'country-state-city';
-	import {
-		computeFamilyDiscountAmount,
-		computeSubtotalAmount,
-		computeTotalAmountDue,
-		getTicketUnitPrice,
-		isStandardEarlyBirdActive
-	} from '$lib/domain/booking';
-	import { formatTicketTypeLabel, TicketPrice, TicketType } from '$lib/domain/shared/enums';
-	import type { ServerData } from './+page.server';
+	import { computeTicketPricing, isEarlyBirdDiscountActive } from '$lib/domain/ticketType';
+	import type { BookingTicketOption, ServerData } from './+page.server';
 
 	export let data: ServerData;
-
-	type TicketOption = {
-		value: TicketType;
-		label: string;
-		available: number;
-		description: string;
-		notes: string[];
-	};
 
 	type CountryOption = {
 		isoCode: string;
@@ -35,7 +20,6 @@
 	const MAX_TYPEAHEAD_OPTIONS = 40;
 	const steps = ['Ticket', 'Details', 'Guests', 'Review'];
 	const now = new Date();
-	const earlyBirdActive = isStandardEarlyBirdActive(now);
 	const countries: CountryOption[] = Country.getAllCountries()
 		.map((country) => ({
 			isoCode: country.isoCode,
@@ -45,34 +29,10 @@
 		.sort((a, b) => a.name.localeCompare(b.name));
 	const cityOptionsByCountry = new Map<string, CityOption[]>();
 
-	const ticketOptions: TicketOption[] = [
-		{
-			value: TicketType.STANDARD,
-			label: formatTicketTypeLabel(TicketType.STANDARD),
-			available: data.standardTicketCounter.available,
-			description: earlyBirdActive
-				? `${TicketPrice.STANDARD_EARLY_BIRD} EUR Early Bird`
-				: `${TicketPrice.STANDARD} EUR`,
-			notes: earlyBirdActive
-				? ['General admission', 'Standard seating', 'No extra 10% discount during Early Bird']
-				: ['General admission', 'Standard seating', '10% group discount for 5+ tickets']
-		},
-		{
-			value: TicketType.GRAND_FEAST_PLUS,
-			label: formatTicketTypeLabel(TicketType.GRAND_FEAST_PLUS),
-			available: data.grandFeastPlusTicketCounter.available,
-			description: `${TicketPrice.GRAND_FEAST_PLUS} EUR`,
-			notes: [
-				'Grand Feast admission',
-				'Our Lady of Knock pilgrimage',
-				'Oct 4 sightseeing',
-				'10% group discount for 5+ tickets'
-			]
-		}
-	];
+	const ticketOptions: BookingTicketOption[] = data.ticketOptions;
 
 	let currentStep = 1;
-	let ticketType: TicketType | '' = '';
+	let ticketType = '';
 	let quantity = 0;
 	let previousQuantity = 0;
 	let ticketStepSubmitted = false;
@@ -93,19 +53,16 @@
 	let confirmedNonRefundable = false;
 	let isSubmitting = false;
 
-	$: selectedTicketOption = ticketOptions.find((option) => option.value === ticketType);
+	$: selectedTicketOption = ticketOptions.find((option) => option.ticket_type_id === ticketType);
 	$: availableTickets = selectedTicketOption?.available ?? 0;
 	$: maxQuantity = availableTickets > 0 ? Math.min(10, availableTickets) : 0;
-	$: unitPrice = selectedTicketOption ? getTicketUnitPrice(selectedTicketOption.value, now) : 0;
-	$: subtotalAmount = selectedTicketOption
-		? computeSubtotalAmount(selectedTicketOption.value, quantity, now)
-		: 0;
-	$: familyDiscountAmount = selectedTicketOption
-		? computeFamilyDiscountAmount(selectedTicketOption.value, quantity, now)
-		: 0;
-	$: totalAmount = selectedTicketOption
-		? computeTotalAmountDue(selectedTicketOption.value, quantity, now)
-		: 0;
+	$: selectedPricing = selectedTicketOption
+		? computeTicketPricing(selectedTicketOption, quantity, now)
+		: null;
+	$: unitPrice = selectedPricing?.unitPrice ?? 0;
+	$: subtotalAmount = selectedPricing?.subtotalAmount ?? 0;
+	$: discountAmount = selectedPricing?.discountAmount ?? 0;
+	$: totalAmount = selectedPricing?.totalAmount ?? 0;
 	$: isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 	$: selectedCountry = findCountryByName(countrySearch, countries);
 	$: countryIso = selectedCountry?.isoCode ?? '';
@@ -241,10 +198,50 @@
 		return '';
 	}
 
-	function selectTicket(value: TicketType) {
-		const option = ticketOptions.find((candidate) => candidate.value === value);
+	function selectTicket(value: string) {
+		const option = ticketOptions.find((candidate) => candidate.ticket_type_id === value);
 		if (!option || option.available < 1) return;
 		ticketType = value;
+	}
+
+	function formatMoney(value: number, currency = 'EUR') {
+		return `${value.toFixed(2)} ${currency}`;
+	}
+
+	function formatSingleTicketDescription(option: BookingTicketOption) {
+		const pricing = computeTicketPricing(option, 1, now);
+		return pricing.earlyBirdDiscountActive
+			? `${formatMoney(pricing.unitPrice, option.currency)} Early Bird`
+			: formatMoney(option.base_price, option.currency);
+	}
+
+	function formatDiscountLabel(option: BookingTicketOption) {
+		if (option.bulk_purchase_discount_rate !== undefined) {
+			return `${Math.round(option.bulk_purchase_discount_rate * 100)}%`;
+		}
+		if (option.bulk_purchase_discount_amount !== undefined) {
+			return formatMoney(option.bulk_purchase_discount_amount, option.currency);
+		}
+		return 'Group';
+	}
+
+	function formatDate(value: string) {
+		const [dateOnly] = value.split('T');
+		if (dateOnly) {
+			return new Intl.DateTimeFormat('en', {
+				month: 'long',
+				day: 'numeric',
+				year: 'numeric',
+				timeZone: 'UTC'
+			}).format(new Date(`${dateOnly}T00:00:00Z`));
+		}
+
+		return new Intl.DateTimeFormat('en', {
+			month: 'long',
+			day: 'numeric',
+			year: 'numeric',
+			timeZone: 'UTC'
+		}).format(new Date(value));
 	}
 
 	function decreaseQuantity() {
@@ -407,44 +404,46 @@
 								<button
 									type="button"
 									class={`conference-card p-5 text-left transition ${
-										ticketType === option.value
+										ticketType === option.ticket_type_id
 											? 'border-[#f3c15f] ring-2 ring-[#f3c15f]/35'
 											: option.available < 1
 												? 'cursor-not-allowed opacity-55'
 												: 'hover:border-[#f3c15f]/55'
 									}`}
-									aria-pressed={ticketType === option.value}
+									aria-pressed={ticketType === option.ticket_type_id}
 									disabled={option.available < 1}
-									on:click={() => selectTicket(option.value)}
+									on:click={() => selectTicket(option.ticket_type_id)}
 								>
 									<div class="flex items-start justify-between gap-4">
 										<div>
 											<p class="text-2xl font-black text-white">{option.label}</p>
-											{#if option.value === TicketType.STANDARD && earlyBirdActive}
+											{#if isEarlyBirdDiscountActive(option, now)}
 												<div class="mt-2 space-y-1">
 													<p class="text-lg font-black text-[#fff3df]/55 line-through">
-														{TicketPrice.STANDARD} EUR
+														{formatMoney(option.base_price, option.currency)}
 													</p>
 													<p class="text-3xl font-black text-[#f3c15f]">
-														{TicketPrice.STANDARD_EARLY_BIRD} EUR Early Bird
+														{formatSingleTicketDescription(option)}
 													</p>
-													<p class="text-sm font-bold text-[#fff3df]/70">Until August 31, 2026</p>
+													<p class="text-sm font-bold text-[#fff3df]/70">
+														Until {formatDate(option.early_bird_discount_available_until ?? '')}
+													</p>
 												</div>
 											{:else}
 												<p class="mt-2 text-3xl font-black text-[#f3c15f]">
-													{option.description}
+													{formatSingleTicketDescription(option)}
 												</p>
 											{/if}
 										</div>
 										<span
 											class={`flex h-8 w-8 items-center justify-center border text-sm font-black ${
-												ticketType === option.value
+												ticketType === option.ticket_type_id
 													? 'border-[#f3c15f] bg-[#d99a32] text-[#061922]'
 													: 'border-white/25 text-white/50'
 											}`}
 											aria-hidden="true"
 										>
-											{ticketType === option.value ? '✓' : ''}
+											{ticketType === option.ticket_type_id ? '✓' : ''}
 										</span>
 									</div>
 									<ul class="mt-5 space-y-3 text-sm text-[#fff3df]/80">
@@ -471,7 +470,7 @@
 								<div>
 									<h4 class="text-xl font-black text-white">How many tickets?</h4>
 									<p class="mt-1 text-sm text-[#fff3df]/70">
-										5+ tickets get group discount where eligible.
+										Group discounts are applied automatically where eligible.
 									</p>
 								</div>
 								<div class="flex items-center gap-3">
@@ -703,9 +702,9 @@
 						type="button"
 						class="conference-button-secondary px-6 py-3 text-sm"
 						on:click={() => (currentStep = Math.max(1, currentStep - 1))}
-					disabled={currentStep === 1}
-				>
-					Back
+						disabled={currentStep === 1}
+					>
+						Back
 					</button>
 
 					{#if currentStep < 4}
@@ -755,22 +754,36 @@
 					</div>
 					<div class="flex justify-between gap-4">
 						<span class="text-[#fff3df]/65">Unit price</span>
-						<span class="font-bold text-white">{unitPrice} EUR</span>
+						<span class="font-bold text-white"
+							>{formatMoney(unitPrice, selectedTicketOption?.currency ?? 'EUR')}</span
+						>
 					</div>
 					<div class="flex justify-between gap-4">
 						<span class="text-[#fff3df]/65">Subtotal</span>
-						<span class="font-bold text-white">{subtotalAmount} EUR</span>
+						<span class="font-bold text-white"
+							>{formatMoney(subtotalAmount, selectedTicketOption?.currency ?? 'EUR')}</span
+						>
 					</div>
-					{#if familyDiscountAmount > 0}
+					{#if discountAmount > 0}
 						<div class="flex justify-between gap-4 text-[#f3c15f]">
-							<span>Group discount</span>
-							<span class="font-bold">-{familyDiscountAmount} EUR</span>
+							<span
+								>{selectedPricing?.earlyBirdDiscountActive
+									? 'Early Bird discount'
+									: selectedTicketOption
+										? `${formatDiscountLabel(selectedTicketOption)} group discount`
+										: 'Discount'}</span
+							>
+							<span class="font-bold"
+								>-{formatMoney(discountAmount, selectedTicketOption?.currency ?? 'EUR')}</span
+							>
 						</div>
 					{/if}
 					<div class="border-t border-white/10 pt-4">
 						<div class="flex justify-between gap-4 text-lg">
 							<span class="font-black text-white">Total</span>
-							<span class="font-black text-[#f3c15f]">{totalAmount} EUR</span>
+							<span class="font-black text-[#f3c15f]"
+								>{formatMoney(totalAmount, selectedTicketOption?.currency ?? 'EUR')}</span
+							>
 						</div>
 					</div>
 				</div>

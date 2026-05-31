@@ -7,13 +7,6 @@
  * single domain-focused module instead of being duplicated across routes,
  * repositories, and services.
  */
-/** Ticket pricing constants in EUR. */
-export enum TicketPrice {
-	STANDARD = 35.0,
-	STANDARD_EARLY_BIRD = 30.0,
-	GRAND_FEAST_PLUS = 65.0
-}
-
 /** The states a booking's payment lifecycle can be in. */
 export enum BookingPaymentStatus {
 	UNPAID = 'UNPAID',
@@ -31,7 +24,9 @@ export enum TicketStatus {
 /** Supported ticket classes sold by the application. */
 export enum TicketType {
 	STANDARD = 'STANDARD',
-	GRAND_FEAST_PLUS = 'GRAND_FEAST_PLUS'
+	GRAND_FEAST_PLUS = 'GRAND_FEAST_PLUS',
+	VIP = 'VIP',
+	YOUTH = 'YOUTH'
 }
 
 /** User-facing ticket labels. */
@@ -39,6 +34,10 @@ export function formatTicketTypeLabel(ticketType: TicketType | string): string {
 	switch (ticketType) {
 		case TicketType.GRAND_FEAST_PLUS:
 			return 'GrandFeast Plus';
+		case TicketType.VIP:
+			return 'Premium';
+		case TicketType.YOUTH:
+			return 'Child';
 		case TicketType.STANDARD:
 			return 'Standard';
 		default:

@@ -8,11 +8,7 @@
  * without pulling in framework or persistence concerns.
  */
 import type { QRCode, Ticket } from '$lib/domain/ticket';
-import { BookingPaymentStatus, TicketPrice, TicketType } from '$lib/domain/shared/enums';
-
-export const STANDARD_EARLY_BIRD_DEADLINE = new Date('2026-08-31T23:59:59+01:00');
-export const FAMILY_DISCOUNT_THRESHOLD = 5;
-export const FAMILY_DISCOUNT_RATE = 0.1;
+import { BookingPaymentStatus, TicketType } from '$lib/domain/shared/enums';
 
 /** Canonical booking shape used by the application layer. */
 export type Booking = {
@@ -74,65 +70,6 @@ export function canGenerateTickets(booking: Booking): boolean {
 	const allTicketsGenerated = booking.ticket_ids.length >= booking.guests.length;
 
 	return isPaid && !allTicketsGenerated;
-}
-
-/** Whether standard-ticket early bird pricing is still available. */
-export function isStandardEarlyBirdActive(now: Date = new Date()): boolean {
-	return now.getTime() <= STANDARD_EARLY_BIRD_DEADLINE.getTime();
-}
-
-/** Returns the unit price in EUR for the selected ticket class. */
-export function getTicketUnitPrice(ticketType: TicketType, now: Date = new Date()): number {
-	switch (ticketType) {
-		case TicketType.GRAND_FEAST_PLUS:
-			return TicketPrice.GRAND_FEAST_PLUS;
-		case TicketType.STANDARD:
-		default:
-			return isStandardEarlyBirdActive(now)
-				? TicketPrice.STANDARD_EARLY_BIRD
-				: TicketPrice.STANDARD;
-	}
-}
-
-/** Computes the pre-discount total for the selected ticket class and quantity. */
-export function computeSubtotalAmount(
-	ticketType: TicketType,
-	quantity: number,
-	now: Date = new Date()
-): number {
-	return getTicketUnitPrice(ticketType, now) * quantity;
-}
-
-/** Computes the family discount for paid ticket purchases of five or more. */
-export function computeFamilyDiscountAmount(
-	ticketType: TicketType,
-	quantity: number,
-	now: Date = new Date()
-): number {
-	if (quantity < FAMILY_DISCOUNT_THRESHOLD) {
-		return 0;
-	}
-	if (ticketType === TicketType.STANDARD && isStandardEarlyBirdActive(now)) {
-		return 0;
-	}
-
-	return roundCurrency(computeSubtotalAmount(ticketType, quantity, now) * FAMILY_DISCOUNT_RATE);
-}
-
-/** Computes total price from ticket class, promotions, family discount, and quantity. */
-export function computeTotalAmountDue(
-	ticketType: TicketType,
-	quantity: number,
-	now: Date = new Date()
-): number {
-	return roundCurrency(
-		computeSubtotalAmount(ticketType, quantity, now) -
-			computeFamilyDiscountAmount(ticketType, quantity, now)
-	);
-}
-
-function roundCurrency(value: number): number {
-	return Math.round(value * 100) / 100;
 }
 
 /** Sort helper used by admin screens to show newest bookings first. */

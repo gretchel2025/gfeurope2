@@ -6,12 +6,7 @@ import {
 	normalizeTicketType,
 	type Ticket
 } from '$lib/domain/ticket';
-import {
-	BookingPaymentStatus,
-	TicketPrice,
-	TicketStatus,
-	TicketType
-} from '$lib/domain/shared/enums';
+import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
 	return {
@@ -23,7 +18,7 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 		ticket_type: TicketType.STANDARD,
 		book_date: '2026-01-01T00:00:00.000Z',
 		payment_status: BookingPaymentStatus.PAID,
-		amount_total: TicketPrice.STANDARD,
+		amount_total: 35,
 		guests: ['Ada'],
 		ticket_ids: ['TTEST001'],
 		...overrides
@@ -47,8 +42,8 @@ function makeTicket(overrides: Partial<Ticket> = {}): Ticket {
 describe('ticket domain rules', () => {
 	it('normalizes known ticket type input and defaults unknown input to standard', () => {
 		expect(normalizeTicketType('GRAND_FEAST_PLUS')).toBe(TicketType.GRAND_FEAST_PLUS);
-		expect(normalizeTicketType('vip')).toBe(TicketType.GRAND_FEAST_PLUS);
-		expect(normalizeTicketType('YOUTH')).toBe(TicketType.STANDARD);
+		expect(normalizeTicketType('vip')).toBe(TicketType.VIP);
+		expect(normalizeTicketType('YOUTH')).toBe(TicketType.YOUTH);
 		expect(normalizeTicketType('surprise-me')).toBe(TicketType.STANDARD);
 	});
 

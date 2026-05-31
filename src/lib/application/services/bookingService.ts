@@ -14,7 +14,6 @@ import {
 	canCancelBooking,
 	canGenerateTickets,
 	canMarkBookingPaid,
-	computeTotalAmountDue,
 	getTopCitiesByCountOfTicketsBooked
 } from '$lib/domain/booking';
 import type { Ticket } from '$lib/domain/ticket';
@@ -23,6 +22,7 @@ import { BookingPaymentStatus } from '$lib/domain/shared/enums';
 import type { TicketCounterService } from '$lib/application/services/ticketCounterService';
 import type { TicketService } from '$lib/application/services/ticketService';
 import type { NotificationService } from '$lib/application/services/notificationService';
+import type { TicketTypeService } from '$lib/application/services/ticketTypeService';
 
 /** Coordinates booking-related use cases across repositories and other services. */
 export class BookingService {
@@ -30,6 +30,7 @@ export class BookingService {
 		private readonly bookingRepository: BookingRepository,
 		private readonly eventRepository: EventRepository,
 		private readonly ticketCounterService: TicketCounterService,
+		private readonly ticketTypeService: TicketTypeService,
 		private readonly ticketService: TicketService,
 		private readonly notificationService: NotificationService,
 		private readonly eventLogger: EventLogger,
@@ -52,6 +53,12 @@ export class BookingService {
 			throw new NotFoundError('event not found');
 		}
 
+		const now = new Date();
+		const ticketTypeConfig = await this.ticketTypeService.getAvailableForBooking(
+			input.event_id,
+			ticketType,
+			now
+		);
 		const counter = await this.ticketCounterService.getByTicketType(ticketType);
 		if (!counter) {
 			throw new NotFoundError('ticket counter is missing');
@@ -67,9 +74,13 @@ export class BookingService {
 			email: input.email,
 			city: input.city,
 			ticket_type: ticketType,
-			book_date: new Date().toISOString(),
+			book_date: now.toISOString(),
 			payment_status: BookingPaymentStatus.UNPAID,
-			amount_total: computeTotalAmountDue(ticketType, input.guests.length),
+			amount_total: this.ticketTypeService.computePricing(
+				ticketTypeConfig,
+				input.guests.length,
+				now
+			).totalAmount,
 			guests: input.guests,
 			ticket_ids: [],
 			payment_proof_url: input.payment_proof_url

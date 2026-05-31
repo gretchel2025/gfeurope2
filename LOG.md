@@ -3,6 +3,12 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-05-31
+
+- Added DB-backed ticket type pricing and discount configuration, migrated
+  ticket counter ids to stable ticket type ids, and moved booking price validation
+  from hard-coded constants to `grandfeasteu.ticket_types`.
+
 ## 2026-05-30
 
 - Added a timeout around Resend email delivery so stalled provider requests do not leave
