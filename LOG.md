@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-31
 
+- Hardened live-dev Supabase session lookup so stale or malformed auth cookies are treated
+  as signed out instead of surfacing as a generic 500, with server-side error logging.
 - Made public ticket selection more reliable on mobile by forcing homepage ticket links
   to use full navigation and changing booking ticket cards to native radio inputs.
 - Added default favicon and Apple touch icon static files so mobile browsers do not

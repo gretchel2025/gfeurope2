@@ -1,8 +1,9 @@
 import { bootstrapApplication } from '$lib/infrastructure/bootstrap/bootstrap';
-import { redirect, type Handle } from '@sveltejs/kit';
+import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 import { createServerClient } from '@supabase/ssr';
 import { assertAllowedFormOrigin } from '$lib/infrastructure/auth/csrfOrigin';
 import { appConfig } from '$lib/infrastructure/config/env.server';
+import { logger } from '$lib/infrastructure/logging/logger';
 import {
 	buildRedirectTo,
 	evaluateAccess,
@@ -12,6 +13,8 @@ import {
 import { getAuthSession, getSessionRoles } from '$lib/infrastructure/auth/session';
 
 await bootstrapApplication();
+
+const emptySession = { session: null, user: null };
 
 export const handle: Handle = async ({ event, resolve }) => {
 	assertAllowedFormOrigin(event, appConfig.appBaseUrl);
@@ -32,23 +35,39 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	event.locals.safeGetSession = async () => {
 		if (!event.locals.supabase) {
-			return { session: null, user: null };
+			return emptySession;
 		}
 
-		const {
-			data: { user },
-			error
-		} = await event.locals.supabase.auth.getUser();
+		try {
+			const {
+				data: { user },
+				error
+			} = await event.locals.supabase.auth.getUser();
 
-		if (error || !user) {
-			return { session: null, user: null };
+			if (error || !user) {
+				return emptySession;
+			}
+
+			const {
+				data: { session },
+				error: sessionError
+			} = await event.locals.supabase.auth.getSession();
+
+			if (sessionError || !session) {
+				return emptySession;
+			}
+
+			return { session, user };
+		} catch (caught) {
+			logger.warn(
+				{
+					err: caught,
+					path: event.url.pathname
+				},
+				'[WARN] Supabase session lookup failed'
+			);
+			return emptySession;
 		}
-
-		const {
-			data: { session }
-		} = await event.locals.supabase.auth.getSession();
-
-		return { session, user };
 	};
 
 	const mode = getRuntimeAccessMode({
@@ -84,4 +103,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 			return name === 'content-range' || name === 'x-supabase-api-version';
 		}
 	});
+};
+
+export const handleError: HandleServerError = ({ error, event, message, status }) => {
+	logger.error(
+		{
+			err: error,
+			status,
+			message,
+			path: event.url.pathname
+		},
+		'[ERROR] Unhandled SvelteKit request error'
+	);
+
+	return { message };
 };

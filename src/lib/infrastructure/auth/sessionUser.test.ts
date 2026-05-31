@@ -1,7 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { RequestEvent } from '@sveltejs/kit';
 import type { AppSession } from './session';
-import { getSessionRoles } from './session';
+import { getAuthSession, getSessionRoles } from './session';
 import { getSessionUser } from './sessionUser';
+
+vi.mock('$lib/infrastructure/logging/logger', () => ({
+	logger: {
+		warn: vi.fn()
+	}
+}));
 
 function sessionWith(input: {
 	email?: string | null;
@@ -65,5 +72,18 @@ describe('Supabase session mapping', () => {
 			[]
 		);
 		expect(getSessionRoles(sessionWith({ email: 'admin@example.com', roles: null }))).toEqual([]);
+	});
+
+	it('treats failed session lookup as signed out', async () => {
+		const event = {
+			url: new URL('https://dev.grandfeast.eu/newbooking'),
+			locals: {
+				safeGetSession: async () => {
+					throw new Error('bad auth cookie');
+				}
+			}
+		} as unknown as RequestEvent;
+
+		await expect(getAuthSession(event)).resolves.toBeNull();
 	});
 });
