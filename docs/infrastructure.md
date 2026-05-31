@@ -151,6 +151,14 @@ matching migration. Create new migrations with `npx supabase migration new
 `npx supabase migration list --local` and a focused query, then deploy/apply the same
 migration through the normal environment workflow.
 
+After `git pull`, check whether any checked-in migrations are missing from the target
+database before doing schema-dependent work. For local development, run
+`npx supabase migration list --local`; for a hosted project, run
+`npx supabase migration list --linked` only when intentionally operating on the linked
+project. If migrations are missing, list the exact versions and ask the user for explicit
+permission before applying them. Do not auto-apply missed migrations as a background
+cleanup step.
+
 Important database env vars:
 
 - `APP_EVENT_ID`

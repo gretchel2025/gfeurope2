@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-05-31
 
+- Documented that agents should check for missing database migrations after `git pull`
+  and ask explicit permission before applying them.
 - Added DB-backed ticket type pricing and discount configuration, migrated
   ticket counter ids to stable ticket type ids, and moved booking price validation
   from hard-coded constants to `grandfeasteu.ticket_types`.

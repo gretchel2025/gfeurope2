@@ -76,6 +76,13 @@ For existing migrations, apply missed local migrations with `npx supabase migrat
 --local`; do not repair or manually edit migration history unless reconciling a known
 history mismatch.
 
+After pulling from git, check whether any checked-in migrations are missing from the
+target database before continuing work. Use `npx supabase migration list --local` for
+local development, or `npx supabase migration list --linked` only when intentionally
+checking a hosted project. If migrations are missing, report the exact migration versions
+and ask the user for explicit permission before applying them. Do not auto-apply missed
+migrations just because they exist after a pull.
+
 ## Build, Test, and Development Commands
 
 - `make install` or `npm install`: install dependencies.

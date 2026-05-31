@@ -174,6 +174,12 @@ with `npx supabase migration up --local`, and verify with `npx supabase migratio
 changes, or one-off local schema queries unless the same change is captured in a checked-in
 file under `supabase/migrations/`.
 
+After pulling new code, check for missed local database migrations before starting work
+that depends on the schema. Run `npx supabase migration list --local` and compare local
+and database history. If any migration is missing, state the exact migration version(s)
+and ask the user for explicit permission before running `npx supabase migration up
+--local`. Do not apply pulled migrations automatically.
+
 ## Access Roles
 
 Access is controlled by Supabase Auth `app_metadata.roles`. The app recognizes these
