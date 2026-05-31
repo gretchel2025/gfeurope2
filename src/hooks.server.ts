@@ -106,6 +106,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError: HandleServerError = ({ error, event, message, status }) => {
+	const mode = getRuntimeAccessMode({
+		dev: appConfig.dev,
+		hostname: event.url.hostname,
+		netlifyBranch: appConfig.netlifyBranch
+	});
 	logger.error(
 		{
 			err: error,
@@ -116,5 +121,63 @@ export const handleError: HandleServerError = ({ error, event, message, status }
 		'[ERROR] Unhandled SvelteKit request error'
 	);
 
+	if (mode !== 'production') {
+		return {
+			message,
+			code: getErrorCode(error),
+			name: getErrorName(error),
+			path: event.url.pathname,
+			stack: getErrorStack(error),
+			cause: getErrorCause(error),
+			timestamp: new Date().toISOString()
+		};
+	}
+
 	return { message };
 };
+
+function getErrorCode(error: unknown): string | undefined {
+	return getErrorRecord(error).code;
+}
+
+function getErrorName(error: unknown): string | undefined {
+	if (error instanceof Error) {
+		return error.name;
+	}
+
+	return getErrorRecord(error).name;
+}
+
+function getErrorStack(error: unknown): string | undefined {
+	if (error instanceof Error) {
+		return error.stack;
+	}
+
+	return getErrorRecord(error).stack;
+}
+
+function getErrorCause(error: unknown): string | undefined {
+	if (!(error instanceof Error) || error.cause === undefined) {
+		return getErrorRecord(error).cause;
+	}
+
+	if (error.cause instanceof Error) {
+		return `${error.cause.name}: ${error.cause.message}`;
+	}
+
+	return String(error.cause);
+}
+
+function getErrorRecord(error: unknown): Record<string, string | undefined> {
+	if (!error || typeof error !== 'object') {
+		return {};
+	}
+
+	const record = error as Record<string, unknown>;
+	return {
+		code: typeof record.code === 'string' ? record.code : undefined,
+		name: typeof record.name === 'string' ? record.name : undefined,
+		stack: typeof record.stack === 'string' ? record.stack : undefined,
+		cause: typeof record.cause === 'string' ? record.cause : undefined
+	};
+}

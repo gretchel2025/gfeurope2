@@ -1,4 +1,6 @@
 <script lang="ts">
+	import ErrorDiagnostics from '$lib/components/public/ErrorDiagnostics.svelte';
+
 	let refreshing = false;
 
 	function refreshPage() {
@@ -14,6 +16,8 @@
 			<h1 class="text-3xl font-black text-white sm:text-4xl">Server Busy</h1>
 			<h2 class="text-lg text-[#fff3df]/75 sm:text-xl">Please refresh and try again</h2>
 		</hgroup>
+
+		<ErrorDiagnostics />
 
 		<div class="flex flex-col justify-center gap-4 sm:flex-row">
 			<button

@@ -9,6 +9,8 @@ test sends, site availability checks, or command-only housekeeping.
   as signed out instead of surfacing as a generic 500, with server-side error logging.
 - Limited browser-facing auth data to a minimal public session so Google provider tokens
   and identity payloads are not serialized into SvelteKit page data.
+- Added live-dev/local error diagnostics to public error pages so browser-visible 500s
+  include status, path, message, and stack details without exposing them in production.
 - Made public ticket selection more reliable on mobile by forcing homepage ticket links
   to use full navigation and changing booking ticket cards to native radio inputs.
 - Added default favicon and Apple touch icon static files so mobile browsers do not
