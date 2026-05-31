@@ -30,10 +30,13 @@
 		['Status', String($page.status)],
 		['Message', $page.error?.message],
 		['Path', $page.error?.path ?? $page.url.pathname],
+		['URL', $page.error?.url],
+		['Route', $page.error?.routeId],
 		['Name', $page.error?.name],
 		['Code', $page.error?.code],
 		['Timestamp', $page.error?.timestamp],
-		['Cause', $page.error?.cause]
+		['Cause', $page.error?.cause],
+		['User Agent', $page.error?.userAgent]
 	].filter(([, value]) => Boolean(value));
 	$: stack = $page.error?.stack;
 	$: clientDiagnosticRows = clientError

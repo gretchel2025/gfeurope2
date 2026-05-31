@@ -13,6 +13,8 @@ test sends, site availability checks, or command-only housekeeping.
   include status, path, message, and stack details without exposing them in production.
 - Added early client-side error capture so live-dev browser 500 pages can display
   hydration/runtime failures that do not reach server logs.
+- Added a SvelteKit client `handleError` hook so handled client navigation/render
+  failures are returned into live-dev error page diagnostics.
 - Made public ticket selection more reliable on mobile by forcing homepage ticket links
   to use full navigation and changing booking ticket cards to native radio inputs.
 - Added default favicon and Apple touch icon static files so mobile browsers do not

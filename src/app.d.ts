@@ -28,6 +28,9 @@ declare global {
 			path?: string;
 			stack?: string;
 			cause?: string;
+			routeId?: string | null;
+			url?: string;
+			userAgent?: string;
 			timestamp?: string;
 		}
 		interface Locals {
