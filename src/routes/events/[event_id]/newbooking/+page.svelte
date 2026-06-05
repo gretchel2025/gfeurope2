@@ -54,6 +54,7 @@
 
 	const ticketOptions: BookingTicketOption[] = data.ticketOptions;
 
+	let appliedQueryTicketType = '';
 	let currentStep = 1;
 	let ticketType = '';
 	let quantity = 0;
@@ -110,6 +111,17 @@
 		quantity = maxQuantity;
 	}
 
+	$: {
+		const queryTicketType = $page.url.searchParams.get('ticket_type') ?? '';
+		if (queryTicketType !== appliedQueryTicketType) {
+			const validTicketType = getAvailableTicketType(queryTicketType);
+			if (validTicketType) {
+				ticketType = validTicketType;
+			}
+			appliedQueryTicketType = queryTicketType;
+		}
+	}
+
 	function filterCountryOptions(search: string, countryOptions: CountryOption[]) {
 		const normalizedSearch = normalizeTypeaheadValue(search);
 		const options = normalizedSearch
@@ -155,6 +167,12 @@
 
 	function normalizeTypeaheadValue(value: string) {
 		return value.trim().toLowerCase();
+	}
+
+	function getAvailableTicketType(value: string) {
+		const option = ticketOptions.find((candidate) => candidate.ticket_type_id === value);
+		if (!option || option.available < 1) return '';
+		return option.ticket_type_id;
 	}
 
 	function handleCountryInput(event: Event) {

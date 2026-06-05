@@ -342,7 +342,7 @@
 				</ul>
 
 				<a
-					href={publicNav.newBooking}
+					href={`${publicNav.newBooking}?ticket_type=STANDARD`}
 					data-sveltekit-reload
 					class="conference-button px-5 py-3 text-sm"
 				>
@@ -386,7 +386,7 @@
 					</li>
 				</ul>
 				<a
-					href={publicNav.newBooking}
+					href={`${publicNav.newBooking}?ticket_type=GRAND_FEAST_PLUS`}
 					data-sveltekit-reload
 					class="conference-button px-5 py-3 text-sm"
 				>
