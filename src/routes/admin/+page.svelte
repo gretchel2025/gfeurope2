@@ -13,6 +13,19 @@
 			year: 'numeric'
 		}).format(new Date(value));
 	}
+
+	function eventThemeStyle(eventRoute: ServerData['eventRoutes'][number]) {
+		return [
+			`--admin-event-main: ${asHexColor(eventRoute.theme_main_color, '#334155')}`,
+			`--admin-event-sub: ${asHexColor(eventRoute.theme_sub_color, '#eef2f7')}`,
+			`--admin-event-highlight: ${asHexColor(eventRoute.theme_highlight_color, '#64748b')}`,
+			`--admin-event-on-main: ${asHexColor(eventRoute.theme_on_main_color, '#ffffff')}`
+		].join('; ');
+	}
+
+	function asHexColor(value: string, fallback: string) {
+		return /^#[0-9A-Fa-f]{6}$/.test(value) ? value : fallback;
+	}
 </script>
 
 <main class="admin-page-surface min-h-screen px-4 py-8 text-slate-900">
@@ -30,18 +43,19 @@
 				<div class="grid gap-3">
 					{#each data.eventRoutes as eventRoute}
 						<article
-							class="flex flex-col gap-4 rounded-md border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+							class="admin-directory-event-card flex flex-col gap-4 rounded-md p-4 sm:flex-row sm:items-center sm:justify-between"
+							style={eventThemeStyle(eventRoute)}
 						>
 							<div>
-								<p class="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+								<p class="event-card-kicker text-xs font-bold uppercase tracking-[0.14em]">
 									{eventRoute.event_id}
 								</p>
 								<h2 class="mt-1 text-lg font-semibold text-slate-950">{eventRoute.title}</h2>
-								<p class="mt-1 text-sm text-slate-600">
+								<p class="event-card-meta mt-1 text-sm">
 									{eventRoute.country} • {formatEventDate(eventRoute.datetime)}
 								</p>
 							</div>
-							<AdminButton href={eventRoute.href} variant="secondary">Open admin</AdminButton>
+							<AdminButton href={eventRoute.href}>Open admin</AdminButton>
 						</article>
 					{/each}
 				</div>
