@@ -188,6 +188,9 @@ The app deliberately separates public marketing themes from operational admin th
 - `/events/<event_id>` uses an event-specific public Svelte component registered in
   `src/lib/publicEvents.ts`; future events should get their own component under
   `src/lib/ui/components/public/events/`.
+- The `/events` index loads DB event records but filters them through
+  `getPublicEventPage(event_id)`, so unregistered event ids do not appear publicly and
+  `/events/<event_id>` fails clearly when no public page is registered.
 - `gfeu2026` is the active sales page and can keep its own marketing design and booking
   calls to action.
 - `gfeu2025` is an archive/portfolio page and should not expose active booking actions.
@@ -366,6 +369,10 @@ Access policy summary:
 - New public event landing pages: put event-specific Svelte components under
   `src/lib/ui/components/public/events/`, then register their public page metadata in
   `src/lib/publicEvents.ts`.
+- To publish a future public event, add/seed the `events` row through a migration, add
+  ticket types/counters if booking is needed, create the event component, register the
+  event in `src/lib/publicEvents.ts`, and wire it in
+  `src/routes/events/[event_id]/+page.svelte`.
 - New event admin tools belong under `/admin/events/<event_id>` and must keep
   event-scoped authorization.
 - New global admin tools belong under `/admin/global` and must require `superuser`.

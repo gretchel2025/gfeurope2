@@ -76,7 +76,8 @@ npm run build         # production build
 ## Routing And Theming
 
 - Public event pages are event-scoped under `/events/<event_id>`.
-- The public events index lives at `/events` and uses a neutral, non-event-specific theme.
+- The public events index lives at `/events`, uses a neutral theme, and lists only events
+  with registered public pages.
 - Public booking is event-scoped at `/events/<event_id>/newbooking`.
 - `/admin` is a neutral directory of admin routes available to the signed-in user.
 - Event admin pages are event-scoped under `/admin/events/<event_id>` and require
@@ -93,15 +94,9 @@ npm run build         # production build
 
 ## Admin Inventory
 
-Ticket inventory is DB-driven. `ticket_types` defines per-event labels, prices,
-availability, discount rules, sort order, and active state. `ticket_counters` stores
-mutable inventory with `counter_id` values matching `ticket_types.ticket_type_id`.
-
-Public booking pages should show only active and currently available ticket types. Event
-admin dashboards should show every counter row for the managed event, including inactive
-compatibility ticket types, so admins can inspect historical or disabled inventory.
-Counter card titles come from `ticket_types.label`; if a ticket type row is missing, the
-UI falls back to formatting the counter id.
+Ticket inventory is DB-driven. `ticket_types` defines event ticket configuration, while
+`ticket_counters` stores mutable inventory. Public booking shows active available ticket
+types; admin pages show all counters for the managed event.
 
 ## Audit Trail
 
@@ -109,55 +104,13 @@ Important domain actions are written server-side to `grandfeasteu.audit_events`.
 rows are durable first-party app data, scoped to an event when applicable, and loaded in
 admin history UI only after an explicit `?load_history=true` request.
 
-Current audit action values:
-
-- `booking.created`
-- `booking.payment_reminder_sent`
-- `booking.marked_paid`
-- `booking.cancelled`
-- `booking.tickets_generated`
-- `ticket.created`
-- `ticket.checked_in`
-- `ticket.checked_out`
-- `ticket_counter.available_added`
-
-Audit actor types are `public`, `admin`, and `system`. Audit entity types are `booking`,
-`ticket`, and `ticket_counter`. Audit metadata may include operational identifiers and
-state changes, but must not include secrets, tokens, uploaded file contents, payment proof
-URLs, or email bodies.
-
 ## Permissions Model
 
 Authorization uses Supabase Auth `app_metadata`, not user-editable `user_metadata`.
-There are two permission layers:
-
-- `roles`: global app roles such as `tester`, `admin`, and `superuser`.
-- `event_roles`: per-event grants such as `gfeu2026: ["admin"]`.
-
-Route access:
-
-- `/admin` is an admin directory. A signed-in user can open it if they have global
-  `admin`, at least one event admin grant, or `superuser`.
-- `/admin/events/<event_id>` requires `event_roles[event_id]` containing `admin`, or
-  `superuser`.
-- `/admin/global` and `/admin/global/*` require `superuser`.
-- On live-dev, non-superusers also need `tester` to access protected pages. `superuser`
-  bypasses that live-dev tester requirement.
-
-Examples:
-
-| Supabase `app_metadata`                                                         | What the user can access                                             |
-| ------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `{ "event_roles": { "gfeu2026": ["admin"] } }`                                  | `/admin`, `/admin/events/gfeu2026`                                   |
-| `{ "event_roles": { "gfeu2025": ["admin"], "gfeu2026": ["admin"] } }`           | `/admin`, `/admin/events/gfeu2025`, `/admin/events/gfeu2026`         |
-| `{ "roles": ["admin"] }`                                                        | `/admin`; no event admin routes unless event grants are also present |
-| `{ "roles": ["superuser"] }`                                                    | `/admin`, all `/admin/events/<event_id>` pages, and `/admin/global`  |
-| `{ "roles": ["tester"], "event_roles": { "gfeu2026": ["admin"] } }` on live-dev | `/admin`, `/admin/events/gfeu2026`, plus live-dev public pages       |
-
-Superusers can inspect global-scope operational records under `/admin/global`. The
-read-only `/admin/global/users` page lists Supabase Auth users with `tester`, `admin`,
-`superuser`, or event-admin grants; role changes remain an operational action outside the
-UI for now.
+Global roles live in `app_metadata.roles`; event admin grants live in
+`app_metadata.event_roles`. `/admin` lists routes available to the signed-in user,
+`/admin/events/<event_id>` requires that event's admin grant or `superuser`, and
+`/admin/global` is superuser-only.
 
 ## Documentation
 

@@ -33,6 +33,24 @@ fall back to another event's design. Keep `/events` visually neutral. Admin page
 the admin UI but read DB-backed event theme colors from the `events` table so operators
 can distinguish which event they are managing.
 
+The `/events` index reads rows from the `events` table, but it only displays events that
+are registered in `src/lib/publicEvents.ts`. Adding a DB row such as `gfeu2027` is not
+enough to publish it publicly: add the event data through a migration, create and wire an
+event-specific landing component, then register the event in `publicEvents.ts`.
+
+To add a future public event landing page:
+
+1. Add or seed the `events` row through a checked-in Supabase migration.
+2. Add ticket types and counters through migrations if the event needs public booking.
+3. Create an event-specific Svelte component under
+   `src/lib/ui/components/public/events/`.
+4. Register the event in `src/lib/publicEvents.ts` with status, header/footer metadata,
+   component key, and booking visibility.
+5. Wire the component in `src/routes/events/[event_id]/+page.svelte`.
+6. Keep `/events` neutral and keep each event's public marketing theme independent.
+7. Verify `/events` lists only registered public event pages, and verify
+   `/events/<event_id>` fails clearly for unregistered event ids.
+
 ## Admin Inventory
 
 Ticket inventory is DB-backed. `ticket_types` stores per-event labels, pricing,
@@ -59,6 +77,39 @@ file contents, payment proof URLs, or email bodies.
 
 Admin history pages and sections must not query audit rows by default. Use the explicit
 `?load_history=true` query param for event, booking, and ticket history.
+
+## Permissions Model
+
+Authorization uses Supabase Auth `app_metadata`, not user-editable `user_metadata`.
+There are two permission layers:
+
+- `roles`: global app roles such as `tester`, `admin`, and `superuser`.
+- `event_roles`: per-event grants such as `gfeu2026: ["admin"]`.
+
+Route access:
+
+- `/admin` is an admin directory. A signed-in user can open it if they have global
+  `admin`, at least one event admin grant, or `superuser`.
+- `/admin/events/<event_id>` requires `event_roles[event_id]` containing `admin`, or
+  `superuser`.
+- `/admin/global` and `/admin/global/*` require `superuser`.
+- On live-dev, non-superusers also need `tester` to access protected pages. `superuser`
+  bypasses that live-dev tester requirement.
+
+Examples:
+
+| Supabase `app_metadata`                                                         | What the user can access                                             |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `{ "event_roles": { "gfeu2026": ["admin"] } }`                                  | `/admin`, `/admin/events/gfeu2026`                                   |
+| `{ "event_roles": { "gfeu2025": ["admin"], "gfeu2026": ["admin"] } }`           | `/admin`, `/admin/events/gfeu2025`, `/admin/events/gfeu2026`         |
+| `{ "roles": ["admin"] }`                                                        | `/admin`; no event admin routes unless event grants are also present |
+| `{ "roles": ["superuser"] }`                                                    | `/admin`, all `/admin/events/<event_id>` pages, and `/admin/global`  |
+| `{ "roles": ["tester"], "event_roles": { "gfeu2026": ["admin"] } }` on live-dev | `/admin`, `/admin/events/gfeu2026`, plus live-dev public pages       |
+
+Superusers can inspect global-scope operational records under `/admin/global`. The
+read-only `/admin/global/users` page lists Supabase Auth users with `tester`, `admin`,
+`superuser`, or event-admin grants; role changes remain an operational action outside the
+UI for now.
 
 ## Activity Logging
 
