@@ -3,6 +3,10 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-06-06
+
+- Added `booking.tickets_email_sent` audit events after successful admin ticket email sends.
+
 ## 2026-06-05
 
 - Added a read-only superuser `/admin/global/users` directory for Supabase Auth users

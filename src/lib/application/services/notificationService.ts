@@ -52,7 +52,10 @@ export class NotificationService {
 	}
 
 	/** Sends the final e-ticket email after tickets have been generated. */
-	async sendTicketsEmail(bookingReferenceNo: string): Promise<void> {
+	async sendTicketsEmail(
+		bookingReferenceNo: string,
+		actor: AuditActor = systemAuditActor
+	): Promise<void> {
 		const booking = await this.bookingRepository.findByReferenceNo(bookingReferenceNo);
 		if (!booking) {
 			throw new NotFoundError('booking not found');
@@ -64,6 +67,22 @@ export class NotificationService {
 			to: booking.email,
 			subject: `Your Grand Feast eTickets ${booking.reference_no}`,
 			message: buildTicketsEmail(booking, tickets)
+		});
+		await this.auditEventService.record({
+			...actor,
+			event_id: booking.event_id,
+			action: AuditAction.BookingTicketsEmailSent,
+			entity_type: AuditEntityType.Booking,
+			entity_id: booking.reference_no,
+			metadata: {
+				booking_reference_no: booking.reference_no,
+				email: booking.email,
+				ticket_type: booking.ticket_type,
+				quantity: tickets.length,
+				ticket_ids: tickets.map((ticket) => ticket.ticket_id),
+				amount_total: booking.amount_total,
+				payment_status: booking.payment_status
+			}
 		});
 	}
 

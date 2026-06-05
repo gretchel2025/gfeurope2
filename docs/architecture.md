@@ -310,6 +310,7 @@ Current audit action values are:
 - `booking.marked_paid`
 - `booking.cancelled`
 - `booking.tickets_generated`
+- `booking.tickets_email_sent`
 - `ticket.created`
 - `ticket.checked_in`
 - `ticket.checked_out`

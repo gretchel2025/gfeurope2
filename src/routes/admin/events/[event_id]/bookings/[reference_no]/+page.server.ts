@@ -64,7 +64,7 @@ export const actions: Actions = {
 		const routes = adminRoutes(eventId);
 		const { params } = event;
 		const referenceNo = requireRouteParam(params, 'reference_no');
-		await notificationService.sendTicketsEmail(referenceNo);
+		await notificationService.sendTicketsEmail(referenceNo, await adminRequestAuditActor(event));
 		throw redirect(303, routes.booking.emailSuccess(referenceNo));
 	}),
 	sendPaymentReminderEmail: adminAction(async (event) => {
