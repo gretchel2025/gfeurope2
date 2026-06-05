@@ -9,6 +9,13 @@
  */
 import { NotFoundError } from '$lib/application/errors';
 import type { BookingRepository, EmailSender, TicketRepository } from '$lib/application/ports';
+import type { AuditEventService } from '$lib/application/services/auditEventService';
+import {
+	AuditAction,
+	AuditEntityType,
+	systemAuditActor,
+	type AuditActor
+} from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
 import { formatTicketTypeLabel } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
@@ -31,7 +38,8 @@ export class NotificationService {
 	constructor(
 		private readonly bookingRepository: BookingRepository,
 		private readonly ticketRepository: TicketRepository,
-		private readonly emailSender: EmailSender
+		private readonly emailSender: EmailSender,
+		private readonly auditEventService: AuditEventService
 	) {}
 
 	/** Sends the initial reservation email after payment proof has been submitted. */
@@ -60,7 +68,10 @@ export class NotificationService {
 	}
 
 	/** Sends a reminder for a booking that is still awaiting payment. */
-	async sendPaymentReminder(bookingReferenceNo: string): Promise<void> {
+	async sendPaymentReminder(
+		bookingReferenceNo: string,
+		actor: AuditActor = systemAuditActor
+	): Promise<void> {
 		const booking = await this.bookingRepository.findByReferenceNo(bookingReferenceNo);
 		if (!booking) {
 			throw new NotFoundError('booking not found');
@@ -70,6 +81,21 @@ export class NotificationService {
 			to: booking.email,
 			subject: `Payment reminder for your Grand Feast booking ${booking.reference_no}`,
 			message: buildPaymentReminderEmail(booking)
+		});
+		await this.auditEventService.record({
+			...actor,
+			event_id: booking.event_id,
+			action: AuditAction.BookingPaymentReminderSent,
+			entity_type: AuditEntityType.Booking,
+			entity_id: booking.reference_no,
+			metadata: {
+				booking_reference_no: booking.reference_no,
+				email: booking.email,
+				ticket_type: booking.ticket_type,
+				quantity: booking.guests.length,
+				amount_total: booking.amount_total,
+				payment_status: booking.payment_status
+			}
 		});
 	}
 

@@ -25,7 +25,7 @@
 	backHref={routes.ticket.list}
 	backLabel="Back to ticket list"
 >
-	<div class="grid gap-6 lg:grid-cols-[1fr_18rem]">
+	<div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
 		<AdminCard title="Ticket">
 			<dl>
 				<DetailRow label="Ticket ID">

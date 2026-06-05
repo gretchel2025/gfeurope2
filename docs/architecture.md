@@ -53,14 +53,14 @@ flowchart TB
         hooks["hooks.server.ts\nbootstrap, CSRF, Supabase SSR, access policy"]
         routes["src/routes\nSvelteKit loads, actions, and callback route"]
         http["src/lib/server/http\nservice composition, guards, form parsing, error mapping"]
-        appServices["src/lib/application/services\nbooking, events, ticket types, tickets, counters, notifications, reports, system"]
+        appServices["src/lib/application/services\nbooking, audit, events, ticket types, tickets, counters, notifications, reports, system"]
         domain["src/lib/domain\nbusiness rules and domain types"]
         infra["src/lib/infrastructure\nSupabase, auth, email, media, logging, config, bootstrap"]
     end
 
     subgraph supabase["Supabase"]
         auth["Auth\nsessions, app_metadata.roles, event_roles"]
-        data["Postgres Data API\ngrandfeasteu events, ticket_types, bookings, tickets, ticket_counters"]
+        data["Postgres Data API\ngrandfeasteu events, ticket_types, bookings, tickets, ticket_counters, audit_events"]
         rpc["Postgres RPC\nreservation, payment, cancellation, ticket append"]
     end
 
@@ -159,8 +159,8 @@ separate neutral admin directory and superuser-only global admin branch:
   rendered in the context of one event.
 - `/admin` is a neutral directory of admin routes available to the signed-in user.
 - `/admin/events/<event_id>` is the admin dashboard for one event.
-- `/admin/events/<event_id>/bookings`, `/tickets`, `/counters`, `/reports`, and
-  `/system` are event-scoped admin tools.
+- `/admin/events/<event_id>/bookings`, `/tickets`, `/counters`, `/audit`, `/reports`,
+  and `/system` are event-scoped admin tools.
 - `/admin/global` is the superuser-only global admin branch.
 - `/admin/global/events` is the read-only global event record list for v1.
 - `/signin`, `/auth/callback`, and `/unauthorized` are global auth/access routes.
@@ -195,6 +195,15 @@ The app deliberately separates public marketing themes from operational admin th
 - `/admin` and `/admin/global/*` use neutral admin styling because they are not scoped to
   one event.
 
+## Admin UI Layout
+
+Admin pages must remain usable on narrow mobile and split-screen viewports. Shared admin
+surfaces should let content shrink with `min-w-0`, use grid tracks like
+`minmax(0, 1fr)`, and wrap long operational values such as emails, reference numbers,
+ticket IDs, URLs, and JSON metadata. Wide history or data tables should either become
+stacked cards on small viewports or live inside an explicitly scoped overflow container;
+the page itself should not horizontally scroll.
+
 ## Key Flow: Booking Reservation
 
 ```mermaid
@@ -206,6 +215,7 @@ sequenceDiagram
     participant Counter as TicketCounterService
     participant Repo as SupabaseBookingRepository
     participant RPC as Supabase RPC create_booking_reservation
+    participant Audit as AuditEventService
     participant Email as NotificationService and Resend
     participant Log as EventLogger
 
@@ -220,6 +230,7 @@ sequenceDiagram
     Repo->>RPC: create booking and reserve inventory for route event_id
     RPC-->>Repo: persisted booking row
     Repo-->>Booking: Booking
+    Booking->>Audit: booking.created
     Booking->>Email: sendBookingConfirmation(booking)
     Email-->>Visitor: Reservation email with payment instructions
     Booking->>Log: BOOKING_RESERVATION_CREATED
@@ -240,6 +251,7 @@ sequenceDiagram
     participant Storage as CloudinaryImageStorage
     participant TicketRepo as SupabaseTicketRepository
     participant BookingRepo as SupabaseBookingRepository
+    participant Audit as AuditEventService
     participant Email as NotificationService and Resend
 
     Admin->>Route: Mark booking paid or generate tickets
@@ -248,6 +260,7 @@ sequenceDiagram
     Route->>Booking: markPaid(reference_no)
     Booking->>BookingRepo: mark_booking_paid RPC
     BookingRepo-->>Booking: paid state persisted
+    Booking->>Audit: booking.marked_paid
     Route->>Booking: generateRelatedTickets(reference_no)
     Booking->>Ticket: createNew(guest ticket input)
     Ticket->>QR: generate check-in QR for app URL
@@ -255,11 +268,47 @@ sequenceDiagram
     Ticket->>Storage: uploadImage(imageData)
     Storage-->>Ticket: hosted QR image URL
     Ticket->>TicketRepo: insert(ticket)
+    Ticket->>Audit: ticket.created
     Ticket-->>Booking: Ticket
     Booking->>BookingRepo: append_booking_ticket_id RPC
+    Booking->>Audit: booking.tickets_generated
     Route->>Email: sendTicketsEmail(reference_no)
     Email-->>Contact: Tickets emailed to booking contact
 ```
+
+## Audit Trail
+
+Durable domain audit events live in `grandfeasteu.audit_events`. The audit trail is
+first-party Supabase data, not an external logging provider. Application services write
+audit rows server-side after successful state changes, and audit insert failures are
+logged without blocking the already-completed user action.
+
+The audit table has a direct FK only to `events(event_id)`. It stores audited targets as
+`entity_type` plus `entity_id` for bookings, tickets, and counters instead of taking
+direct FKs on operational tables. This keeps the audit trail polymorphic and resilient to
+future cleanup, archive, or schema reshaping of bookings and tickets.
+
+Event admins can open `/admin/events/<event_id>/audit`, and booking/ticket details show
+related history sections. Those pages do not query audit rows by default; the UI links to
+the same page with `?load_history=true` before loading event or entity history.
+
+Current audit action values are:
+
+- `booking.created`
+- `booking.payment_reminder_sent`
+- `booking.marked_paid`
+- `booking.cancelled`
+- `booking.tickets_generated`
+- `ticket.created`
+- `ticket.checked_in`
+- `ticket.checked_out`
+- `ticket_counter.available_added`
+
+Audit actor types are `public`, `admin`, and `system`. Audit entity types are `booking`,
+`ticket`, and `ticket_counter`. Metadata should capture useful operational context such as
+ticket type, quantity, amount, generated ticket ids, and previous/new state where useful.
+It must not store secrets, tokens, API keys, uploaded file contents, payment proof URLs,
+or email bodies.
 
 ## Runtime Access Model
 

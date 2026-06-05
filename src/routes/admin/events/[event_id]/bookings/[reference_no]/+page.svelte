@@ -2,16 +2,17 @@
 	import AdminButton from '$lib/ui/components/admin/AdminButton.svelte';
 	import AdminCard from '$lib/ui/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/ui/components/admin/AdminPage.svelte';
+	import AuditHistorySection from '$lib/ui/components/admin/AuditHistorySection.svelte';
 	import BackLinks from '$lib/ui/components/admin/BackLinks.svelte';
 	import DetailRow from '$lib/ui/components/admin/DetailRow.svelte';
-	import type { Booking } from '$lib/domain/booking';
 	import { canCancelBooking, canGenerateTickets, canMarkBookingPaid } from '$lib/domain/booking';
 	import { BookingPaymentStatus, formatTicketTypeLabel } from '$lib/domain/shared/enums';
 	import { page } from '$app/stores';
 
 	import { adminRoutes } from '$lib/navigation/adminRoutes';
+	import type { ServerData } from './+page.server';
 
-	export let data: { aRecord: Booking };
+	export let data: ServerData;
 
 	const booking = data.aRecord;
 	const canMarkAsPaid = canMarkBookingPaid(booking);
@@ -31,6 +32,7 @@
 	const isImageProof = /\.(png|jpe?g|gif|webp|avif)$/.test(proofUrlPath);
 
 	$: routes = adminRoutes($page.params.event_id);
+	$: loadHistoryHref = `${routes.booking.details(booking.reference_no)}?load_history=true#history`;
 </script>
 
 <AdminPage
@@ -47,7 +49,7 @@
 		View summary
 	</AdminButton>
 
-	<div class="grid gap-6 lg:grid-cols-[1fr_18rem]">
+	<div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
 		<AdminCard title="Reservation">
 			<dl>
 				<DetailRow label="Reference No" value={booking.reference_no} />
@@ -77,10 +79,10 @@
 			</dl>
 		</AdminCard>
 
-		<div class="lg:col-span-2">
+		<div class="min-w-0 lg:col-span-2">
 			<AdminCard title="Payment Proof" subtitle="Uploaded bank-transfer receipt.">
 				{#if booking.payment_proof_url}
-					<div class="space-y-4">
+					<div class="min-w-0 space-y-4">
 						<div class="overflow-hidden rounded-md border border-slate-200 bg-white">
 							{#if isImageProof}
 								<img
@@ -100,7 +102,7 @@
 							href={booking.payment_proof_url}
 							target="_blank"
 							rel="noreferrer"
-							class="inline-flex w-full items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+							class="inline-flex w-full min-w-0 items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
 						>
 							Open proof in new tab
 						</a>
@@ -111,7 +113,7 @@
 			</AdminCard>
 		</div>
 
-		<div class="lg:col-span-2">
+		<div class="min-w-0 lg:col-span-2">
 			<AdminCard title="Actions" subtitle="Use these when the booking changes state.">
 				<div class="space-y-3">
 					{#if canSendPaymentReminderEmail}
@@ -151,6 +153,16 @@
 					{/if}
 				</div>
 			</AdminCard>
+		</div>
+
+		<div class="min-w-0 lg:col-span-2">
+			<AuditHistorySection
+				title="Booking History"
+				subtitle="Audit events related to this booking."
+				events={data.auditEvents}
+				historyLoaded={data.historyLoaded}
+				{loadHistoryHref}
+			/>
 		</div>
 	</div>
 

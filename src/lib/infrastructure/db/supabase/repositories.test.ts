@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { InfrastructureError } from '$lib/application/errors';
+import { AuditAction, AuditActorType, AuditEntityType } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
 import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
+import { SupabaseAuditEventRepository } from '$lib/infrastructure/db/supabase/auditEventRepository';
 import { SupabaseBookingRepository } from '$lib/infrastructure/db/supabase/bookingRepository';
 import { SupabaseEventRepository } from '$lib/infrastructure/db/supabase/eventRepository';
 import { SupabaseTicketCounterRepository } from '$lib/infrastructure/db/supabase/ticketCounterRepository';
@@ -510,5 +512,114 @@ describe('Supabase repositories', () => {
 		await expect(
 			repository.increment('STANDARD', { available: -100, reserved: 0, sold: 0 })
 		).rejects.toBeInstanceOf(InfrastructureError);
+	});
+
+	it('inserts audit events into the app schema', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			insert: (value: Record<string, unknown>) => {
+				calls.push(['insert', value]);
+				return query;
+			},
+			select: (value: string) => {
+				calls.push(['select', value]);
+				return query;
+			},
+			single: async () => ({
+				data: {
+					audit_event_id: '00000000-0000-0000-0000-000000000001',
+					event_id: 'event-test',
+					action: 'booking.created',
+					actor_type: 'public',
+					actor_id: null,
+					actor_email: 'ada@example.com',
+					entity_type: 'booking',
+					entity_id: 'B123',
+					occurred_at: '2026-01-01T00:00:00.000Z',
+					metadata: { quantity: 1 },
+					created_at: '2026-01-01T00:00:00.000Z'
+				},
+				error: null
+			})
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseAuditEventRepository(client);
+		await expect(
+			repository.insert({
+				event_id: 'event-test',
+				action: AuditAction.BookingCreated,
+				actor_type: AuditActorType.Public,
+				actor_email: 'ada@example.com',
+				entity_type: AuditEntityType.Booking,
+				entity_id: 'B123',
+				metadata: { quantity: 1 }
+			})
+		).resolves.toEqual(expect.objectContaining({ action: AuditAction.BookingCreated }));
+
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'audit_events']);
+		expect(calls).toContainEqual([
+			'insert',
+			expect.objectContaining({
+				event_id: 'event-test',
+				action: AuditAction.BookingCreated,
+				entity_type: AuditEntityType.Booking,
+				entity_id: 'B123'
+			})
+		]);
+	});
+
+	it('lists audit events by event and entity newest first', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			select: (value: string) => {
+				calls.push(['select', value]);
+				return query;
+			},
+			eq: (key: string, value: unknown) => {
+				calls.push([key, value]);
+				return query;
+			},
+			order: (key: string, value: unknown) => {
+				calls.push(['order', [key, value]]);
+				return query;
+			},
+			limit: async (value: number) => {
+				calls.push(['limit', value]);
+				return { data: [], error: null };
+			}
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseAuditEventRepository(client);
+		await repository.listByEvent('event-test', { limit: 20 });
+		await repository.listByEntity('event-test', AuditEntityType.Ticket, 'T123', { limit: 10 });
+
+		expect(calls).toContainEqual(['from', 'audit_events']);
+		expect(calls).toContainEqual(['event_id', 'event-test']);
+		expect(calls).toContainEqual(['entity_type', AuditEntityType.Ticket]);
+		expect(calls).toContainEqual(['entity_id', 'T123']);
+		expect(calls).toContainEqual(['order', ['occurred_at', { ascending: false }]]);
+		expect(calls).toContainEqual(['limit', 20]);
+		expect(calls).toContainEqual(['limit', 10]);
 	});
 });

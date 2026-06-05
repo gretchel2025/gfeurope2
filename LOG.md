@@ -5,6 +5,10 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-05
 
+- Added first-party Supabase audit events for booking, ticket, and manual counter actions,
+  with event/admin history pages that query only after an explicit load-history request.
+- Hardened admin detail and history pages for narrow viewports by allowing long
+  operational values to wrap and rendering audit history as stacked mobile cards.
 - Added a neutral `/admin` directory, superuser-only `/admin/global/events`, and distinct
   admin access semantics for directory, event, and global admin routes.
 - Documented the event-scoped public/admin route model and the split between neutral,

@@ -15,6 +15,13 @@ import type {
 	QrCodeGenerator,
 	TicketRepository
 } from '$lib/application/ports';
+import type { AuditEventService } from '$lib/application/services/auditEventService';
+import {
+	AuditAction,
+	AuditEntityType,
+	systemAuditActor,
+	type AuditActor
+} from '$lib/domain/auditEvent';
 import type { CreateTicketInput, QRCode, Ticket } from '$lib/domain/ticket';
 import { canCheckInTicket, canCheckOutTicket, normalizeTicketType } from '$lib/domain/ticket';
 import { TicketStatus } from '$lib/domain/shared/enums';
@@ -27,13 +34,14 @@ export class TicketService {
 		private readonly imageStorage: ImageStorage,
 		private readonly qrCodeGenerator: QrCodeGenerator,
 		private readonly eventLogger: EventLogger,
+		private readonly auditEventService: AuditEventService,
 		private readonly appBaseUrl: string,
 		private readonly eventId: string,
 		private readonly randomIdGenerator: (size: number) => string
 	) {}
 
 	/** Creates a ticket, generates its QR code, and stores its check-in asset. */
-	async createNew(input: CreateTicketInput): Promise<Ticket> {
+	async createNew(input: CreateTicketInput, actor: AuditActor = systemAuditActor): Promise<Ticket> {
 		const ticketType = normalizeTicketType(input.ticket_type);
 		const ticketId = this.generateTicketId();
 		const qrCode = await this.getCheckinQRCode(ticketId, input.booking_reference_no);
@@ -51,6 +59,20 @@ export class TicketService {
 		};
 
 		await this.ticketRepository.insert(ticket);
+		await this.auditEventService.record({
+			...actor,
+			event_id: this.eventId,
+			action: AuditAction.TicketCreated,
+			entity_type: AuditEntityType.Ticket,
+			entity_id: ticket.ticket_id,
+			metadata: {
+				ticket_id: ticket.ticket_id,
+				ticket_guest_name: ticket.name,
+				ticket_type: ticket.ticket_type,
+				booking_reference_no: ticket.booking_reference_no,
+				status: ticket.status
+			}
+		});
 		this.eventLogger.log('TICKET_CREATED', 'system', {
 			ticket_id: ticket.ticket_id,
 			ticket_guest_name: ticket.name,
@@ -85,13 +107,28 @@ export class TicketService {
 	}
 
 	/** Checks in a ticket if the booking and ticket state allow it. */
-	async checkIn(ticketId: string): Promise<void> {
+	async checkIn(ticketId: string, actor: AuditActor = systemAuditActor): Promise<void> {
 		const { ticket, booking } = await this.getTicketAndBooking(ticketId);
 		if (!canCheckInTicket(booking, ticket)) {
 			throw new ValidationError('ticket state is not allowed for check in');
 		}
 
 		await this.ticketRepository.updateStatus(ticketId, TicketStatus.CHECKED_IN);
+		await this.auditEventService.record({
+			...actor,
+			event_id: this.eventId,
+			action: AuditAction.TicketCheckedIn,
+			entity_type: AuditEntityType.Ticket,
+			entity_id: ticket.ticket_id,
+			metadata: {
+				ticket_id: ticket.ticket_id,
+				ticket_guest_name: ticket.name,
+				ticket_type: ticket.ticket_type,
+				booking_reference_no: ticket.booking_reference_no,
+				previous_status: ticket.status,
+				status: TicketStatus.CHECKED_IN
+			}
+		});
 		this.eventLogger.log('TICKET_CHECKED_IN', 'system', {
 			ticket_id: ticket.ticket_id,
 			ticket_guest_name: ticket.name,
@@ -100,13 +137,28 @@ export class TicketService {
 	}
 
 	/** Checks out a previously checked-in ticket when allowed by state. */
-	async checkOut(ticketId: string): Promise<void> {
+	async checkOut(ticketId: string, actor: AuditActor = systemAuditActor): Promise<void> {
 		const { ticket, booking } = await this.getTicketAndBooking(ticketId);
 		if (!canCheckOutTicket(booking, ticket)) {
 			throw new ValidationError('ticket state is not allowed for check out');
 		}
 
 		await this.ticketRepository.updateStatus(ticketId, TicketStatus.CHECKED_OUT);
+		await this.auditEventService.record({
+			...actor,
+			event_id: this.eventId,
+			action: AuditAction.TicketCheckedOut,
+			entity_type: AuditEntityType.Ticket,
+			entity_id: ticket.ticket_id,
+			metadata: {
+				ticket_id: ticket.ticket_id,
+				ticket_guest_name: ticket.name,
+				ticket_type: ticket.ticket_type,
+				booking_reference_no: ticket.booking_reference_no,
+				previous_status: ticket.status,
+				status: TicketStatus.CHECKED_OUT
+			}
+		});
 		this.eventLogger.log('TICKET_CHECKED_OUT', 'system', {
 			ticket_id: ticket.ticket_id,
 			ticket_guest_name: ticket.name,

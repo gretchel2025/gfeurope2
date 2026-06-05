@@ -90,6 +90,29 @@ npm run build         # production build
 - Admin event pages use DB-backed event theme colors from the `events` table to help
   operators distinguish which event they are managing.
 
+## Audit Trail
+
+Important domain actions are written server-side to `grandfeasteu.audit_events`. Audit
+rows are durable first-party app data, scoped to an event when applicable, and loaded in
+admin history UI only after an explicit `?load_history=true` request.
+
+Current audit action values:
+
+- `booking.created`
+- `booking.payment_reminder_sent`
+- `booking.marked_paid`
+- `booking.cancelled`
+- `booking.tickets_generated`
+- `ticket.created`
+- `ticket.checked_in`
+- `ticket.checked_out`
+- `ticket_counter.available_added`
+
+Audit actor types are `public`, `admin`, and `system`. Audit entity types are `booking`,
+`ticket`, and `ticket_counter`. Audit metadata may include operational identifiers and
+state changes, but must not include secrets, tokens, uploaded file contents, payment proof
+URLs, or email bodies.
+
 ## Permissions Model
 
 Authorization uses Supabase Auth `app_metadata`, not user-editable `user_metadata`.

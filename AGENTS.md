@@ -33,6 +33,24 @@ fall back to another event's design. Keep `/events` visually neutral. Admin page
 the admin UI but read DB-backed event theme colors from the `events` table so operators
 can distinguish which event they are managing.
 
+## Audit Events
+
+Important domain actions are written server-side to `grandfeasteu.audit_events` after
+the represented action succeeds. Audit insert failures are logged and do not block the
+completed user action. The table has a direct FK only to `events(event_id)`; bookings,
+tickets, and counters are referenced by `entity_type` plus `entity_id`.
+
+Current audit actions are `booking.created`, `booking.payment_reminder_sent`,
+`booking.marked_paid`, `booking.cancelled`, `booking.tickets_generated`,
+`ticket.created`, `ticket.checked_in`, `ticket.checked_out`, and
+`ticket_counter.available_added`. Actor types are `public`, `admin`, and `system`.
+Entity types are `booking`, `ticket`, and `ticket_counter`. Audit metadata may include
+operational identifiers and state changes, but must not include secrets, tokens, uploaded
+file contents, payment proof URLs, or email bodies.
+
+Admin history pages and sections must not query audit rows by default. Use the explicit
+`?load_history=true` query param for event, booking, and ticket history.
+
 ## Activity Logging
 
 Keep `LOG.md` as a concise running record of meaningful project activity. Add entries for changes that affect app behavior, infrastructure, deployment, provider configuration, data/auth/email behavior, or operational procedures. Do not log routine checks or one-off verification tasks such as sending a test email, confirming a site is live, running standard tests, or checking command output unless the result changes project state or reveals a decision worth preserving.

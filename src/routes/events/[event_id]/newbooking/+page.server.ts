@@ -5,6 +5,7 @@ import type { TicketTypeConfig } from '$lib/domain/ticketType';
 import { publicRoutes } from '$lib/navigation/adminRoutes';
 import { isPublicBookingOpen } from '$lib/publicEvents';
 import { getEventContext } from '$lib/server/http/eventContext';
+import { publicRequestAuditActor } from '$lib/server/http/auditActor';
 import { parseCreateBookingForm, parsePaymentProofFile } from '$lib/server/http/forms';
 import { kitAction, withKitErrors } from '$lib/server/http/handlers';
 import {
@@ -63,11 +64,14 @@ export const actions: Actions = {
 		const input = await parseCreateBookingForm(formData);
 		const paymentProofFile = parsePaymentProofFile(formData);
 		const paymentProofUrl = await paymentProofStorage.uploadProof(paymentProofFile);
-		await bookingService.createNew({
-			...input,
-			event_id: eventId,
-			payment_proof_url: paymentProofUrl
-		});
+		await bookingService.createNew(
+			{
+				...input,
+				event_id: eventId,
+				payment_proof_url: paymentProofUrl
+			},
+			publicRequestAuditActor(input.email)
+		);
 		throw redirect(303, routes.newBookingSuccess);
 	})
 };

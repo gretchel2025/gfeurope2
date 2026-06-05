@@ -2,6 +2,7 @@
 	import AdminButton from '$lib/ui/components/admin/AdminButton.svelte';
 	import AdminCard from '$lib/ui/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/ui/components/admin/AdminPage.svelte';
+	import AuditHistorySection from '$lib/ui/components/admin/AuditHistorySection.svelte';
 	import BackLinks from '$lib/ui/components/admin/BackLinks.svelte';
 	import DetailRow from '$lib/ui/components/admin/DetailRow.svelte';
 	import { formatTicketTypeLabel } from '$lib/domain/shared/enums';
@@ -13,6 +14,7 @@
 	export let data: ServerData;
 
 	$: routes = adminRoutes($page.params.event_id);
+	$: loadHistoryHref = `${routes.ticket.details(data.aTicket.ticket_id)}?load_history=true#history`;
 </script>
 
 <AdminPage
@@ -21,7 +23,7 @@
 	backHref={routes.ticket.list}
 	backLabel="Back to ticket list"
 >
-	<div class="grid gap-6 lg:grid-cols-[1fr_18rem]">
+	<div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
 		<AdminCard title="Ticket">
 			<dl>
 				<DetailRow label="Ticket ID" value={data.aTicket.ticket_id} />
@@ -40,7 +42,7 @@
 		</AdminCard>
 
 		<AdminCard title="Check-in QR Code">
-			<div class="space-y-3 text-center">
+			<div class="min-w-0 space-y-3 text-center">
 				<img
 					src={data.checkin.imageData}
 					alt="QR Code"
@@ -50,6 +52,16 @@
 				<AdminButton href="./checkin" fullWidth>View check-in</AdminButton>
 			</div>
 		</AdminCard>
+
+		<div class="min-w-0 lg:col-span-2">
+			<AuditHistorySection
+				title="Ticket History"
+				subtitle="Audit events related to this ticket."
+				events={data.auditEvents}
+				historyLoaded={data.historyLoaded}
+				{loadHistoryHref}
+			/>
+		</div>
 	</div>
 
 	<BackLinks

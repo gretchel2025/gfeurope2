@@ -9,7 +9,14 @@
  */
 import { NotFoundError, ValidationError } from '$lib/application/errors';
 import type { BookingRepository, EventLogger, EventRepository } from '$lib/application/ports';
+import type { AuditEventService } from '$lib/application/services/auditEventService';
 import type { Booking, CreateBookingInput, TicketWithQRCode } from '$lib/domain/booking';
+import {
+	AuditAction,
+	AuditEntityType,
+	systemAuditActor,
+	type AuditActor
+} from '$lib/domain/auditEvent';
 import {
 	canCancelBooking,
 	canGenerateTickets,
@@ -34,11 +41,15 @@ export class BookingService {
 		private readonly ticketService: TicketService,
 		private readonly notificationService: NotificationService,
 		private readonly eventLogger: EventLogger,
+		private readonly auditEventService: AuditEventService,
 		private readonly randomIdGenerator: (size: number) => string
 	) {}
 
 	/** Creates a new booking and reserves inventory in one database lifecycle call. */
-	async createNew(input: CreateBookingInput): Promise<Booking> {
+	async createNew(
+		input: CreateBookingInput,
+		actor: AuditActor = systemAuditActor
+	): Promise<Booking> {
 		if (input.quantity < 1 || input.quantity > 10) {
 			throw new ValidationError('validation failed: quantity must be between 1 and 10');
 		}
@@ -87,6 +98,21 @@ export class BookingService {
 		};
 
 		const createdBooking = await this.bookingRepository.insertReservation(booking);
+		await this.auditEventService.record({
+			...actor,
+			event_id: createdBooking.event_id,
+			action: AuditAction.BookingCreated,
+			entity_type: AuditEntityType.Booking,
+			entity_id: createdBooking.reference_no,
+			metadata: {
+				booking_reference_no: createdBooking.reference_no,
+				email: createdBooking.email,
+				ticket_type: createdBooking.ticket_type,
+				quantity: createdBooking.guests.length,
+				amount_total: createdBooking.amount_total,
+				payment_status: createdBooking.payment_status
+			}
+		});
 		await this.notificationService.sendBookingConfirmation(createdBooking);
 
 		this.eventLogger.log('BOOKING_RESERVATION_CREATED', createdBooking.email, {
@@ -153,13 +179,29 @@ export class BookingService {
 	}
 
 	/** Marks an unpaid booking as paid and moves reserved inventory into sold inventory. */
-	async markPaid(referenceNo: string): Promise<void> {
+	async markPaid(referenceNo: string, actor: AuditActor = systemAuditActor): Promise<void> {
 		const booking = await this.getRequiredById(referenceNo);
 		if (!canMarkBookingPaid(booking)) {
 			throw new ValidationError('Booking cannot be further marked as paid');
 		}
 
 		await this.bookingRepository.markPaid(booking.reference_no);
+		await this.auditEventService.record({
+			...actor,
+			event_id: booking.event_id,
+			action: AuditAction.BookingMarkedPaid,
+			entity_type: AuditEntityType.Booking,
+			entity_id: booking.reference_no,
+			metadata: {
+				booking_reference_no: booking.reference_no,
+				email: booking.email,
+				previous_payment_status: booking.payment_status,
+				payment_status: BookingPaymentStatus.PAID,
+				ticket_type: booking.ticket_type,
+				quantity: booking.guests.length,
+				amount_total: booking.amount_total
+			}
+		});
 
 		this.eventLogger.log('BOOKING_MARKED_AS_PAID', 'system', {
 			booking_reference_no: booking.reference_no,
@@ -169,7 +211,10 @@ export class BookingService {
 	}
 
 	/** Creates any missing tickets for a paid booking without duplicating existing ones. */
-	async generateRelatedTickets(referenceNo: string): Promise<string[]> {
+	async generateRelatedTickets(
+		referenceNo: string,
+		actor: AuditActor = systemAuditActor
+	): Promise<string[]> {
 		const booking = await this.getRequiredById(referenceNo);
 		if (!canGenerateTickets(booking)) {
 			throw new ValidationError('Booking is in a state where it cannot generate tickets');
@@ -182,13 +227,16 @@ export class BookingService {
 		const ticketIds: string[] = [];
 		const guestsWithoutTickets = booking.guests.slice(booking.ticket_ids.length);
 		for (const guest of guestsWithoutTickets) {
-			const ticket = await this.ticketService.createNew({
-				name: guest,
-				ticket_type: booking.ticket_type,
-				description: '',
-				booking_reference_no: referenceNo,
-				is_paid: true
-			});
+			const ticket = await this.ticketService.createNew(
+				{
+					name: guest,
+					ticket_type: booking.ticket_type,
+					description: '',
+					booking_reference_no: referenceNo,
+					is_paid: true
+				},
+				actor
+			);
 
 			await this.bookingRepository.appendTicketId(referenceNo, ticket.ticket_id);
 			ticketIds.push(ticket.ticket_id);
@@ -197,6 +245,23 @@ export class BookingService {
 				booking_email: booking.email,
 				related_ticket_id: ticket.ticket_id,
 				related_ticket_guest_name: ticket.name
+			});
+		}
+
+		if (ticketIds.length > 0) {
+			await this.auditEventService.record({
+				...actor,
+				event_id: booking.event_id,
+				action: AuditAction.BookingTicketsGenerated,
+				entity_type: AuditEntityType.Booking,
+				entity_id: booking.reference_no,
+				metadata: {
+					booking_reference_no: booking.reference_no,
+					email: booking.email,
+					ticket_type: booking.ticket_type,
+					quantity: ticketIds.length,
+					ticket_ids: ticketIds
+				}
 			});
 		}
 
@@ -224,13 +289,31 @@ export class BookingService {
 	}
 
 	/** Cancels an unpaid reservation and returns its reserved inventory to availability. */
-	async cancelBookingReservation(referenceNo: string): Promise<void> {
+	async cancelBookingReservation(
+		referenceNo: string,
+		actor: AuditActor = systemAuditActor
+	): Promise<void> {
 		const booking = await this.getRequiredById(referenceNo);
 		if (!canCancelBooking(booking)) {
 			throw new ValidationError('Only UNPAID Bookings can be cancelled');
 		}
 
 		await this.bookingRepository.cancelReservation(referenceNo);
+		await this.auditEventService.record({
+			...actor,
+			event_id: booking.event_id,
+			action: AuditAction.BookingCancelled,
+			entity_type: AuditEntityType.Booking,
+			entity_id: booking.reference_no,
+			metadata: {
+				booking_reference_no: booking.reference_no,
+				email: booking.email,
+				ticket_type: booking.ticket_type,
+				quantity: booking.guests.length,
+				previous_payment_status: booking.payment_status,
+				payment_status: BookingPaymentStatus.BOOKING_RESERVATION_CANCELLED
+			}
+		});
 
 		this.eventLogger.log('BOOKING_RESERVATION_CANCELLED', 'system', {
 			booking_reference_no: booking.reference_no,

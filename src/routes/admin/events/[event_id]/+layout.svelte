@@ -40,6 +40,7 @@
 		<a href={routes.booking.list} class="hover:text-slate-950">Bookings</a>
 		<a href={routes.booking.search()} class="hover:text-slate-950">Search</a>
 		<a href={routes.ticket.list} class="hover:text-slate-950">Tickets</a>
+		<a href={routes.audit} class="hover:text-slate-950">Audit</a>
 		<a href={routes.reports} class="hover:text-slate-950">Reports</a>
 		<a href={routes.system} class="hover:text-slate-950">System</a>
 		{#if isSuperUser}

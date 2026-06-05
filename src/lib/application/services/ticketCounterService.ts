@@ -9,6 +9,13 @@
  */
 import { ValidationError } from '$lib/application/errors';
 import type { TicketCounterRepository } from '$lib/application/ports';
+import type { AuditEventService } from '$lib/application/services/auditEventService';
+import {
+	AuditAction,
+	AuditEntityType,
+	systemAuditActor,
+	type AuditActor
+} from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
 import { TicketType } from '$lib/domain/shared/enums';
@@ -19,7 +26,11 @@ const GRAND_FEAST_PLUS_TICKETS_ID = TicketType.GRAND_FEAST_PLUS;
 
 /** Application service for ticket inventory counters. */
 export class TicketCounterService {
-	constructor(private readonly counterRepository: TicketCounterRepository) {}
+	constructor(
+		private readonly counterRepository: TicketCounterRepository,
+		private readonly auditEventService: AuditEventService,
+		private readonly eventId: string
+	) {}
 
 	/** Returns the storage id for the standard ticket counter. */
 	getStandardCounterId(): string {
@@ -69,6 +80,46 @@ export class TicketCounterService {
 	/** Applies a raw delta to a counter. */
 	async incrementTickets(id: string, values: TicketCounterDelta): Promise<void> {
 		await this.counterRepository.increment(id, values);
+	}
+
+	/** Adds manual available inventory and records the admin-facing audit event. */
+	async addAvailableTickets(
+		id: string,
+		quantity: number,
+		actor: AuditActor = systemAuditActor
+	): Promise<void> {
+		if (!Number.isInteger(quantity) || quantity <= 0) {
+			throw new ValidationError('ticket quantity must be a positive integer');
+		}
+
+		await this.incrementTickets(id, { available: quantity, reserved: 0, sold: 0 });
+		await this.auditEventService.record({
+			...actor,
+			event_id: this.eventId,
+			action: AuditAction.TicketCounterAvailableAdded,
+			entity_type: AuditEntityType.TicketCounter,
+			entity_id: id,
+			metadata: {
+				ticket_type: id,
+				quantity_added: quantity
+			}
+		});
+	}
+
+	/** Adds manual standard ticket availability. */
+	async addAvailableStandardTickets(
+		quantity: number,
+		actor: AuditActor = systemAuditActor
+	): Promise<void> {
+		await this.addAvailableTickets(STANDARD_TICKETS_ID, quantity, actor);
+	}
+
+	/** Adds manual GrandFeast Plus ticket availability. */
+	async addAvailableGrandFeastPlusTickets(
+		quantity: number,
+		actor: AuditActor = systemAuditActor
+	): Promise<void> {
+		await this.addAvailableTickets(GRAND_FEAST_PLUS_TICKETS_ID, quantity, actor);
 	}
 
 	/** Applies a delta to the standard counter. */

@@ -1,6 +1,7 @@
 import type { Ticket } from '$lib/domain/ticket';
 import type { Booking } from '$lib/domain/booking';
 import type { Actions, PageServerLoad } from './$types';
+import { adminRequestAuditActor } from '$lib/server/http/auditActor';
 import { getEventServiceContext } from '$lib/server/http/eventContext';
 import { adminAction, requireRouteParam, withKitErrors } from '$lib/server/http/handlers';
 
@@ -28,7 +29,7 @@ export const actions: Actions = {
 		} = await getEventServiceContext(event);
 		const { params } = event;
 		const ticketId = requireRouteParam(params, 'ticket_id');
-		await ticketService.checkIn(ticketId);
+		await ticketService.checkIn(ticketId, await adminRequestAuditActor(event));
 	}),
 	checkOut: adminAction(async (event) => {
 		const {
@@ -36,6 +37,6 @@ export const actions: Actions = {
 		} = await getEventServiceContext(event);
 		const { params } = event;
 		const ticketId = requireRouteParam(params, 'ticket_id');
-		await ticketService.checkOut(ticketId);
+		await ticketService.checkOut(ticketId, await adminRequestAuditActor(event));
 	})
 };

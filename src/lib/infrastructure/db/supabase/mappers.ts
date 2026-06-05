@@ -4,6 +4,13 @@ import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shar
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter } from '$lib/domain/ticketCounter';
 import type { TicketTypeConfig } from '$lib/domain/ticketType';
+import {
+	AuditActorType,
+	AuditEntityType,
+	type AuditAction,
+	type AuditEvent,
+	type CreateAuditEventInput
+} from '$lib/domain/auditEvent';
 
 export type SupabaseBookingRow = {
 	event_id: string;
@@ -69,6 +76,20 @@ export type SupabaseTicketTypeRow = {
 	bulk_purchase_discount_amount: number | string | null;
 	sort_order: number;
 	is_active: boolean;
+};
+
+export type SupabaseAuditEventRow = {
+	audit_event_id: string;
+	event_id: string | null;
+	action: string;
+	actor_type: string;
+	actor_id: string | null;
+	actor_email: string | null;
+	entity_type: string;
+	entity_id: string;
+	occurred_at: string;
+	metadata: Record<string, unknown> | null;
+	created_at: string;
 };
 
 export function mapBooking(row: SupabaseBookingRow): Booking {
@@ -155,6 +176,22 @@ export function mapTicketType(row: SupabaseTicketTypeRow): TicketTypeConfig {
 	};
 }
 
+export function mapAuditEvent(row: SupabaseAuditEventRow): AuditEvent {
+	return {
+		audit_event_id: row.audit_event_id,
+		event_id: row.event_id,
+		action: row.action as AuditAction,
+		actor_type: row.actor_type as AuditActorType,
+		actor_id: row.actor_id,
+		actor_email: row.actor_email,
+		entity_type: row.entity_type as AuditEntityType,
+		entity_id: row.entity_id,
+		occurred_at: new Date(row.occurred_at).toISOString(),
+		metadata: row.metadata ?? {},
+		created_at: new Date(row.created_at).toISOString()
+	};
+}
+
 export function ticketToRow(ticket: Ticket, eventId: string) {
 	return {
 		event_id: eventId,
@@ -166,5 +203,18 @@ export function ticketToRow(ticket: Ticket, eventId: string) {
 		is_paid: ticket.is_paid,
 		booking_reference_no: ticket.booking_reference_no,
 		checkin_qr_code_image_url: ticket.checkin_qr_code_image_url
+	};
+}
+
+export function auditEventToRow(input: CreateAuditEventInput) {
+	return {
+		event_id: input.event_id,
+		action: input.action,
+		actor_type: input.actor_type,
+		actor_id: input.actor_id ?? null,
+		actor_email: input.actor_email ?? null,
+		entity_type: input.entity_type,
+		entity_id: input.entity_id,
+		metadata: input.metadata ?? {}
 	};
 }

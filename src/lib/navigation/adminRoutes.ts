@@ -38,6 +38,7 @@ export function adminRoutes(eventId: string) {
 	const adminBase = `/admin/events/${encodeSegment(eventId)}`;
 	return {
 		home: adminBase,
+		audit: `${adminBase}/audit`,
 		reports: `${adminBase}/reports`,
 		system: `${adminBase}/system`,
 		booking: {

@@ -1,6 +1,7 @@
 import type { Actions, PageServerLoad } from './$types';
 import { NotFoundError } from '$lib/application/errors';
 import type { TicketCounter } from '$lib/domain/ticketCounter';
+import { adminRequestAuditActor } from '$lib/server/http/auditActor';
 import { getEventServiceContext } from '$lib/server/http/eventContext';
 import { adminAction, withKitErrors } from '$lib/server/http/handlers';
 
@@ -33,16 +34,15 @@ export const actions: Actions = {
 		const {
 			services: { ticketCounterService }
 		} = await getEventServiceContext(event);
-		await ticketCounterService.incrementStandardTickets({ available: 10, reserved: 0, sold: 0 });
+		await ticketCounterService.addAvailableStandardTickets(10, await adminRequestAuditActor(event));
 	}),
 	add10ToAvailableGrandFeastPlusTickets: adminAction(async (event) => {
 		const {
 			services: { ticketCounterService }
 		} = await getEventServiceContext(event);
-		await ticketCounterService.incrementGrandFeastPlusTickets({
-			available: 10,
-			reserved: 0,
-			sold: 0
-		});
+		await ticketCounterService.addAvailableGrandFeastPlusTickets(
+			10,
+			await adminRequestAuditActor(event)
+		);
 	})
 };

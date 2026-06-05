@@ -4,11 +4,13 @@ import type { NotificationService } from '$lib/application/services/notification
 import type { TicketCounterService } from '$lib/application/services/ticketCounterService';
 import type { TicketService } from '$lib/application/services/ticketService';
 import type { TicketTypeService } from '$lib/application/services/ticketTypeService';
+import type { AuditEventService } from '$lib/application/services/auditEventService';
 import type { BookingRepository, EventLogger, EventRepository } from '$lib/application/ports';
+import { AuditAction, AuditEntityType } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
 import type { Event } from '$lib/domain/event';
 import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
-import type { Ticket } from '$lib/domain/ticket';
+import type { CreateTicketInput, Ticket } from '$lib/domain/ticket';
 import { computeTicketPricing, type TicketTypeConfig } from '$lib/domain/ticketType';
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
@@ -101,6 +103,14 @@ function makeService(
 	const ticketService = {
 		getById: vi.fn(
 			async (ticketId: string) => tickets.find((ticket) => ticket.ticket_id === ticketId) ?? null
+		),
+		createNew: vi.fn(async (input: CreateTicketInput) =>
+			makeTicket({
+				ticket_id: `TICKET${input.name.replace(/\s+/g, '').toUpperCase()}`,
+				name: input.name,
+				ticket_type: input.ticket_type as TicketType,
+				booking_reference_no: input.booking_reference_no
+			})
 		)
 	} as unknown as TicketService;
 	const ticketCounterService = {
@@ -127,6 +137,9 @@ function makeService(
 	const notificationService = {
 		sendBookingConfirmation: vi.fn()
 	} as unknown as NotificationService;
+	const auditEventService = {
+		record: vi.fn()
+	} as unknown as AuditEventService;
 
 	const service = new BookingService(
 		bookingRepository,
@@ -136,6 +149,7 @@ function makeService(
 		ticketService,
 		notificationService,
 		{ log: vi.fn() } satisfies EventLogger,
+		auditEventService,
 		() => 'ABC'
 	);
 
@@ -146,7 +160,13 @@ function makeService(
 		ticketTypeService: ticketTypeService as TicketTypeService & {
 			getAvailableForBooking: ReturnType<typeof vi.fn>;
 		},
-		ticketService: ticketService as TicketService & { getById: ReturnType<typeof vi.fn> }
+		ticketService: ticketService as TicketService & {
+			createNew: ReturnType<typeof vi.fn>;
+			getById: ReturnType<typeof vi.fn>;
+		},
+		auditEventService: auditEventService as AuditEventService & {
+			record: ReturnType<typeof vi.fn>;
+		}
 	};
 }
 
@@ -207,7 +227,7 @@ describe('BookingService.search', () => {
 
 describe('BookingService.createNew', () => {
 	it('persists the uploaded payment proof URL with the booking', async () => {
-		const { service, bookingRepository } = makeService([]);
+		const { service, bookingRepository, auditEventService } = makeService([]);
 
 		const booking = await service.createNew({
 			event_id: 'gfeu2026',
@@ -225,6 +245,17 @@ describe('BookingService.createNew', () => {
 			expect.objectContaining({
 				event_id: 'gfeu2026',
 				payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
+			})
+		);
+		expect(auditEventService.record).toHaveBeenCalledWith(
+			expect.objectContaining({
+				event_id: 'gfeu2026',
+				action: AuditAction.BookingCreated,
+				entity_type: AuditEntityType.Booking,
+				entity_id: booking.reference_no,
+				metadata: expect.not.objectContaining({
+					payment_proof_url: expect.anything()
+				})
 			})
 		);
 	});
@@ -327,5 +358,72 @@ describe('BookingService.createNew', () => {
 		).rejects.toThrow('ticket type is not available');
 
 		expect(bookingRepository.insertReservation).not.toHaveBeenCalled();
+	});
+});
+
+describe('BookingService audit events', () => {
+	it('records booking.marked_paid after payment state changes', async () => {
+		const booking = makeBooking();
+		const { service, auditEventService } = makeService([booking]);
+
+		await service.markPaid(booking.reference_no);
+
+		expect(auditEventService.record).toHaveBeenCalledWith(
+			expect.objectContaining({
+				event_id: 'gfeu2026',
+				action: AuditAction.BookingMarkedPaid,
+				entity_type: AuditEntityType.Booking,
+				entity_id: booking.reference_no,
+				metadata: expect.objectContaining({
+					previous_payment_status: BookingPaymentStatus.UNPAID,
+					payment_status: BookingPaymentStatus.PAID
+				})
+			})
+		);
+	});
+
+	it('records booking.cancelled after reservation cancellation', async () => {
+		const booking = makeBooking();
+		const { service, auditEventService } = makeService([booking]);
+
+		await service.cancelBookingReservation(booking.reference_no);
+
+		expect(auditEventService.record).toHaveBeenCalledWith(
+			expect.objectContaining({
+				event_id: 'gfeu2026',
+				action: AuditAction.BookingCancelled,
+				entity_type: AuditEntityType.Booking,
+				entity_id: booking.reference_no,
+				metadata: expect.objectContaining({
+					previous_payment_status: BookingPaymentStatus.UNPAID,
+					payment_status: BookingPaymentStatus.BOOKING_RESERVATION_CANCELLED
+				})
+			})
+		);
+	});
+
+	it('records booking.tickets_generated after missing tickets are appended', async () => {
+		const booking = makeBooking({
+			payment_status: BookingPaymentStatus.PAID,
+			guests: ['Ada Lovelace', 'Grace Hopper'],
+			ticket_ids: []
+		});
+		const { service, auditEventService, bookingRepository } = makeService([booking]);
+
+		const ticketIds = await service.generateRelatedTickets(booking.reference_no);
+
+		expect(ticketIds).toEqual(['TICKETADALOVELACE', 'TICKETGRACEHOPPER']);
+		expect(bookingRepository.appendTicketId).toHaveBeenCalledTimes(2);
+		expect(auditEventService.record).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: AuditAction.BookingTicketsGenerated,
+				entity_type: AuditEntityType.Booking,
+				entity_id: booking.reference_no,
+				metadata: expect.objectContaining({
+					quantity: 2,
+					ticket_ids: ticketIds
+				})
+			})
+		);
 	});
 });

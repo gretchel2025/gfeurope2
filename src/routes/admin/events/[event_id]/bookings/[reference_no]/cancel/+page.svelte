@@ -33,7 +33,7 @@
 	backHref={routes.booking.details(booking.reference_no)}
 	backLabel="Back to booking details"
 >
-	<div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+	<div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
 		<AdminCard title="Reservation">
 			<dl>
 				<DetailRow label="Reference No" value={booking.reference_no} />

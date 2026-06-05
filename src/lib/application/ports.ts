@@ -13,6 +13,12 @@ import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
 import type { TicketTypeConfig } from '$lib/domain/ticketType';
 import type { TicketStatus } from '$lib/domain/shared/enums';
+import type {
+	AuditEntityType,
+	AuditEvent,
+	AuditEventListOptions,
+	CreateAuditEventInput
+} from '$lib/domain/auditEvent';
 
 /** A transport-friendly representation of an outbound email. */
 export type EmailMessage = {
@@ -29,6 +35,18 @@ export interface BookingRepository {
 	markPaid(referenceNo: string): Promise<void>;
 	cancelReservation(referenceNo: string): Promise<void>;
 	appendTicketId(referenceNo: string, ticketId: string): Promise<void>;
+}
+
+/** Persistence contract for append-only domain audit events. */
+export interface AuditEventRepository {
+	insert(input: CreateAuditEventInput): Promise<AuditEvent>;
+	listByEvent(eventId: string, options?: AuditEventListOptions): Promise<AuditEvent[]>;
+	listByEntity(
+		eventId: string,
+		entityType: AuditEntityType,
+		entityId: string,
+		options?: AuditEventListOptions
+	): Promise<AuditEvent[]>;
 }
 
 /** Persistence contract for event records. */

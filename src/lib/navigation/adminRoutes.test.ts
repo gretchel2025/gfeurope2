@@ -16,6 +16,7 @@ describe('event route builders', () => {
 		const routes = adminRoutes(eventId);
 
 		expect(routes.home).toBe(`/admin/events/${eventId}`);
+		expect(routes.audit).toBe(`/admin/events/${eventId}/audit`);
 		expect(routes.booking.list).toBe(`/admin/events/${eventId}/bookings`);
 		expect(routes.booking.details('B123')).toBe(`/admin/events/${eventId}/bookings/B123`);
 		expect(routes.ticket.details('T123')).toBe(`/admin/events/${eventId}/tickets/T123`);

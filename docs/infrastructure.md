@@ -157,6 +157,7 @@ App data tables:
 - `bookings`
 - `tickets`
 - `ticket_counters`
+- `audit_events`
 
 The `events` table is keyed by `event_id`. `ticket_types` stores per-event ticket
 labels, base prices, availability windows, and discount rules. `ticket_counters`
@@ -169,6 +170,29 @@ URL and build repositories/services for that event. `APP_EVENT_ID` remains the d
 event for `/` redirects and bootstrap/setup defaults; it should not be used as request
 data scope inside event routes. Prod/test separation comes from the selected Supabase
 project, not an `environment` column.
+
+`audit_events` is the first-party operational audit trail for important domain actions
+such as booking creation, payment reminders, payment state changes, ticket generation,
+ticket check-in/check-out, and manual ticket counter additions. Audit rows are written
+server-side only, after the represented action succeeds. Audit insert failures are logged
+and do not block the completed user action. The table has a direct FK only to
+`events(event_id)`; audited booking, ticket, and counter targets are stored as
+`entity_type` plus `entity_id` so the audit trail survives operational record cleanup or
+schema changes. Admin history UI uses explicit `?load_history=true` requests before
+querying audit rows.
+
+Audit event fields use these stable values:
+
+- `action`: `booking.created`, `booking.payment_reminder_sent`, `booking.marked_paid`,
+  `booking.cancelled`, `booking.tickets_generated`, `ticket.created`,
+  `ticket.checked_in`, `ticket.checked_out`, and `ticket_counter.available_added`
+- `actor_type`: `public`, `admin`, or `system`
+- `entity_type`: `booking`, `ticket`, or `ticket_counter`
+
+Audit metadata is JSON object data for non-secret operational context, for example ticket
+type, quantity, amount, generated ticket ids, and previous/new state. Do not store payment
+proof URLs, uploaded file contents, email bodies, tokens, API keys, or other secrets in
+audit metadata.
 
 RLS is enabled on all `grandfeasteu` schema tables with no anon/authenticated policies.
 The schema is exposed to Supabase's Data API for server-side service-role access only.

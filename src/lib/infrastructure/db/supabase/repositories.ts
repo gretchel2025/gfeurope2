@@ -1,3 +1,4 @@
+export { SupabaseAuditEventRepository } from '$lib/infrastructure/db/supabase/auditEventRepository';
 export { SupabaseBookingRepository } from '$lib/infrastructure/db/supabase/bookingRepository';
 export { SupabaseEventRepository } from '$lib/infrastructure/db/supabase/eventRepository';
 export { SupabaseTicketRepository } from '$lib/infrastructure/db/supabase/ticketRepository';

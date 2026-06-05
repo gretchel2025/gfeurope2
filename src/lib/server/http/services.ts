@@ -6,6 +6,7 @@
  * Composition happens in one place, which makes the rest of the app import ready
  * to use services instead of repeatedly constructing dependencies by hand.
  */
+import { AuditEventService } from '$lib/application/services/auditEventService';
 import { BookingService } from '$lib/application/services/bookingService';
 import { NotificationService } from '$lib/application/services/notificationService';
 import { ReportingService } from '$lib/application/services/reportingService';
@@ -14,6 +15,7 @@ import { TicketCounterService } from '$lib/application/services/ticketCounterSer
 import { TicketService } from '$lib/application/services/ticketService';
 import { TicketTypeService } from '$lib/application/services/ticketTypeService';
 import {
+	SupabaseAuditEventRepository,
 	SupabaseBookingRepository,
 	SupabaseEventRepository,
 	SupabaseTicketCounterRepository,
@@ -25,6 +27,7 @@ import { CloudinaryImageStorage } from '$lib/infrastructure/media/cloudinaryImag
 import { CloudinaryPaymentProofStorage } from '$lib/infrastructure/media/cloudinaryPaymentProofStorage';
 import { DefaultQrCodeGenerator } from '$lib/infrastructure/media/qrCodeGenerator';
 import { PinoEventLogger } from '$lib/infrastructure/logging/eventLogger';
+import { logger } from '$lib/infrastructure/logging/logger';
 import { InMemorySystemSettingsStore } from '$lib/infrastructure/system/inMemorySystemSettingsStore';
 import { appConfig } from '$lib/infrastructure/config/env.server';
 import { customAlphabet } from 'nanoid/non-secure';
@@ -34,6 +37,7 @@ const randomIdGenerator = customAlphabet('23456789ABCDEFGHJKLMNPRSTUVWXYZ', 10);
 
 const eventRepository = new SupabaseEventRepository();
 const ticketTypeRepository = new SupabaseTicketTypeRepository();
+const auditEventRepository = new SupabaseAuditEventRepository();
 
 /** Infrastructure adapters used by the service layer. */
 const emailSender = new ResendEmailSender();
@@ -54,11 +58,28 @@ export function createEventServices(eventId: string) {
 	const bookingRepository = new SupabaseBookingRepository(undefined, eventId);
 	const ticketRepository = new SupabaseTicketRepository(undefined, eventId);
 	const ticketCounterRepository = new SupabaseTicketCounterRepository(undefined, eventId);
-	const ticketCounterService = new TicketCounterService(ticketCounterRepository);
+	const auditEventService = new AuditEventService(auditEventRepository, (caught, input) => {
+		logger.warn(
+			{
+				err: caught,
+				action: input.action,
+				event_id: input.event_id,
+				entity_type: input.entity_type,
+				entity_id: input.entity_id
+			},
+			'[WARN] Audit event insert failed'
+		);
+	});
+	const ticketCounterService = new TicketCounterService(
+		ticketCounterRepository,
+		auditEventService,
+		eventId
+	);
 	const notificationService = new NotificationService(
 		bookingRepository,
 		ticketRepository,
-		emailSender
+		emailSender,
+		auditEventService
 	);
 	const ticketService = new TicketService(
 		bookingRepository,
@@ -66,6 +87,7 @@ export function createEventServices(eventId: string) {
 		imageStorage,
 		qrCodeGenerator,
 		eventLogger,
+		auditEventService,
 		appConfig.appBaseUrl,
 		eventId,
 		(size) => randomIdGenerator(size)
@@ -78,6 +100,7 @@ export function createEventServices(eventId: string) {
 		ticketService,
 		notificationService,
 		eventLogger,
+		auditEventService,
 		(size) => randomIdGenerator(size)
 	);
 
@@ -85,6 +108,8 @@ export function createEventServices(eventId: string) {
 		bookingRepository,
 		ticketRepository,
 		ticketCounterRepository,
+		auditEventRepository,
+		auditEventService,
 		ticketCounterService,
 		notificationService,
 		ticketService,
@@ -96,5 +121,6 @@ export function createEventServices(eventId: string) {
 /** Raw repository exports for the occasional place that needs direct repository access. */
 export const repositories = {
 	eventRepository,
-	ticketTypeRepository
+	ticketTypeRepository,
+	auditEventRepository
 };

@@ -1,4 +1,5 @@
 import type { Booking } from '$lib/domain/booking';
+import { adminRequestAuditActor } from '$lib/server/http/auditActor';
 import type { Actions } from './$types';
 import { getEventServiceContext } from '$lib/server/http/eventContext';
 import { adminAction } from '$lib/server/http/handlers';
@@ -43,7 +44,7 @@ export const actions: Actions = {
 
 		const referenceNo = formData.get('reference_no');
 		if (typeof referenceNo === 'string' && referenceNo.trim()) {
-			await bookingService.markPaid(referenceNo.trim());
+			await bookingService.markPaid(referenceNo.trim(), await adminRequestAuditActor(event));
 		}
 	})
 };

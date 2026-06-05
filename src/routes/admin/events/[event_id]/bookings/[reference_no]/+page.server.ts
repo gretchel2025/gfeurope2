@@ -1,20 +1,34 @@
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { AuditEntityType, type AuditEvent } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
 import { adminRoutes } from '$lib/navigation/adminRoutes';
+import { adminRequestAuditActor } from '$lib/server/http/auditActor';
 import { getEventServiceContext } from '$lib/server/http/eventContext';
 import { adminAction, requireRouteParam, withKitErrors } from '$lib/server/http/handlers';
 
-export const load: PageServerLoad = withKitErrors(
-	async (event): Promise<{ aRecord: Booking | null }> => {
-		const {
-			services: { bookingService }
-		} = await getEventServiceContext(event);
-		return {
-			aRecord: await bookingService.getRequiredById(event.params.reference_no)
-		};
-	}
-);
+export type ServerData = {
+	aRecord: Booking;
+	auditEvents: AuditEvent[];
+	historyLoaded: boolean;
+};
+
+export const load: PageServerLoad = withKitErrors(async (event): Promise<ServerData> => {
+	const {
+		eventId,
+		services: { auditEventService, bookingService }
+	} = await getEventServiceContext(event);
+	const referenceNo = requireRouteParam(event.params, 'reference_no');
+	const historyLoaded = event.url.searchParams.get('load_history') === 'true';
+
+	return {
+		aRecord: await bookingService.getRequiredById(referenceNo),
+		auditEvents: historyLoaded
+			? await auditEventService.listByEntity(eventId, AuditEntityType.Booking, referenceNo)
+			: [],
+		historyLoaded
+	};
+});
 
 export const actions: Actions = {
 	markPaid: adminAction(async (event) => {
@@ -25,7 +39,7 @@ export const actions: Actions = {
 		const routes = adminRoutes(eventId);
 		const { params } = event;
 		const referenceNo = requireRouteParam(params, 'reference_no');
-		await bookingService.markPaid(referenceNo);
+		await bookingService.markPaid(referenceNo, await adminRequestAuditActor(event));
 		throw redirect(303, routes.booking.details(referenceNo));
 	}),
 	generateTickets: adminAction(async (event) => {
@@ -36,7 +50,7 @@ export const actions: Actions = {
 		const routes = adminRoutes(eventId);
 		const { params } = event;
 		const referenceNo = requireRouteParam(params, 'reference_no');
-		await bookingService.generateRelatedTickets(referenceNo);
+		await bookingService.generateRelatedTickets(referenceNo, await adminRequestAuditActor(event));
 		throw redirect(303, routes.booking.details(referenceNo));
 	}),
 	sendTicketsEmail: adminAction(async (event) => {
@@ -58,7 +72,7 @@ export const actions: Actions = {
 		const routes = adminRoutes(eventId);
 		const { params } = event;
 		const referenceNo = requireRouteParam(params, 'reference_no');
-		await notificationService.sendPaymentReminder(referenceNo);
+		await notificationService.sendPaymentReminder(referenceNo, await adminRequestAuditActor(event));
 		throw redirect(303, routes.booking.emailSuccess(referenceNo));
 	})
 };

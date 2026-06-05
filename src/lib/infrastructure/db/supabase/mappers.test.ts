@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { AuditAction, AuditActorType, AuditEntityType } from '$lib/domain/auditEvent';
 import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
 import {
+	auditEventToRow,
+	mapAuditEvent,
 	mapBooking,
 	mapEvent,
 	mapTicket,
@@ -38,6 +41,57 @@ describe('Supabase persistence mappers', () => {
 			guests: ['Ada'],
 			ticket_ids: ['T123'],
 			payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
+		});
+	});
+
+	it('maps audit event rows and write inputs', () => {
+		expect(
+			mapAuditEvent({
+				audit_event_id: '00000000-0000-0000-0000-000000000001',
+				event_id: 'gfeu2026',
+				action: 'booking.created',
+				actor_type: 'public',
+				actor_id: null,
+				actor_email: 'ada@example.com',
+				entity_type: 'booking',
+				entity_id: 'B123',
+				occurred_at: '2026-01-01T00:00:00+00:00',
+				metadata: { ticket_type: 'STANDARD' },
+				created_at: '2026-01-01T00:00:01+00:00'
+			})
+		).toEqual({
+			audit_event_id: '00000000-0000-0000-0000-000000000001',
+			event_id: 'gfeu2026',
+			action: AuditAction.BookingCreated,
+			actor_type: AuditActorType.Public,
+			actor_id: null,
+			actor_email: 'ada@example.com',
+			entity_type: AuditEntityType.Booking,
+			entity_id: 'B123',
+			occurred_at: '2026-01-01T00:00:00.000Z',
+			metadata: { ticket_type: 'STANDARD' },
+			created_at: '2026-01-01T00:00:01.000Z'
+		});
+
+		expect(
+			auditEventToRow({
+				event_id: 'gfeu2026',
+				action: AuditAction.BookingCreated,
+				actor_type: AuditActorType.Public,
+				actor_email: 'ada@example.com',
+				entity_type: AuditEntityType.Booking,
+				entity_id: 'B123',
+				metadata: { quantity: 2 }
+			})
+		).toEqual({
+			event_id: 'gfeu2026',
+			action: 'booking.created',
+			actor_type: 'public',
+			actor_id: null,
+			actor_email: 'ada@example.com',
+			entity_type: 'booking',
+			entity_id: 'B123',
+			metadata: { quantity: 2 }
 		});
 	});
 
