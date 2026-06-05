@@ -68,6 +68,7 @@ export interface TicketRepository {
 export interface TicketCounterRepository {
 	create(counterId: string, values?: TicketCounterDelta): Promise<void>;
 	findById(id: string): Promise<TicketCounter | null>;
+	list(): Promise<TicketCounter[]>;
 	set(id: string, values: TicketCounterDelta): Promise<void>;
 	increment(id: string, values: TicketCounterDelta): Promise<void>;
 }
@@ -75,6 +76,7 @@ export interface TicketCounterRepository {
 /** Persistence contract for ticket type configuration. */
 export interface TicketTypeRepository {
 	findById(eventId: string, ticketTypeId: string): Promise<TicketTypeConfig | null>;
+	list(eventId: string): Promise<TicketTypeConfig[]>;
 	listActive(eventId: string): Promise<TicketTypeConfig[]>;
 }
 

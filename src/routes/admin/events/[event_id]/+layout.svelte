@@ -19,14 +19,14 @@
 
 {#if managedEvent}
 	<section class="admin-event-context admin-page-surface border-b border-slate-200/80 px-4 py-3">
-		<div
-			class="mx-auto flex max-w-6xl items-center justify-between gap-4"
-		>
+		<div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
 			<div class="min-w-0">
 				<p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Managing event</p>
 				<h2 class="mt-1 text-lg font-black text-slate-950">{managedEvent.title}</h2>
 				<p class="admin-event-meta mt-1 text-sm font-semibold">
-					{managedEvent.event_id} • {managedEvent.country} • {formatEventDate(managedEvent.datetime)}
+					{managedEvent.event_id} • {managedEvent.country} • {formatEventDate(
+						managedEvent.datetime
+					)}
 				</p>
 			</div>
 			<div class="flex shrink-0 items-start justify-end text-right">

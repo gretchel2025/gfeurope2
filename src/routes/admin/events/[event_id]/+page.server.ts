@@ -1,31 +1,28 @@
 import type { Actions, PageServerLoad } from './$types';
-import { NotFoundError } from '$lib/application/errors';
-import type { TicketCounter } from '$lib/domain/ticketCounter';
+import {
+	buildTicketCounterDashboardItems,
+	type TicketCounterDashboardItem
+} from '$lib/application/services/ticketCounterService';
 import { adminRequestAuditActor } from '$lib/server/http/auditActor';
 import { getEventServiceContext } from '$lib/server/http/eventContext';
 import { adminAction, withKitErrors } from '$lib/server/http/handlers';
 
 export type ServerData = {
-	standardTicketCounter: TicketCounter;
-	grandFeastPlusTicketCounter: TicketCounter;
+	ticketCounters: TicketCounterDashboardItem[];
 };
 
 export const load: PageServerLoad = withKitErrors(async (event): Promise<ServerData> => {
 	const {
-		services: { ticketCounterService }
+		eventId,
+		services: { ticketCounterService, ticketTypeService }
 	} = await getEventServiceContext(event);
-	const [standardTicketCounter, grandFeastPlusTicketCounter] = await Promise.all([
-		ticketCounterService.getStandardTickets(),
-		ticketCounterService.getGrandFeastPlusTickets()
+	const [ticketCounters, ticketTypes] = await Promise.all([
+		ticketCounterService.list(),
+		ticketTypeService.list(eventId)
 	]);
 
-	if (!standardTicketCounter) throw new NotFoundError('standard ticket counter is missing');
-	if (!grandFeastPlusTicketCounter)
-		throw new NotFoundError('GrandFeast Plus ticket counter is missing');
-
 	return {
-		standardTicketCounter,
-		grandFeastPlusTicketCounter
+		ticketCounters: buildTicketCounterDashboardItems(ticketCounters, ticketTypes)
 	};
 });
 

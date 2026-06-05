@@ -204,6 +204,12 @@ ticket IDs, URLs, and JSON metadata. Wide history or data tables should either b
 stacked cards on small viewports or live inside an explicitly scoped overflow container;
 the page itself should not horizontally scroll.
 
+Event admin dashboard inventory cards are data-driven from the route event's
+`ticket_counters` rows, joined with `ticket_types` for display labels, active state, and
+sort order. Admin inventory intentionally includes inactive ticket types because inactive
+means unavailable for public booking, not invisible to operators. Public booking pages
+continue to load only active and currently available ticket types.
+
 ## Key Flow: Booking Reservation
 
 ```mermaid

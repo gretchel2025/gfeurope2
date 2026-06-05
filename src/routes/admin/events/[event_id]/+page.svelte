@@ -3,7 +3,6 @@
 	import AdminCard from '$lib/ui/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/ui/components/admin/AdminPage.svelte';
 	import DetailRow from '$lib/ui/components/admin/DetailRow.svelte';
-	import type { TicketCounter } from '$lib/domain/ticketCounter';
 	import { page } from '$app/stores';
 
 	import { adminRoutes } from '$lib/navigation/adminRoutes';
@@ -11,25 +10,13 @@
 
 	export let data: ServerData;
 
-	type CounterSummary = {
-		title: string;
-		href: string;
-		counter: TicketCounter;
-	};
+	type CounterSummary = ServerData['ticketCounters'][number] & { href: string };
 
 	$: routes = adminRoutes($page.params.event_id);
-	$: counters = [
-		{
-			title: 'Standard Tickets',
-			href: routes.ticketCounter.details('STANDARD'),
-			counter: data.standardTicketCounter
-		},
-		{
-			title: 'GrandFeast Plus Tickets',
-			href: routes.ticketCounter.details('GRAND_FEAST_PLUS'),
-			counter: data.grandFeastPlusTicketCounter
-		}
-	] satisfies CounterSummary[];
+	$: counters = data.ticketCounters.map((item) => ({
+		...item,
+		href: routes.ticketCounter.details(item.counter._id)
+	})) satisfies CounterSummary[];
 </script>
 
 <AdminPage
@@ -61,7 +48,14 @@
 		<div class="grid gap-4 md:grid-cols-2">
 			{#each counters as item}
 				<article class="rounded-md border border-slate-200 bg-slate-50 p-4">
-					<h3 class="font-semibold text-slate-950">{item.title}</h3>
+					<div class="flex items-start justify-between gap-3">
+						<h3 class="break-words font-semibold text-slate-950">{item.title}</h3>
+						{#if !item.isActive}
+							<span class="shrink-0 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+								Inactive
+							</span>
+						{/if}
+					</div>
 					<dl class="mt-3">
 						<DetailRow label="Available" value={item.counter.available} />
 						<DetailRow label="Reserved" value={item.counter.reserved} />
@@ -71,6 +65,8 @@
 						<AdminButton href={item.href} variant="secondary">Update</AdminButton>
 					</div>
 				</article>
+			{:else}
+				<p class="text-sm text-slate-600">No ticket counters found.</p>
 			{/each}
 		</div>
 	</AdminCard>

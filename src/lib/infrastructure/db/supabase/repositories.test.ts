@@ -352,6 +352,151 @@ describe('Supabase repositories', () => {
 		expect(calls).toContainEqual(['counter_id', 'STANDARD']);
 	});
 
+	it('lists ticket counters in the app schema by event id', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			select: (value: string) => {
+				calls.push(['select', value]);
+				return query;
+			},
+			eq: (key: string, value: unknown) => {
+				calls.push([key, value]);
+				return query;
+			},
+			order: async (key: string, value: unknown) => {
+				calls.push(['order', [key, value]]);
+				return {
+					data: [
+						{
+							counter_id: 'STANDARD',
+							available: 10,
+							reserved: 2,
+							sold: 3
+						},
+						{
+							counter_id: 'VIP',
+							available: 4,
+							reserved: 1,
+							sold: 0
+						}
+					],
+					error: null
+				};
+			}
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseTicketCounterRepository(client, 'event-test');
+		await expect(repository.list()).resolves.toEqual([
+			{
+				_id: 'STANDARD',
+				available: 10,
+				reserved: 2,
+				sold: 3
+			},
+			{
+				_id: 'VIP',
+				available: 4,
+				reserved: 1,
+				sold: 0
+			}
+		]);
+
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'ticket_counters']);
+		expect(calls).toContainEqual(['event_id', 'event-test']);
+		expect(calls).toContainEqual(['order', ['counter_id', { ascending: true }]]);
+	});
+
+	it('lists all ticket types in the app schema by event id', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			select: (value: string) => {
+				calls.push(['select', value]);
+				return query;
+			},
+			eq: (key: string, value: unknown) => {
+				calls.push([key, value]);
+				return query;
+			},
+			order: async (key: string, value: unknown) => {
+				calls.push(['order', [key, value]]);
+				return {
+					data: [
+						{
+							event_id: 'event-test',
+							ticket_type_id: 'STANDARD',
+							label: 'Standard',
+							description: 'General admission',
+							base_price: '35.00',
+							currency: 'EUR',
+							available_from: null,
+							available_until: null,
+							early_bird_discount_available_until: null,
+							early_bird_discount_rate: null,
+							early_bird_discount_amount: null,
+							bulk_purchase_discount_min_quantity: null,
+							bulk_purchase_discount_rate: null,
+							bulk_purchase_discount_amount: null,
+							sort_order: 10,
+							is_active: true
+						},
+						{
+							event_id: 'event-test',
+							ticket_type_id: 'GRAND_FEAST_PLUS',
+							label: 'GrandFeast Plus',
+							description: 'Inactive legacy type',
+							base_price: '65.00',
+							currency: 'EUR',
+							available_from: null,
+							available_until: null,
+							early_bird_discount_available_until: null,
+							early_bird_discount_rate: null,
+							early_bird_discount_amount: null,
+							bulk_purchase_discount_min_quantity: null,
+							bulk_purchase_discount_rate: null,
+							bulk_purchase_discount_amount: null,
+							sort_order: 40,
+							is_active: false
+						}
+					],
+					error: null
+				};
+			}
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseTicketTypeRepository(client);
+		await expect(repository.list('event-test')).resolves.toEqual([
+			expect.objectContaining({ ticket_type_id: 'STANDARD', is_active: true }),
+			expect.objectContaining({ ticket_type_id: 'GRAND_FEAST_PLUS', is_active: false })
+		]);
+
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'ticket_types']);
+		expect(calls).toContainEqual(['event_id', 'event-test']);
+		expect(calls).not.toContainEqual(['is_active', true]);
+		expect(calls).toContainEqual(['order', ['sort_order', { ascending: true }]]);
+	});
+
 	it('lists active ticket types in the app schema by event id', async () => {
 		const calls: Array<[string, unknown]> = [];
 		const query = {

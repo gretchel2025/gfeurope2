@@ -227,9 +227,7 @@
 							Privacy Policy
 						</a>
 						<a href={publicNav.faq} class="text-[#fff3df]/75 transition hover:text-white">FAQ</a>
-						<a href="/events" class="text-[#fff3df]/75 transition hover:text-white">
-							All Events
-						</a>
+						<a href="/events" class="text-[#fff3df]/75 transition hover:text-white"> All Events </a>
 						<a
 							href={adminIndexRoute}
 							target="_self"

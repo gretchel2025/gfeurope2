@@ -18,11 +18,46 @@ import {
 } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
-import { TicketType } from '$lib/domain/shared/enums';
+import type { TicketTypeConfig } from '$lib/domain/ticketType';
+import { formatTicketTypeLabel, TicketType } from '$lib/domain/shared/enums';
 
 /** Stable ids for the inventory counters stored in Supabase. */
 const STANDARD_TICKETS_ID = TicketType.STANDARD;
 const GRAND_FEAST_PLUS_TICKETS_ID = TicketType.GRAND_FEAST_PLUS;
+const UNKNOWN_COUNTER_SORT_ORDER = Number.MAX_SAFE_INTEGER;
+
+export type TicketCounterDashboardItem = {
+	title: string;
+	counter: TicketCounter;
+	isActive: boolean;
+	sortOrder: number;
+};
+
+export function buildTicketCounterDashboardItems(
+	counters: TicketCounter[],
+	ticketTypes: TicketTypeConfig[]
+): TicketCounterDashboardItem[] {
+	const ticketTypesById = new Map(
+		ticketTypes.map((ticketType) => [ticketType.ticket_type_id, ticketType])
+	);
+
+	return counters
+		.map((counter) => {
+			const ticketType = ticketTypesById.get(counter._id);
+			const label = ticketType?.label || formatTicketTypeLabel(counter._id);
+
+			return {
+				title: `${label} Tickets`,
+				counter,
+				isActive: ticketType?.is_active ?? true,
+				sortOrder: ticketType?.sort_order ?? UNKNOWN_COUNTER_SORT_ORDER
+			};
+		})
+		.sort(
+			(left, right) =>
+				left.sortOrder - right.sortOrder || left.counter._id.localeCompare(right.counter._id)
+		);
+}
 
 /** Application service for ticket inventory counters. */
 export class TicketCounterService {
@@ -45,6 +80,11 @@ export class TicketCounterService {
 	/** Loads a counter by its storage id. */
 	async getById(id: string): Promise<TicketCounter | null> {
 		return await this.counterRepository.findById(id);
+	}
+
+	/** Lists all counters for the current event. */
+	async list(): Promise<TicketCounter[]> {
+		return await this.counterRepository.list();
 	}
 
 	/** Creates a new counter record, typically during bootstrap. */

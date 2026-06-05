@@ -11,6 +11,10 @@ import {
 export class TicketTypeService {
 	constructor(private readonly ticketTypeRepository: TicketTypeRepository) {}
 
+	async list(eventId: string): Promise<TicketTypeConfig[]> {
+		return await this.ticketTypeRepository.list(eventId);
+	}
+
 	async listActive(eventId: string, now: Date = new Date()): Promise<TicketTypeConfig[]> {
 		const ticketTypes = await this.ticketTypeRepository.listActive(eventId);
 		return ticketTypes.filter((ticketType) => isTicketTypeAvailable(ticketType, now));

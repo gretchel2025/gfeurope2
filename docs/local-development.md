@@ -188,6 +188,12 @@ Use canonical event routes in local testing:
 - `/admin` shows the neutral admin directory for routes available to the signed-in user.
 - `/admin/events/gfeu2026` and `/admin/events/gfeu2025` open event-scoped admin tools
   when the signed-in user has the matching event admin grant.
+
+For admin inventory checks, `/admin/events/<event_id>` should render every counter row
+for that event from `ticket_counters`, using `ticket_types.label` for card names. Inactive
+ticket types should still appear in admin inventory with an inactive marker, while public
+booking pages should continue to hide inactive ticket types.
+
 - `/admin/global/events` shows the superuser-only global events list.
 
 Public event landing pages can have independent marketing themes. The global `/events`

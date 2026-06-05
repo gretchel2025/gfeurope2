@@ -41,6 +41,17 @@ export class SupabaseTicketCounterRepository implements TicketCounterRepository 
 		return data ? mapTicketCounter(data as SupabaseTicketCounterRow) : null;
 	}
 
+	async list(): Promise<TicketCounter[]> {
+		const { data, error } = await this.schema
+			.from(tableName)
+			.select('*')
+			.eq('event_id', this.eventId)
+			.order('counter_id', { ascending: true });
+
+		if (error) throwSupabaseError('ticket counter list failed', error);
+		return (data ?? []).map((row) => mapTicketCounter(row as SupabaseTicketCounterRow));
+	}
+
 	async set(id: string, values: TicketCounterDelta): Promise<void> {
 		const { error } = await this.schema
 			.from(tableName)

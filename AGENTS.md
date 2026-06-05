@@ -33,6 +33,15 @@ fall back to another event's design. Keep `/events` visually neutral. Admin page
 the admin UI but read DB-backed event theme colors from the `events` table so operators
 can distinguish which event they are managing.
 
+## Admin Inventory
+
+Ticket inventory is DB-backed. `ticket_types` stores per-event labels, pricing,
+availability, discount rules, active state, and sort order; `ticket_counters` stores
+mutable inventory using matching stable ids. Public booking pages should load only active
+and available ticket types. Event admin dashboards should render all counters for the
+route event, including inactive compatibility or historical ticket types, and use
+`ticket_types.label` for display names when available.
+
 ## Audit Events
 
 Important domain actions are written server-side to `grandfeasteu.audit_events` after

@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-05
 
+- Made event admin dashboard ticket counter cards data-driven from all event counter rows,
+  including inactive compatibility ticket types for admin inventory visibility.
 - Added first-party Supabase audit events for booking, ticket, and manual counter actions,
   with event/admin history pages that query only after an explicit load-history request.
 - Hardened admin detail and history pages for narrow viewports by allowing long

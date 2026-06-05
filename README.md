@@ -90,6 +90,18 @@ npm run build         # production build
 - Admin event pages use DB-backed event theme colors from the `events` table to help
   operators distinguish which event they are managing.
 
+## Admin Inventory
+
+Ticket inventory is DB-driven. `ticket_types` defines per-event labels, prices,
+availability, discount rules, sort order, and active state. `ticket_counters` stores
+mutable inventory with `counter_id` values matching `ticket_types.ticket_type_id`.
+
+Public booking pages should show only active and currently available ticket types. Event
+admin dashboards should show every counter row for the managed event, including inactive
+compatibility ticket types, so admins can inspect historical or disabled inventory.
+Counter card titles come from `ticket_types.label`; if a ticket type row is missing, the
+UI falls back to formatting the counter id.
+
 ## Audit Trail
 
 Important domain actions are written server-side to `grandfeasteu.audit_events`. Audit

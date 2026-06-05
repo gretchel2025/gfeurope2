@@ -171,6 +171,12 @@ event for `/` redirects and bootstrap/setup defaults; it should not be used as r
 data scope inside event routes. Prod/test separation comes from the selected Supabase
 project, not an `environment` column.
 
+Public booking reads only active ticket types that are currently available for the route
+event. Event admin inventory reads all `ticket_counters` rows for the route event and
+joins them to `ticket_types` for labels, active markers, and sort order. This lets admins
+see inactive compatibility or historical counters such as disabled ticket classes while
+keeping those ticket types hidden from public purchase flows.
+
 `audit_events` is the first-party operational audit trail for important domain actions
 such as booking creation, payment reminders, payment state changes, ticket generation,
 ticket check-in/check-out, and manual ticket counter additions. Audit rows are written

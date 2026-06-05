@@ -23,6 +23,17 @@ export class SupabaseTicketTypeRepository implements TicketTypeRepository {
 		return data ? mapTicketType(data as SupabaseTicketTypeRow) : null;
 	}
 
+	async list(eventId: string): Promise<TicketTypeConfig[]> {
+		const { data, error } = await this.schema
+			.from(tableName)
+			.select('*')
+			.eq('event_id', eventId)
+			.order('sort_order', { ascending: true });
+
+		if (error) throwSupabaseError('ticket type list failed', error);
+		return (data ?? []).map((row) => mapTicketType(row as SupabaseTicketTypeRow));
+	}
+
 	async listActive(eventId: string): Promise<TicketTypeConfig[]> {
 		const { data, error } = await this.schema
 			.from(tableName)
