@@ -146,6 +146,47 @@ routes/ui components -> server/http -> application services -> domain
                                       application services -> ports <- infrastructure
 ```
 
+## Route Model
+
+The app uses event-scoped URLs for public event pages and admin tools:
+
+- `/` redirects to `/events/<APP_EVENT_ID>`.
+- `/events` is a global public index grouped by event year.
+- `/events/<event_id>` is the public landing page for one event.
+- `/events/<event_id>/newbooking` is the public booking flow for one event.
+- `/events/<event_id>/privacy`, `/conditions`, and `/faq` are shared legal/help pages
+  rendered in the context of one event.
+- `/admin/events/<event_id>` is the admin dashboard for one event.
+- `/admin/events/<event_id>/bookings`, `/tickets`, `/counters`, `/reports`, and
+  `/system` are event-scoped admin tools.
+- `/signin`, `/auth/callback`, and `/unauthorized` are global auth/access routes.
+
+Old non-root URLs such as `/newbooking`, `/api`, `/privacy`, `/conditions`, and `/faq`
+are not canonical event routes. New work should use the event id from route params and
+build repositories/services for that request event. `APP_EVENT_ID` is only the default
+event for root redirects and setup/bootstrap defaults.
+
+When a signed-out user opens a protected admin URL, the app redirects through global
+`/signin?redirectTo=<original event URL>` and returns to the same event-scoped admin URL
+after sign-in. Admin authorization is event-specific through
+`app_metadata.event_roles[eventId]`.
+
+## Theming Model
+
+The app deliberately separates public marketing themes from operational admin theming:
+
+- `/events` uses a neutral index theme and should not inherit an individual event's
+  public marketing style.
+- `/events/<event_id>` uses an event-specific public Svelte component registered in
+  `src/lib/publicEvents.ts`; future events should get their own component under
+  `src/lib/ui/components/public/events/`.
+- `gfeu2026` is the active sales page and can keep its own marketing design and booking
+  calls to action.
+- `gfeu2025` is an archive/portfolio page and should not expose active booking actions.
+- `/admin/events/<event_id>` pages share the admin UI but use DB-backed event theme
+  colors from `events.theme_main_color`, `theme_sub_color`, `theme_highlight_color`, and
+  `theme_on_main_color` to make the managed event visually obvious while scrolling.
+
 ## Key Flow: Booking Reservation
 
 ```mermaid

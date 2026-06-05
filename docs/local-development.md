@@ -177,6 +177,21 @@ anon/authenticated policies; server code uses the service-role key. The `grandfe
 schema is exposed to Supabase's Data API only so the server-side service-role client can
 access it.
 
+Use canonical event routes in local testing:
+
+- `/` redirects to the default event from `APP_EVENT_ID`.
+- `/events` shows a neutral public events index.
+- `/events/gfeu2026` shows the active 2026 public sales page.
+- `/events/gfeu2025` shows the archive-only 2025 public page.
+- `/events/gfeu2026/newbooking` opens the current booking flow.
+- `/admin/events/gfeu2026` and `/admin/events/gfeu2025` open event-scoped admin tools
+  when the signed-in user has the matching event admin grant.
+
+Public event landing pages can have independent marketing themes. The global `/events`
+index should remain neutral. Admin pages use DB-backed colors from the selected
+`events` row so local testing should make it visually obvious when switching between
+admin events.
+
 Local schema changes must still use the repository migration workflow. Create migrations
 with `npx supabase migration new <descriptive_name>`, edit the generated SQL file, apply
 with `npx supabase migration up --local`, and verify with `npx supabase migration list

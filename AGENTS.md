@@ -14,6 +14,23 @@ assets live in `static/`. Tests are co-located with the code they cover, for exa
 
 For deployment, DNS, Supabase, Google OAuth, and external account context, read `docs/infrastructure.md` before making infrastructure-sensitive changes.
 
+## Event Routing & Theming
+
+Canonical public and admin pages are event-scoped. Public event pages live under
+`/events/<event_id>`, public booking lives under `/events/<event_id>/newbooking`, and
+admin pages live under `/admin/events/<event_id>` with child routes such as
+`/admin/events/<event_id>/bookings`. The root path `/` redirects to the default event
+from `APP_EVENT_ID`. The `/events` index is global and uses a neutral theme. Auth routes
+remain global (`/signin`, `/auth/callback`, `/unauthorized`); protected event-admin
+URLs should redirect through `/signin?redirectTo=<original event URL>`.
+
+Public event landing pages are intentionally independent marketing surfaces. Put
+event-specific public page components under `src/lib/ui/components/public/events/` and
+register page metadata in `src/lib/publicEvents.ts`; do not make one event page silently
+fall back to another event's design. Keep `/events` visually neutral. Admin pages share
+the admin UI but read DB-backed event theme colors from the `events` table so operators
+can distinguish which event they are managing.
+
 ## Activity Logging
 
 Keep `LOG.md` as a concise running record of meaningful project activity. Add entries for changes that affect app behavior, infrastructure, deployment, provider configuration, data/auth/email behavior, or operational procedures. Do not log routine checks or one-off verification tasks such as sending a test email, confirming a site is live, running standard tests, or checking command output unless the result changes project state or reveals a decision worth preserving.

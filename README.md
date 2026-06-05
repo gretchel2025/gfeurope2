@@ -73,6 +73,21 @@ npm run build         # production build
 - `src/lib/navigation/` contains navigation metadata.
 - `static/` contains static assets.
 
+## Routing And Theming
+
+- Public event pages are event-scoped under `/events/<event_id>`.
+- The public events index lives at `/events` and uses a neutral, non-event-specific theme.
+- Public booking is event-scoped at `/events/<event_id>/newbooking`.
+- Admin pages are event-scoped under `/admin/events/<event_id>` and require
+  event-specific admin grants.
+- Global auth stays outside event scope at `/signin` and `/auth/callback`; redirects carry
+  the original event URL through `redirectTo`.
+- Public event marketing pages use independent Svelte components under
+  `src/lib/ui/components/public/events/` so archived and future events can have distinct
+  designs.
+- Admin event pages use DB-backed event theme colors from the `events` table to help
+  operators distinguish which event they are managing.
+
 ## Documentation
 
 - Architecture map: [`docs/architecture.md`](docs/architecture.md)

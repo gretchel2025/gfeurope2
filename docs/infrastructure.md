@@ -127,14 +127,24 @@ App data schema: `grandfeasteu`
 
 Canonical app routes are event-scoped:
 
-- Public event pages: `/events/<event_id>` and `/events/<event_id>/newbooking`
+- Public events index: `/events`
+- Public event pages: `/events/<event_id>`, `/events/<event_id>/newbooking`,
+  `/events/<event_id>/privacy`, `/events/<event_id>/conditions`, and
+  `/events/<event_id>/faq`
 - Admin event pages: `/admin/events/<event_id>` and child routes such as
-  `/admin/events/<event_id>/bookings`
+  `/admin/events/<event_id>/bookings`, `/tickets`, `/counters`, `/reports`, and `/system`
 - Global auth pages: `/signin`, `/auth/callback`, and `/unauthorized`
 
 The root path `/` redirects to `/events/<APP_EVENT_ID>`. Authentication remains global;
 protected event-admin URLs redirect to `/signin?redirectTo=<original event URL>` and then
-return to that event URL after sign-in.
+return to that event URL after sign-in. Old non-root URLs such as `/newbooking`, `/api`,
+`/privacy`, `/conditions`, and `/faq` are not canonical app routes after the event route
+split.
+
+Public event page theming is handled per event in Svelte components registered through
+`src/lib/publicEvents.ts`. The `/events` index uses a neutral theme. Admin pages share the
+admin shell and use DB-backed theme colors from each `events` row so operators can
+distinguish the managed event.
 
 App data tables:
 
@@ -147,12 +157,14 @@ App data tables:
 The `events` table is keyed by `event_id`. `ticket_types` stores per-event ticket
 labels, base prices, availability windows, and discount rules. `ticket_counters`
 stores mutable inventory keyed by the same `(event_id, ticket_type_id)` ids via
-`counter_id`. `bookings`, `tickets`, and `ticket_counters` include `event_id text
-not null default 'gfeu2026'`, `created_at`, and `updated_at`. Event-scoped request
-routes resolve `event_id` from the URL and build repositories/services for that event.
-`APP_EVENT_ID` remains the default event for `/` redirects and bootstrap/setup defaults;
-it should not be used as request data scope inside event routes. Prod/test separation
-comes from the selected Supabase project, not an `environment` column.
+`counter_id`. `events` also stores admin theme colors (`theme_main_color`,
+`theme_sub_color`, `theme_highlight_color`, and `theme_on_main_color`). `bookings`,
+`tickets`, and `ticket_counters` include `event_id text not null default 'gfeu2026'`,
+`created_at`, and `updated_at`. Event-scoped request routes resolve `event_id` from the
+URL and build repositories/services for that event. `APP_EVENT_ID` remains the default
+event for `/` redirects and bootstrap/setup defaults; it should not be used as request
+data scope inside event routes. Prod/test separation comes from the selected Supabase
+project, not an `environment` column.
 
 RLS is enabled on all `grandfeasteu` schema tables with no anon/authenticated policies.
 The schema is exposed to Supabase's Data API for server-side service-role access only.

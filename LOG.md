@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-05
 
+- Documented the event-scoped public/admin route model and the split between neutral,
+  public event-specific, and DB-backed admin event theming.
 - Moved UI-facing Svelte components under `src/lib/ui/components/` and updated project
   guidance to distinguish UI components from public event page configuration.
 - Gave the `/events` index its own neutral public theme, separate from event-specific
