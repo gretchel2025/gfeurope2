@@ -1,13 +1,7 @@
 import { appConfig } from '$lib/infrastructure/config/env.server';
-import { ticketTypeService } from '$lib/server/http/services';
-import type { TicketTypeConfig } from '$lib/domain/ticketType';
+import { publicRoutes } from '$lib/navigation/adminRoutes';
+import { redirect } from '@sveltejs/kit';
 
-export type ServerData = {
-	ticketTypes: TicketTypeConfig[];
-};
-
-export async function load(): Promise<ServerData> {
-	return {
-		ticketTypes: await ticketTypeService.listActive(appConfig.appEventId)
-	};
+export function load(): never {
+	throw redirect(308, publicRoutes(appConfig.appEventId).home);
 }

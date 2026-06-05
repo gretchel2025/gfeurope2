@@ -1,6 +1,5 @@
 import type { TicketCounterRepository } from '$lib/application/ports';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
-import { appConfig } from '$lib/infrastructure/config/env.server';
 import { getSupabaseDataClient } from '$lib/infrastructure/db/supabase/client';
 import { throwSupabaseError } from '$lib/infrastructure/db/supabase/errors';
 import {
@@ -14,8 +13,8 @@ const tableName = 'ticket_counters';
 
 export class SupabaseTicketCounterRepository implements TicketCounterRepository {
 	constructor(
-		private readonly clientOverride?: SupabaseClient,
-		private readonly eventId: string = appConfig.appEventId
+		private readonly clientOverride: SupabaseClient | undefined,
+		private readonly eventId: string
 	) {}
 
 	async create(counterId: string, values?: TicketCounterDelta): Promise<void> {

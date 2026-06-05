@@ -5,7 +5,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const liveDevProjectUrl = 'https://guoqhigzyfisvtnlrbjw.supabase.co';
-const supportedRoles = new Set(['tester', 'admin', 'superuser']);
+const supportedRoles = new Set(['tester', 'superuser']);
+const supportedEventRoles = new Set(['admin']);
 const fileEnv = loadDotEnvFile(path.resolve(process.cwd(), '.env'));
 
 const supabaseUrl = readLiveDevEnv('LIVE_DEV_SUPABASE_URL');
@@ -15,13 +16,17 @@ const accounts = [
 		label: 'tester',
 		email: readLiveDevEnv('LIVE_DEV_CODEX_TESTER_EMAIL') || 'codex-tester@grandfeast.eu',
 		password: readLiveDevEnv('LIVE_DEV_CODEX_TESTER_PASSWORD'),
-		roles: ['tester']
+		roles: ['tester'],
+		eventRoles: {}
 	},
 	{
 		label: 'admin',
 		email: readLiveDevEnv('LIVE_DEV_CODEX_ADMIN_EMAIL') || 'codex-admin@grandfeast.eu',
 		password: readLiveDevEnv('LIVE_DEV_CODEX_ADMIN_PASSWORD'),
-		roles: ['tester', 'admin']
+		roles: ['tester'],
+		eventRoles: {
+			gfeu2026: ['admin']
+		}
 	}
 ];
 
@@ -54,7 +59,7 @@ for (const account of accounts) {
 
 async function upsertAccount(account) {
 	const existingUser = await findUserByEmail(account.email);
-	const appMetadata = { roles: account.roles };
+	const appMetadata = { roles: account.roles, event_roles: account.eventRoles };
 
 	if (existingUser) {
 		const { error } = await runAuthAdminRequest(
@@ -155,6 +160,18 @@ function validateAccount(account) {
 	if (unsupportedRoles.length > 0) {
 		console.error(`Unsupported role(s): ${unsupportedRoles.join(', ')}`);
 		process.exit(1);
+	}
+
+	for (const [eventId, roles] of Object.entries(account.eventRoles)) {
+		if (!eventId.trim()) {
+			console.error('Event role event ids must be non-empty.');
+			process.exit(1);
+		}
+		const unsupportedEventRoles = roles.filter((role) => !supportedEventRoles.has(role));
+		if (unsupportedEventRoles.length > 0) {
+			console.error(`Unsupported event role(s): ${unsupportedEventRoles.join(', ')}`);
+			process.exit(1);
+		}
 	}
 }
 

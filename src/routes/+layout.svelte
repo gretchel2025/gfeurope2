@@ -1,6 +1,16 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { signOutCurrentUser as signOutAuth } from '$lib/infrastructure/auth/authClient';
+	import { adminRoutes, publicRoutes } from '$lib/navigation/adminRoutes';
 	import '../app.css';
+
+	type AdminThemeEvent = {
+		theme_main_color?: string;
+		theme_sub_color?: string;
+		theme_highlight_color?: string;
+		theme_on_main_color?: string;
+	};
 
 	let isMenuOpen = false;
 
@@ -12,61 +22,90 @@
 		isMenuOpen = false;
 	}
 
-	$: isAdminRoute = $page.url.pathname.startsWith('/api');
+	function asHexColor(value: unknown, fallback: string) {
+		return typeof value === 'string' && /^#[0-9A-Fa-f]{6}$/.test(value) ? value : fallback;
+	}
+
+	function getAdminThemeStyle(event?: AdminThemeEvent) {
+		return [
+			`--admin-event-main: ${asHexColor(event?.theme_main_color, '#005B72')}`,
+			`--admin-event-sub: ${asHexColor(event?.theme_sub_color, '#E7F6F9')}`,
+			`--admin-event-highlight: ${asHexColor(event?.theme_highlight_color, '#D99A32')}`,
+			`--admin-event-on-main: ${asHexColor(event?.theme_on_main_color, '#FFFFFF')}`
+		].join('; ');
+	}
+
+	async function signOutCurrentUser() {
+		await signOutAuth($page.data.supabaseAuth);
+		await goto('/signin');
+	}
+
+	$: activeEventId = $page.params.event_id ?? $page.data.defaultEventId;
+	$: publicNav = publicRoutes(activeEventId);
+	$: adminNav = adminRoutes(activeEventId);
+	$: isAdminRoute = $page.url.pathname.startsWith('/admin');
+	$: adminThemeStyle = getAdminThemeStyle($page.data.event as AdminThemeEvent | undefined);
 </script>
 
 {#if isAdminRoute}
-	<div class="admin-shell text-slate-950">
+	<div class="admin-shell text-slate-950" style={adminThemeStyle}>
 		<header class="admin-header border-b border-slate-200/80 px-4 py-6 md:px-8">
 			<div
 				class="mx-auto flex max-w-6xl flex-col gap-4 md:flex-row md:items-center md:justify-between"
 			>
 				<div class="flex items-center justify-between">
-					<a href="/" on:click={closeMenu}>
+					<a href={publicNav.home} on:click={closeMenu}>
 						<h1 class="text-2xl font-bold tracking-wider text-slate-950">Grand Feast EU UK</h1>
 					</a>
 
-					<button
-						type="button"
-						class="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-900 md:hidden"
-						aria-expanded={isMenuOpen}
-						aria-controls="site-nav"
-						on:click={toggleMenu}
-					>
-						Menu
-					</button>
+					<div class="flex items-center gap-3 md:hidden">
+						{#if $page.data.session?.user}
+							<button
+								type="button"
+								class="text-sm font-semibold text-red-700 hover:text-red-800"
+								on:click={signOutCurrentUser}
+							>
+								Sign out
+							</button>
+						{/if}
+
+						<button
+							type="button"
+							class="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-900"
+							aria-expanded={isMenuOpen}
+							aria-controls="site-nav"
+							on:click={toggleMenu}
+						>
+							Menu
+						</button>
+					</div>
 				</div>
 
 				<nav id="site-nav" class:hidden={!isMenuOpen} class="md:block">
-					<ul class="flex flex-col gap-3 md:flex-row md:gap-6">
+					<ul class="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
 						<li>
 							<a
-								href="/"
+								href={publicNav.home}
 								class="text-slate-600 transition hover:text-slate-950"
 								on:click={closeMenu}>Home</a
 							>
 						</li>
-						<li>
-							<a
-								href="/#speakers"
-								class="text-slate-600 transition hover:text-slate-950"
-								on:click={closeMenu}>Speakers</a
-							>
-						</li>
-						<li>
-							<a
-								href="/#details"
-								class="text-slate-600 transition hover:text-slate-950"
-								on:click={closeMenu}>Details</a
-							>
-						</li>
-						<li>
-							<a
-								href="/newbooking"
-								class="text-slate-600 transition hover:text-slate-950"
-								on:click={closeMenu}>Buy Tickets</a
-							>
-						</li>
+						{#if $page.data.session?.user}
+							<li class="hidden text-slate-600 md:block">
+								<a href="/signin" class="transition hover:text-slate-950">
+									{$page.data.session.user.email}
+								</a>
+							</li>
+							<li class="hidden md:block">
+								<button
+									type="button"
+									class="font-semibold text-red-700 hover:text-red-800"
+									on:click={signOutCurrentUser}
+								>
+									Sign out
+								</button>
+							</li>
+						{/if}
 					</ul>
 				</nav>
 			</div>
@@ -81,7 +120,7 @@
 				class="mx-auto flex max-w-6xl flex-col gap-4 rounded-xl border border-white/10 bg-[#021821]/80 px-4 py-4 shadow-xl backdrop-blur md:flex-row md:items-center md:justify-between md:px-5"
 			>
 				<div class="flex items-center justify-between">
-					<a href="/" on:click={closeMenu} class="group">
+					<a href={publicNav.home} on:click={closeMenu} class="group">
 						<p class="conference-kicker">Grand Feast</p>
 						<h1 class="text-2xl font-black tracking-normal text-white">Europe and UK 2026</h1>
 					</a>
@@ -101,28 +140,30 @@
 					<ul class="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
 						<li>
 							<a
-								href="/"
+								href={publicNav.home}
 								class="font-semibold text-[#fff3df]/80 transition hover:text-white"
 								on:click={closeMenu}>Home</a
 							>
 						</li>
 						<li>
 							<a
-								href="/#speakers"
+								href={`${publicNav.home}#speakers`}
 								class="font-semibold text-[#fff3df]/80 transition hover:text-white"
 								on:click={closeMenu}>Speakers</a
 							>
 						</li>
 						<li>
 							<a
-								href="/#details"
+								href={`${publicNav.home}#details`}
 								class="font-semibold text-[#fff3df]/80 transition hover:text-white"
 								on:click={closeMenu}>Details</a
 							>
 						</li>
 						<li>
-							<a href="/newbooking" class="conference-button px-4 py-2 text-sm" on:click={closeMenu}
-								>Buy Tickets</a
+							<a
+								href={publicNav.newBooking}
+								class="conference-button px-4 py-2 text-sm"
+								on:click={closeMenu}>Buy Tickets</a
 							>
 						</li>
 					</ul>
@@ -143,15 +184,15 @@
 						<p class="mt-1 text-sm text-[#fff3df]/70">© 2026 Grand Feast Europe and UK.</p>
 					</div>
 					<div class="flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
-						<a href="/conditions" class="text-[#fff3df]/75 transition hover:text-white">
+						<a href={publicNav.conditions} class="text-[#fff3df]/75 transition hover:text-white">
 							Terms &amp; Conditions
 						</a>
-						<a href="/privacy" class="text-[#fff3df]/75 transition hover:text-white">
+						<a href={publicNav.privacy} class="text-[#fff3df]/75 transition hover:text-white">
 							Privacy Policy
 						</a>
-						<a href="/faq" class="text-[#fff3df]/75 transition hover:text-white">FAQ</a>
+						<a href={publicNav.faq} class="text-[#fff3df]/75 transition hover:text-white">FAQ</a>
 						<a
-							href="/api"
+							href={adminNav.home}
 							target="_self"
 							rel="noopener"
 							class="text-[#fff3df]/75 transition hover:text-white"

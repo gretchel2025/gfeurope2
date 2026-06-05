@@ -1,4 +1,9 @@
-import type { UserRole } from '$lib/domain/user';
+import {
+	hasEventAdminAccess,
+	hasTesterAccess,
+	type EventRoleMap,
+	type UserRole
+} from '$lib/domain/user';
 
 export type RuntimeAccessMode = 'local' | 'production' | 'live-dev';
 export type AccessDenialReason = 'sign-in-required' | 'permission-denied';
@@ -13,6 +18,7 @@ export type RuntimeAccessInput = {
 export type RequiredAccess = {
 	mode: RuntimeAccessMode;
 	pathname: string;
+	eventId: string | null;
 	bypass: boolean;
 	requiresTester: boolean;
 	requiresAdmin: boolean;
@@ -79,10 +85,12 @@ export function getRequiredAccess(input: {
 }): RequiredAccess {
 	const bypass = isAuthBypassPath(input.pathname);
 	const adminPath = isAdminPath(input.pathname);
+	const eventId = getPathEventId(input.pathname);
 
 	return {
 		mode: input.mode,
 		pathname: input.pathname,
+		eventId,
 		bypass,
 		requiresTester: !bypass && input.mode === 'live-dev',
 		requiresAdmin: !bypass && adminPath
@@ -93,6 +101,7 @@ export function evaluateAccess(input: {
 	requiredAccess: RequiredAccess;
 	signedIn: boolean;
 	roles: UserRole[];
+	eventRoles: EventRoleMap;
 }): AccessEvaluation {
 	if (input.requiredAccess.bypass) {
 		return { allowed: true };
@@ -109,14 +118,17 @@ export function evaluateAccess(input: {
 		};
 	}
 
-	if (input.requiredAccess.requiresTester && !input.roles.includes('tester')) {
+	if (input.requiredAccess.requiresTester && !hasTesterAccess(input.roles)) {
 		return {
 			allowed: false,
 			reason: 'permission-denied'
 		};
 	}
 
-	if (input.requiredAccess.requiresAdmin && !hasAdminRole(input.roles)) {
+	if (
+		input.requiredAccess.requiresAdmin &&
+		!hasEventAdminAccess(input.roles, input.eventRoles, input.requiredAccess.eventId)
+	) {
 		return {
 			allowed: false,
 			reason: 'permission-denied'
@@ -144,7 +156,7 @@ export function isLocalSupabaseUrl(value: string): boolean {
 }
 
 export function isAdminPath(pathname: string): boolean {
-	return pathname === '/api' || pathname.startsWith('/api/');
+	return pathname === '/admin' || pathname.startsWith('/admin/');
 }
 
 export function isAuthBypassPath(pathname: string): boolean {
@@ -176,8 +188,15 @@ export function buildRedirectTo(url: URL): string {
 	return `${url.pathname}${url.search}`;
 }
 
-function hasAdminRole(roles: UserRole[]): boolean {
-	return roles.includes('admin') || roles.includes('superuser');
+export function getPathEventId(pathname: string): string | null {
+	const segments = pathname.split('/').filter(Boolean);
+	if (segments[0] === 'events' && segments[1]) {
+		return decodeURIComponent(segments[1]);
+	}
+	if (segments[0] === 'admin' && segments[1] === 'events' && segments[2]) {
+		return decodeURIComponent(segments[2]);
+	}
+	return null;
 }
 
 function hasStaticAssetExtension(pathname: string): boolean {

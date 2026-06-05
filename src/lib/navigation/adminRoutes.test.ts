@@ -1,0 +1,26 @@
+import { describe, expect, it } from 'vitest';
+import { adminRoutes, publicRoutes } from './adminRoutes';
+
+describe('event route builders', () => {
+	it.each(['gfeu2025', 'gfeu2026'])('builds public event routes for %s', (eventId) => {
+		const routes = publicRoutes(eventId);
+
+		expect(routes.home).toBe(`/events/${eventId}`);
+		expect(routes.newBooking).toBe(`/events/${eventId}/newbooking`);
+		expect(routes.privacy).toBe(`/events/${eventId}/privacy`);
+		expect(routes.conditions).toBe(`/events/${eventId}/conditions`);
+		expect(routes.faq).toBe(`/events/${eventId}/faq`);
+	});
+
+	it.each(['gfeu2025', 'gfeu2026'])('builds admin event routes for %s', (eventId) => {
+		const routes = adminRoutes(eventId);
+
+		expect(routes.home).toBe(`/admin/events/${eventId}`);
+		expect(routes.booking.list).toBe(`/admin/events/${eventId}/bookings`);
+		expect(routes.booking.details('B123')).toBe(`/admin/events/${eventId}/bookings/B123`);
+		expect(routes.ticket.details('T123')).toBe(`/admin/events/${eventId}/tickets/T123`);
+		expect(routes.ticketCounter.details('STANDARD')).toBe(
+			`/admin/events/${eventId}/counters/STANDARD`
+		);
+	});
+});

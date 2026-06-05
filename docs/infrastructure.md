@@ -78,7 +78,7 @@ come from `.env`, usually copied from `.env.example`.
 Important deployment-related env vars:
 
 - `APP_BASE_URL`
-- `APP_EVENT_ID`
+- `APP_EVENT_ID`, the default event id used for root redirects and bootstrap/setup defaults
 - `PUBLIC_SUPABASE_URL`
 - `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -125,6 +125,17 @@ Hosted projects:
 
 App data schema: `grandfeasteu`
 
+Canonical app routes are event-scoped:
+
+- Public event pages: `/events/<event_id>` and `/events/<event_id>/newbooking`
+- Admin event pages: `/admin/events/<event_id>` and child routes such as
+  `/admin/events/<event_id>/bookings`
+- Global auth pages: `/signin`, `/auth/callback`, and `/unauthorized`
+
+The root path `/` redirects to `/events/<APP_EVENT_ID>`. Authentication remains global;
+protected event-admin URLs redirect to `/signin?redirectTo=<original event URL>` and then
+return to that event URL after sign-in.
+
 App data tables:
 
 - `events`
@@ -137,9 +148,11 @@ The `events` table is keyed by `event_id`. `ticket_types` stores per-event ticke
 labels, base prices, availability windows, and discount rules. `ticket_counters`
 stores mutable inventory keyed by the same `(event_id, ticket_type_id)` ids via
 `counter_id`. `bookings`, `tickets`, and `ticket_counters` include `event_id text
-not null default 'gfeu2026'`, `created_at`, and `updated_at`. The app scopes
-repository reads/writes by `APP_EVENT_ID`; prod/test separation comes from the
-selected Supabase project, not an `environment` column.
+not null default 'gfeu2026'`, `created_at`, and `updated_at`. Event-scoped request
+routes resolve `event_id` from the URL and build repositories/services for that event.
+`APP_EVENT_ID` remains the default event for `/` redirects and bootstrap/setup defaults;
+it should not be used as request data scope inside event routes. Prod/test separation
+comes from the selected Supabase project, not an `environment` column.
 
 RLS is enabled on all `grandfeasteu` schema tables with no anon/authenticated policies.
 The schema is exposed to Supabase's Data API for server-side service-role access only.
@@ -184,23 +197,35 @@ On startup, the app creates missing ticket counter records. Local `supabase/seed
 contains only initial counters for `event_id='gfeu2026'`; do not commit exported booking
 data or PII.
 
-Hosted authorization uses Supabase Auth `app_metadata.roles`. Do not use `user_metadata`
-for authorization because users can edit it.
+Hosted authorization uses Supabase Auth `app_metadata.roles` and
+`app_metadata.event_roles`. Do not use `user_metadata` for authorization because users
+can edit it.
 
 - `tester` grants access to public pages on live development.
-- `admin` grants admin access in production/local and, with `tester`, on live development.
-- `superuser` counts as admin-level access but does not imply `tester`.
+- `event_roles[event_id]` containing `admin` grants admin access for that event.
+- `superuser` bypasses event-admin checks and live-dev tester checks.
 
 Expected role combinations:
 
 - `tester`: live-dev public pages only.
-- `tester` plus `admin`: live-dev public pages and live-dev `/api`.
-- `tester` plus `superuser`: live-dev public pages and live-dev `/api`.
-- `admin`: production/local `/api` only; no live-dev access.
-- `superuser`: production/local `/api` only; no live-dev access.
+- `tester` plus `event_roles.gfeu2026=["admin"]`: live-dev public pages and
+  `/admin/events/gfeu2026`.
+- `tester` plus `event_roles.gfeu2025=["admin"]`: live-dev public pages and
+  `/admin/events/gfeu2025`.
+- `tester` alone cannot access admin pages.
+- `superuser`: global operator access across public/admin event pages.
 
-For `dev.grandfeast.eu`, `jonathangersam@gmail.com` currently needs all three roles:
-`admin`, `superuser`, and `tester`.
+Example metadata:
+
+```json
+{
+	"roles": ["tester"],
+	"event_roles": {
+		"gfeu2026": ["admin"],
+		"gfeu2025": []
+	}
+}
+```
 
 Live-dev service-account password auth:
 
@@ -223,16 +248,17 @@ Live-dev service-account password auth:
 
 - Run `make setup-live-dev-service-accounts` to create or update the live-dev accounts.
   The helper refuses any Supabase URL except `77 Labs Test`, confirms the emails, and
-  writes roles to `app_metadata`.
-- `codex-tester@grandfeast.eu` gets `tester`. `codex-admin@grandfeast.eu` gets
-  `tester` plus `admin`.
+  writes roles plus event roles to `app_metadata`.
+- `codex-tester@grandfeast.eu` gets `roles=["tester"]`.
+- `codex-admin@grandfeast.eu` gets `roles=["tester"]` plus
+  `event_roles.gfeu2026=["admin"]`.
 
 Local Supabase role setup:
 
 1. Start the local stack with `make supabase-up` or `make run-local`.
 2. For offline-friendly local auth, use the default `admin` / `password` login or set
-   `LOCAL_DEV_AUTH_EMAIL`, `LOCAL_DEV_AUTH_PASSWORD`, and optionally
-   `LOCAL_DEV_AUTH_ROLES` in `.env`.
+   `LOCAL_DEV_AUTH_EMAIL`, `LOCAL_DEV_AUTH_PASSWORD`, `LOCAL_DEV_AUTH_ROLES`, and
+   optionally `LOCAL_DEV_AUTH_EVENT_ROLES` in `.env`.
 3. Create or update the local Supabase email/password user. `make run-local` does this
    automatically after Supabase starts, or run it directly:
 
@@ -240,9 +266,9 @@ Local Supabase role setup:
    make setup-local-auth
    ```
 
-   The helper refuses non-local Supabase URLs and writes roles to
+   The helper refuses non-local Supabase URLs and writes roles plus event roles to
    `auth.users.raw_app_meta_data`. The default UI login `admin` maps to Supabase user
-   `admin@example.test`.
+   `admin@example.test`. By default it grants `event_roles.gfeu2026=["admin"]`.
 
 4. If using Google instead of local email/password, sign in once with Google so Supabase
    creates the local `auth.users` row.
@@ -252,8 +278,9 @@ Local Supabase role setup:
    make grant-local-roles EMAIL=you@example.com
    ```
 
-   The default roles are `tester`, `admin`, and `superuser`. Use
-   `ROLES=admin` or another comma-separated subset for narrower local testing.
+   The default roles are `tester`, `admin`, and `superuser`, with
+   `EVENT_ROLES=gfeu2026:admin`. Use `ROLES=tester EVENT_ROLES=gfeu2026:admin`
+   or another subset for narrower local testing.
 
 6. If the browser session was already active, sign out and back in once so the session
    reads the updated `app_metadata`.
@@ -262,7 +289,7 @@ Local Supabase role setup:
 
 Auth is configured through Supabase Auth and wired into SvelteKit with `@supabase/ssr`.
 Server-side authorization uses Supabase's trusted `auth.getUser()` path before reading
-`app_metadata.roles`.
+`app_metadata.roles` and `app_metadata.event_roles`.
 
 Important auth env vars:
 
@@ -308,7 +335,7 @@ First-time local setup checklist for agents:
    authorized redirect URI for the configured client.
 6. Restart local Supabase after changing `.env` auth provider values.
 7. For offline-friendly auth, run `make setup-local-auth`. The script creates or updates a
-   confirmed local email/password Supabase Auth user and grants roles.
+   confirmed local email/password Supabase Auth user and grants roles plus event roles.
 8. Ask the developer to use the local username/password form on `/signin`; by default, it
    is prefilled with `admin` / `password`.
 9. If using Google instead, ask the developer to sign in once so the local `auth.users` row
@@ -329,8 +356,8 @@ Auth troubleshooting map:
 - Google returns `redirect_uri_mismatch`: the Google Cloud OAuth client is missing
   `http://127.0.0.1:54321/auth/v1/callback`.
 - The app shows `Access unavailable` after successful sign-in: the user exists but lacks
-  required `app_metadata.roles`; run `make grant-local-roles EMAIL=...`, then refresh the
-  browser session.
+  required `app_metadata.roles` or `app_metadata.event_roles`; run
+  `make grant-local-roles EMAIL=...`, then refresh the browser session.
 
 First-class access policy code:
 
@@ -347,9 +374,11 @@ First-class access policy code:
 Access policy behavior:
 
 - Production and local public pages are open.
-- Production and local `/api` requires `admin` or `superuser`.
+- Production and local `/admin/events/<event_id>` requires
+  `event_roles[event_id]` containing `admin`, or `superuser`.
 - Live dev public pages require a signed-in user with `tester`.
-- Live dev `/api` requires `tester` and either `admin` or `superuser`.
+- Live dev `/admin/events/<event_id>` requires `tester` plus
+  `event_roles[event_id]` containing `admin`, unless the user has `superuser`.
 - Signed-out protected requests redirect to `/signin?redirectTo=...`.
 - Signed-in users missing required roles redirect to `/unauthorized`.
 
@@ -363,7 +392,7 @@ Current live-dev operator account:
 
 ```txt
 Email: jonathangersam@gmail.com
-Required Supabase app_metadata.roles: admin, superuser, tester
+Required Supabase app_metadata: tester plus event_roles for administered event ids, or superuser
 ```
 
 ## Optional Integrations
@@ -424,7 +453,7 @@ DNS and routing:
 dig NS grandfeast.eu @1.1.1.1 +short
 dig dev.grandfeast.eu @1.1.1.1 +short
 curl -I https://dev.grandfeast.eu/
-curl -I https://dev.grandfeast.eu/api
+curl -I https://dev.grandfeast.eu/admin/events/gfeu2026
 ```
 
 OAuth start is browser-driven from `/signin`; verify that the Google sign-in URL starts

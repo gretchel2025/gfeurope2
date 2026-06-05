@@ -3,7 +3,7 @@
 	export let subtitle = '';
 </script>
 
-<section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+<section class="admin-card rounded-lg bg-white p-5 shadow-sm">
 	{#if title || subtitle || $$slots.actions}
 		<header class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 			<div>

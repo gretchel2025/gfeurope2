@@ -51,6 +51,10 @@ function makeEvent(overrides: Partial<Event> = {}): Event {
 		venue: "St. Helen's Hotel",
 		datetime: '2026-10-03T11:00:00.000Z',
 		timezone: 'Europe/Dublin',
+		theme_main_color: '#005B72',
+		theme_sub_color: '#E7F6F9',
+		theme_highlight_color: '#D99A32',
+		theme_on_main_color: '#FFFFFF',
 		...overrides
 	};
 }

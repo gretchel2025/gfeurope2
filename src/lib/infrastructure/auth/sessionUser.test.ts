@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { RequestEvent } from '@sveltejs/kit';
 import type { AppSession } from './session';
-import { getAuthSession, getSessionRoles, toPublicSession } from './session';
+import { getAuthSession, getSessionEventRoles, getSessionRoles, toPublicSession } from './session';
 import { getSessionUser } from './sessionUser';
 
 vi.mock('$lib/infrastructure/logging/logger', () => ({
@@ -14,13 +14,15 @@ function sessionWith(input: {
 	email?: string | null;
 	name?: unknown;
 	roles?: unknown;
+	eventRoles?: unknown;
 }): AppSession {
 	return {
 		user: {
 			id: 'supabase-user-id',
 			email: input.email,
 			app_metadata: {
-				roles: input.roles
+				roles: input.roles,
+				event_roles: input.eventRoles
 			},
 			user_metadata: {
 				name: input.name
@@ -74,6 +76,23 @@ describe('Supabase session mapping', () => {
 		expect(getSessionRoles(sessionWith({ email: 'admin@example.com', roles: null }))).toEqual([]);
 	});
 
+	it('reads supported event roles from Supabase app metadata', () => {
+		const session = sessionWith({
+			email: 'admin@example.com',
+			roles: ['tester'],
+			eventRoles: {
+				gfeu2026: ['admin', 'unsupported', 123],
+				gfeu2025: [],
+				ignored: 'admin'
+			}
+		});
+
+		expect(getSessionEventRoles(session)).toEqual({
+			gfeu2026: ['admin']
+		});
+		expect(getSessionEventRoles(null)).toEqual({});
+	});
+
 	it('only exposes minimal session data to browser pages', () => {
 		expect(
 			toPublicSession(
@@ -93,7 +112,7 @@ describe('Supabase session mapping', () => {
 
 	it('treats failed session lookup as signed out', async () => {
 		const event = {
-			url: new URL('https://dev.grandfeast.eu/newbooking'),
+			url: new URL('https://dev.grandfeast.eu/events/gfeu2026/newbooking'),
 			locals: {
 				safeGetSession: async () => {
 					throw new Error('bad auth cookie');

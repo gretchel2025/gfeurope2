@@ -241,7 +241,7 @@
     <path d="M446 887 l25 9 v20 c0 17 -10 28 -25 36 c-15 -8 -25 -19 -25 -36 v-20 z" fill="none" stroke="#4f8a3a" stroke-width="4"/>
     <text x="492" y="904" class="small-title" fill="#4f8a3a">Access policy</text>
     <text x="492" y="926" class="body-small">hooks.server.ts -> Supabase</text>
-    <text x="492" y="944" class="body-small">session -> app_metadata.roles</text>
+    <text x="492" y="944" class="body-small">session -> app_metadata roles + event_roles</text>
 
     <rect x="770" y="864" width="346" height="92" rx="10" fill="#fffdf8" class="gold" stroke-width="1.1"/>
     <circle cx="812" cy="910" r="28" class="soft-gold"/>
@@ -255,7 +255,7 @@
     <path d="M1158 914 h40 M1178 894 v40 M1164 900 h28 v28 h-28 z" fill="none" stroke="#ef4b36" stroke-width="4" stroke-linecap="round"/>
     <text x="1224" y="904" class="small-title" fill="#ef4b36">Runtime bootstrap</text>
     <text x="1224" y="926" class="body-small">startup ensures counters</text>
-    <text x="1224" y="944" class="body-small">exist for APP_EVENT_ID</text>
+    <text x="1224" y="944" class="body-small">exist for route event_id</text>
   </g>
 
   <text x="768" y="1000" text-anchor="middle" class="micro">Source of truth: docs/architecture.md, docs/infrastructure.md, and current src/lib boundaries.</text>

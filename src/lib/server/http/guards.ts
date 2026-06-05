@@ -9,13 +9,20 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { AuthenticationRequiredError, PermissionDeniedError } from '$lib/application/errors';
 import type { SessionUser } from '$lib/domain/user';
-import { hasAdminAccess, isSuperUser } from '$lib/domain/user';
-import { getAuthSession, getSessionRoles, type AppSession } from '$lib/infrastructure/auth/session';
+import { hasEventAdminAccess, isSuperUser } from '$lib/domain/user';
+import {
+	getAuthSession,
+	getSessionEventRoles,
+	getSessionRoles,
+	type AppSession
+} from '$lib/infrastructure/auth/session';
+import { getPathEventId } from '$lib/infrastructure/auth/accessPolicy';
 import { getSessionUser } from '$lib/infrastructure/auth/sessionUser';
 
 /** Requires an authenticated admin session and returns the normalized session user. */
 export async function requireAdminSession(
-	session: AppSession | null
+	session: AppSession | null,
+	eventId: string | null
 ): Promise<{ session: AppSession; user: SessionUser }> {
 	const currentUser = getSessionUser(session);
 	if (!currentUser.wasFound || !session) {
@@ -23,7 +30,8 @@ export async function requireAdminSession(
 	}
 
 	const roles = getSessionRoles(session);
-	if (!hasAdminAccess(roles)) {
+	const eventRoles = getSessionEventRoles(session);
+	if (!hasEventAdminAccess(roles, eventRoles, eventId)) {
 		throw new PermissionDeniedError(`user ${currentUser._id} unauthorized`);
 	}
 
@@ -40,7 +48,7 @@ export async function requireAdminSession(
 export async function requireSuperUserSession(
 	session: AppSession | null
 ): Promise<{ session: AppSession; user: SessionUser }> {
-	const result = await requireAdminSession(session);
+	const result = await requireAdminSession(session, null);
 	if (!result.user.isASuperUser) {
 		throw new PermissionDeniedError('unauthorized, must be a superuser');
 	}
@@ -51,7 +59,7 @@ export async function requireSuperUserSession(
 export async function requireAdminRequest(
 	event: RequestEvent
 ): Promise<{ session: AppSession; user: SessionUser }> {
-	return await requireAdminSession(await getAuthSession(event));
+	return await requireAdminSession(await getAuthSession(event), getPathEventId(event.url.pathname));
 }
 
 /** RequestEvent wrapper for superuser-only route handlers. */

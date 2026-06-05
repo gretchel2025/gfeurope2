@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
 	evaluateAccess,
+	getPathEventId,
 	getPasswordAuthMode,
 	getRequiredAccess,
 	getRuntimeAccessMode,
 	isAuthBypassPath
 } from './accessPolicy';
-import type { UserRole } from '$lib/domain/user';
+import type { EventRoleMap, UserRole } from '$lib/domain/user';
 
 function accessFor(input: {
 	dev?: boolean;
@@ -15,6 +16,7 @@ function accessFor(input: {
 	pathname: string;
 	signedIn?: boolean;
 	roles?: UserRole[];
+	eventRoles?: EventRoleMap;
 }) {
 	const mode = getRuntimeAccessMode({
 		dev: input.dev ?? false,
@@ -28,7 +30,8 @@ function accessFor(input: {
 			pathname: input.pathname
 		}),
 		signedIn: input.signedIn ?? false,
-		roles: input.roles ?? []
+		roles: input.roles ?? [],
+		eventRoles: input.eventRoles ?? {}
 	});
 }
 
@@ -37,28 +40,44 @@ describe('access policy', () => {
 		expect(accessFor({ hostname: 'www.grandfeast.eu', pathname: '/' })).toEqual({
 			allowed: true
 		});
-		expect(accessFor({ dev: true, hostname: 'localhost', pathname: '/newbooking' })).toEqual({
+		expect(
+			accessFor({ dev: true, hostname: 'localhost', pathname: '/events/gfeu2026/newbooking' })
+		).toEqual({
 			allowed: true
 		});
 	});
 
-	it('requires admin roles for production and local admin routes', () => {
-		expect(accessFor({ pathname: '/api', signedIn: false })).toEqual({
+	it('requires event admin roles for production and local admin routes', () => {
+		expect(accessFor({ pathname: '/admin/events/gfeu2026', signedIn: false })).toEqual({
 			allowed: false,
 			reason: 'sign-in-required'
 		});
-		expect(accessFor({ pathname: '/api', signedIn: true, roles: ['tester'] })).toEqual({
+		expect(
+			accessFor({
+				pathname: '/admin/events/gfeu2026',
+				signedIn: true,
+				roles: ['tester'],
+				eventRoles: { gfeu2025: ['admin'] }
+			})
+		).toEqual({
 			allowed: false,
 			reason: 'permission-denied'
 		});
-		expect(accessFor({ pathname: '/api', signedIn: true, roles: ['admin'] })).toEqual({
+		expect(
+			accessFor({
+				pathname: '/admin/events/gfeu2026',
+				signedIn: true,
+				roles: ['tester'],
+				eventRoles: { gfeu2026: ['admin'] }
+			})
+		).toEqual({
 			allowed: true
 		});
 		expect(
 			accessFor({
 				dev: true,
 				hostname: 'localhost',
-				pathname: '/api',
+				pathname: '/admin/events/gfeu2025',
 				signedIn: true,
 				roles: ['superuser']
 			})
@@ -68,30 +87,51 @@ describe('access policy', () => {
 	});
 
 	it('requires tester roles for live dev public pages', () => {
-		expect(accessFor({ hostname: 'dev.grandfeast.eu', pathname: '/' })).toEqual({
+		expect(accessFor({ hostname: 'dev.grandfeast.eu', pathname: '/events/gfeu2026' })).toEqual({
 			allowed: false,
 			reason: 'sign-in-required'
 		});
 		expect(
-			accessFor({ hostname: 'dev.grandfeast.eu', pathname: '/', signedIn: true, roles: ['admin'] })
+			accessFor({
+				hostname: 'dev.grandfeast.eu',
+				pathname: '/events/gfeu2026',
+				signedIn: true,
+				roles: []
+			})
 		).toEqual({
 			allowed: false,
 			reason: 'permission-denied'
 		});
 		expect(
-			accessFor({ hostname: 'dev.grandfeast.eu', pathname: '/', signedIn: true, roles: ['tester'] })
+			accessFor({
+				hostname: 'dev.grandfeast.eu',
+				pathname: '/events/gfeu2026',
+				signedIn: true,
+				roles: ['tester']
+			})
+		).toEqual({
+			allowed: true
+		});
+		expect(
+			accessFor({
+				hostname: 'dev.grandfeast.eu',
+				pathname: '/events/gfeu2026',
+				signedIn: true,
+				roles: ['superuser']
+			})
 		).toEqual({
 			allowed: true
 		});
 	});
 
-	it('requires tester plus admin roles for live dev admin routes', () => {
+	it('requires tester plus event admin roles for live dev admin routes', () => {
 		expect(
 			accessFor({
 				hostname: 'dev--grand-feast-uk-x-europe.netlify.app',
-				pathname: '/api',
+				pathname: '/admin/events/gfeu2026/bookings',
 				signedIn: true,
-				roles: ['tester']
+				roles: ['tester'],
+				eventRoles: {}
 			})
 		).toEqual({
 			allowed: false,
@@ -100,9 +140,10 @@ describe('access policy', () => {
 		expect(
 			accessFor({
 				hostname: 'dev--grand-feast-uk-x-europe.netlify.app',
-				pathname: '/api',
+				pathname: '/admin/events/gfeu2026/bookings',
 				signedIn: true,
-				roles: ['admin']
+				roles: [],
+				eventRoles: { gfeu2026: ['admin'] }
 			})
 		).toEqual({
 			allowed: false,
@@ -111,9 +152,32 @@ describe('access policy', () => {
 		expect(
 			accessFor({
 				hostname: 'dev--grand-feast-uk-x-europe.netlify.app',
-				pathname: '/api',
+				pathname: '/admin/events/gfeu2026/bookings',
 				signedIn: true,
-				roles: ['tester', 'admin']
+				roles: ['tester'],
+				eventRoles: { gfeu2026: ['admin'] }
+			})
+		).toEqual({
+			allowed: true
+		});
+		expect(
+			accessFor({
+				hostname: 'dev--grand-feast-uk-x-europe.netlify.app',
+				pathname: '/admin/events/gfeu2025/bookings',
+				signedIn: true,
+				roles: ['tester'],
+				eventRoles: { gfeu2026: ['admin'] }
+			})
+		).toEqual({
+			allowed: false,
+			reason: 'permission-denied'
+		});
+		expect(
+			accessFor({
+				hostname: 'dev--grand-feast-uk-x-europe.netlify.app',
+				pathname: '/admin/events/gfeu2025/bookings',
+				signedIn: true,
+				roles: ['superuser']
 			})
 		).toEqual({
 			allowed: true
@@ -125,7 +189,7 @@ describe('access policy', () => {
 			accessFor({
 				hostname: 'preview.example.netlify.app',
 				netlifyBranch: 'dev',
-				pathname: '/',
+				pathname: '/events/gfeu2026',
 				signedIn: true,
 				roles: ['tester']
 			})
@@ -140,7 +204,13 @@ describe('access policy', () => {
 		expect(isAuthBypassPath('/auth/callback')).toBe(true);
 		expect(isAuthBypassPath('/_app/immutable/entry/app.js')).toBe(true);
 		expect(isAuthBypassPath('/favicon.png')).toBe(true);
-		expect(isAuthBypassPath('/api/v0/booking/list')).toBe(false);
+		expect(isAuthBypassPath('/admin/events/gfeu2026/bookings')).toBe(false);
+	});
+
+	it('extracts event ids from public and admin routes', () => {
+		expect(getPathEventId('/events/gfeu2026/newbooking')).toBe('gfeu2026');
+		expect(getPathEventId('/admin/events/gfeu2025/bookings')).toBe('gfeu2025');
+		expect(getPathEventId('/signin')).toBeNull();
 	});
 
 	it('enables password auth only for local Supabase or flagged live dev', () => {

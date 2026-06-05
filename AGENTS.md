@@ -20,7 +20,8 @@ For a new developer or a fresh local Supabase setup, use the local Supabase CLI 
 2. For offline-friendly local auth, run `make setup-local-auth`, or use `make run-local`
    which runs it automatically after Supabase starts. By default this creates or updates
    the local Supabase user `admin@example.test` for the UI login `admin` / `password`,
-   and grants `LOCAL_DEV_AUTH_ROLES`, defaulting to `tester,admin,superuser`.
+   grants `LOCAL_DEV_AUTH_ROLES`, defaulting to `tester,admin,superuser`, and grants
+   `LOCAL_DEV_AUTH_EVENT_ROLES`, defaulting to `gfeu2026:admin`.
 3. For local Google OAuth, ensure `.env` has
    `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and
    `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET`. Do not print these values.
@@ -37,8 +38,9 @@ For a new developer or a fresh local Supabase setup, use the local Supabase CLI 
    Supabase creates the local
    `auth.users` row.
 9. Grant local roles with `make grant-local-roles EMAIL=developer@example.com`. The
-   default grants `tester`, `admin`, and `superuser`; pass `ROLES=admin` or another
-   comma-separated subset only for narrower testing.
+   default grants `tester`, `admin`, and `superuser` plus `event_roles.gfeu2026=["admin"]`;
+   pass `ROLES=tester EVENT_ROLES=gfeu2026:admin` or another subset only for narrower
+   testing.
 10. If the browser was already signed in before roles were granted, have the developer
     sign out and sign back in so the session picks up updated `app_metadata`.
 
@@ -89,10 +91,10 @@ migrations just because they exist after a pull.
 - `make run`: start the Vite dev server and open the app in a browser.
 - `make run-local`: start the Supabase CLI local stack, then run the app.
 - `make supabase-up`, `make supabase-down`, `make supabase-status`: manage local Supabase.
-- `make setup-local-auth [EMAIL=admin PASSWORD=password]`: create or
+- `make setup-local-auth [EMAIL=admin PASSWORD=password EVENT_ROLES=gfeu2026:admin]`: create or
   update an offline-friendly local Supabase email/password user.
-- `make grant-local-roles EMAIL=you@example.com [ROLES=tester,admin,superuser]`: grant
-  local Supabase Auth roles after first local sign-in.
+- `make grant-local-roles EMAIL=you@example.com [ROLES=tester,admin,superuser] [EVENT_ROLES=gfeu2026:admin]`: grant
+  local Supabase Auth roles and event roles after first local sign-in.
 - `npm run build` or `make build`: create the production build.
 - `npm run check` or `make test-unit`: run Svelte/TypeScript validation with `svelte-check`.
 - `npm run test`: run Vitest once.
@@ -116,4 +118,4 @@ Recent commits use short, imperative, lowercase subjects like `refactor legal pa
 
 Do not commit secrets. Copy `.env.example` to `.env` for local development and fill in values such as `APP_BASE_URL`, `APP_EVENT_ID`, `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and server-only `SUPABASE_SERVICE_ROLE_KEY`. The app also reads initial ticket counter values, `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, and Cloudinary credentials. Local development uses the Supabase CLI stack; never point local work at hosted production/test unless you are intentionally verifying hosted behavior. Resend and Cloudinary can be left empty unless those integrations are needed locally.
 
-Auth uses Supabase Auth with Google OAuth. Application roles live in Supabase Auth `app_metadata.roles`; do not use user-editable metadata for authorization. Booking, ticket, and counter data lives in the `grandfeasteu` Supabase schema (`bookings`, `tickets`, `ticket_counters`) scoped by `APP_EVENT_ID`; production uses `77 Labs Prod`, live development uses `77 Labs Test`, and local development uses the Supabase CLI local database.
+Auth uses Supabase Auth with Google OAuth. Application roles live in Supabase Auth `app_metadata.roles` and event admin grants live in `app_metadata.event_roles`; do not use user-editable metadata for authorization. Booking, ticket, and counter data lives in the `grandfeasteu` Supabase schema (`events`, `ticket_types`, `bookings`, `tickets`, `ticket_counters`) scoped by event route ids such as `/events/gfeu2026` and `/admin/events/gfeu2026`; `APP_EVENT_ID` is only the default event for root redirects and setup/bootstrap defaults. Production uses `77 Labs Prod`, live development uses `77 Labs Test`, and local development uses the Supabase CLI local database.

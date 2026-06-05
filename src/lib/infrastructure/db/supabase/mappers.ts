@@ -28,6 +28,10 @@ export type SupabaseEventRow = {
 	venue: string;
 	datetime: string;
 	timezone: string;
+	theme_main_color: string;
+	theme_sub_color: string;
+	theme_highlight_color: string;
+	theme_on_main_color: string;
 };
 
 export type SupabaseTicketRow = {
@@ -92,7 +96,11 @@ export function mapEvent(row: SupabaseEventRow): Event {
 		country: row.country,
 		venue: row.venue,
 		datetime: new Date(row.datetime).toISOString(),
-		timezone: row.timezone
+		timezone: row.timezone,
+		theme_main_color: row.theme_main_color,
+		theme_sub_color: row.theme_sub_color,
+		theme_highlight_color: row.theme_highlight_color,
+		theme_on_main_color: row.theme_on_main_color
 	};
 }
 

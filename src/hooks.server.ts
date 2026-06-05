@@ -10,7 +10,12 @@ import {
 	getRequiredAccess,
 	getRuntimeAccessMode
 } from '$lib/infrastructure/auth/accessPolicy';
-import { getAuthSession, getSessionRoles } from '$lib/infrastructure/auth/session';
+import {
+	getAuthSession,
+	getSessionEventRoles,
+	getSessionRoles
+} from '$lib/infrastructure/auth/session';
+import { globalRoutes } from '$lib/navigation/adminRoutes';
 
 await bootstrapApplication();
 
@@ -85,16 +90,17 @@ export const handle: Handle = async ({ event, resolve }) => {
 		const access = evaluateAccess({
 			requiredAccess,
 			signedIn: Boolean(session),
-			roles: getSessionRoles(session)
+			roles: getSessionRoles(session),
+			eventRoles: getSessionEventRoles(session)
 		});
 
 		if (!access.allowed && access.reason === 'sign-in-required') {
 			const redirectTo = encodeURIComponent(buildRedirectTo(event.url));
-			throw redirect(303, `/signin?redirectTo=${redirectTo}`);
+			throw redirect(303, `${globalRoutes.signin}?redirectTo=${redirectTo}`);
 		}
 
 		if (!access.allowed) {
-			throw redirect(303, '/unauthorized');
+			throw redirect(303, globalRoutes.unauthorized);
 		}
 	}
 

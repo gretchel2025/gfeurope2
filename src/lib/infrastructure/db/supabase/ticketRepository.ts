@@ -1,7 +1,6 @@
 import type { TicketRepository } from '$lib/application/ports';
 import type { TicketStatus } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
-import { appConfig } from '$lib/infrastructure/config/env.server';
 import { getSupabaseDataClient } from '$lib/infrastructure/db/supabase/client';
 import { throwSupabaseError } from '$lib/infrastructure/db/supabase/errors';
 import {
@@ -16,8 +15,8 @@ const tableName = 'tickets';
 
 export class SupabaseTicketRepository implements TicketRepository {
 	constructor(
-		private readonly clientOverride?: SupabaseClient,
-		private readonly eventId: string = appConfig.appEventId
+		private readonly clientOverride: SupabaseClient | undefined,
+		private readonly eventId: string
 	) {}
 
 	async insert(ticket: Ticket): Promise<string> {

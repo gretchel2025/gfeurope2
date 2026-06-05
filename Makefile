@@ -16,7 +16,7 @@ run:
 run-local:
 	# start local Supabase, then start the dev server
 	supabase start
-	node scripts/setup-local-auth.mjs "$(EMAIL)" "$(PASSWORD)" "$(ROLES)"
+	node scripts/setup-local-auth.mjs "$(EMAIL)" "$(PASSWORD)" "$(ROLES)" "$(EVENT_ROLES)"
 	npm run dev -- --open
 
 supabase-up:
@@ -29,11 +29,11 @@ supabase-status:
 	supabase status
 
 grant-local-roles:
-	@test -n "$(EMAIL)" || (echo "Usage: make grant-local-roles EMAIL=user@example.com [ROLES=tester,admin,superuser]" && exit 1)
-	node scripts/grant-local-roles.mjs "$(EMAIL)" "$(ROLES)"
+	@test -n "$(EMAIL)" || (echo "Usage: make grant-local-roles EMAIL=user@example.com [ROLES=tester,admin,superuser] [EVENT_ROLES=gfeu2026:admin]" && exit 1)
+	node scripts/grant-local-roles.mjs "$(EMAIL)" "$(ROLES)" "$(EVENT_ROLES)"
 
 setup-local-auth:
-	node scripts/setup-local-auth.mjs "$(EMAIL)" "$(PASSWORD)" "$(ROLES)"
+	node scripts/setup-local-auth.mjs "$(EMAIL)" "$(PASSWORD)" "$(ROLES)" "$(EVENT_ROLES)"
 
 setup-live-dev-service-accounts:
 	node scripts/setup-live-dev-service-accounts.mjs

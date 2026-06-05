@@ -1,6 +1,9 @@
 <script lang="ts">
 	import ErrorDiagnostics from '$lib/components/public/ErrorDiagnostics.svelte';
 	import { page } from '$app/stores';
+	import { publicRoutes } from '$lib/navigation/adminRoutes';
+
+	$: homeHref = publicRoutes($page.params.event_id ?? $page.data.defaultEventId).home;
 </script>
 
 <section class="public-status-page px-4 py-12">
@@ -16,7 +19,7 @@
 		<ErrorDiagnostics />
 
 		<div class="mt-6 flex flex-col justify-center gap-4 sm:flex-row">
-			<a href="/" class="conference-button px-6 py-3 text-center text-sm">Home</a>
+			<a href={homeHref} class="conference-button px-6 py-3 text-center text-sm">Home</a>
 			<button
 				type="button"
 				on:click={() => location.reload()}

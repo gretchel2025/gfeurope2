@@ -7,4 +7,8 @@ export type Event = {
 	venue: string;
 	datetime: string;
 	timezone: string;
+	theme_main_color: string;
+	theme_sub_color: string;
+	theme_highlight_color: string;
+	theme_on_main_color: string;
 };

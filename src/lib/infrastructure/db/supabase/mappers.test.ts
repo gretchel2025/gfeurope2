@@ -50,7 +50,11 @@ describe('Supabase persistence mappers', () => {
 				country: 'Ireland',
 				venue: "St. Helen's Hotel",
 				datetime: '2026-10-03T12:00:00+01:00',
-				timezone: 'Europe/Dublin'
+				timezone: 'Europe/Dublin',
+				theme_main_color: '#005B72',
+				theme_sub_color: '#E7F6F9',
+				theme_highlight_color: '#D99A32',
+				theme_on_main_color: '#FFFFFF'
 			})
 		).toEqual({
 			event_id: 'gfeu2026',
@@ -59,7 +63,11 @@ describe('Supabase persistence mappers', () => {
 			country: 'Ireland',
 			venue: "St. Helen's Hotel",
 			datetime: '2026-10-03T11:00:00.000Z',
-			timezone: 'Europe/Dublin'
+			timezone: 'Europe/Dublin',
+			theme_main_color: '#005B72',
+			theme_sub_color: '#E7F6F9',
+			theme_highlight_color: '#D99A32',
+			theme_on_main_color: '#FFFFFF'
 		});
 	});
 

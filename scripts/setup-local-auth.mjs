@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const supportedRoles = new Set(['tester', 'admin', 'superuser']);
+const supportedEventRoles = new Set(['admin']);
 const fileEnv = loadDotEnvFile(path.resolve(process.cwd(), '.env'));
 
 const email = normalizeLocalLogin(
@@ -20,6 +21,11 @@ const requestedRoles =
 	process.env.LOCAL_DEV_AUTH_ROLES ||
 	fileEnv.LOCAL_DEV_AUTH_ROLES ||
 	'tester,admin,superuser';
+const requestedEventRoles =
+	process.argv[5] ||
+	process.env.LOCAL_DEV_AUTH_EVENT_ROLES ||
+	fileEnv.LOCAL_DEV_AUTH_EVENT_ROLES ||
+	'gfeu2026:admin';
 const supabaseUrl = process.env.PUBLIC_SUPABASE_URL || fileEnv.PUBLIC_SUPABASE_URL || '';
 const serviceRoleKey =
 	process.env.SUPABASE_SERVICE_ROLE_KEY || fileEnv.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -61,6 +67,8 @@ if (unsupportedRoles.length > 0) {
 	process.exit(1);
 }
 
+const eventRoles = parseEventRoles(requestedEventRoles);
+
 const supabase = createClient(supabaseUrl, serviceRoleKey, {
 	auth: {
 		autoRefreshToken: false,
@@ -69,7 +77,7 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
 });
 
 const existingUser = await findUserByEmail(email);
-const appMetadata = { roles };
+const appMetadata = { roles, event_roles: eventRoles };
 
 if (existingUser) {
 	const { error } = await runAuthAdminRequest(
@@ -89,7 +97,9 @@ if (existingUser) {
 		process.exit(1);
 	}
 
-	console.log(`Updated local auth user ${email} with roles: ${roles.join(', ')}`);
+	console.log(
+		`Updated local auth user ${email} with roles: ${roles.join(', ')} and event_roles: ${formatEventRoles(eventRoles)}`
+	);
 } else {
 	const { error } = await runAuthAdminRequest(
 		() =>
@@ -107,7 +117,9 @@ if (existingUser) {
 		process.exit(1);
 	}
 
-	console.log(`Created local auth user ${email} with roles: ${roles.join(', ')}`);
+	console.log(
+		`Created local auth user ${email} with roles: ${roles.join(', ')} and event_roles: ${formatEventRoles(eventRoles)}`
+	);
 }
 
 async function findUserByEmail(targetEmail) {
@@ -164,6 +176,68 @@ function isLocalSupabaseUrl(value) {
 function normalizeLocalLogin(value) {
 	const trimmed = value.trim().toLowerCase();
 	return trimmed === 'admin' ? 'admin@example.test' : trimmed;
+}
+
+function parseEventRoles(value) {
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return {};
+	}
+
+	if (trimmed.startsWith('{')) {
+		try {
+			return validateEventRoles(JSON.parse(trimmed));
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			console.error(`Invalid LOCAL_DEV_AUTH_EVENT_ROLES JSON: ${message}`);
+			process.exit(1);
+		}
+	}
+
+	const result = {};
+	for (const entry of trimmed.split(';')) {
+		const [eventId, rolesText] = entry.split(':');
+		const eventRoles = (rolesText ?? '')
+			.split(',')
+			.map((role) => role.trim())
+			.filter(Boolean);
+		if (eventId?.trim()) {
+			result[eventId.trim()] = eventRoles;
+		}
+	}
+
+	return validateEventRoles(result);
+}
+
+function validateEventRoles(value) {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) {
+		console.error('Event roles must be an object or event_id:role list.');
+		process.exit(1);
+	}
+
+	for (const [eventId, roles] of Object.entries(value)) {
+		if (!eventId.trim() || !Array.isArray(roles)) {
+			console.error('Event roles must map event ids to role arrays.');
+			process.exit(1);
+		}
+		const unsupported = roles.filter((role) => !supportedEventRoles.has(role));
+		if (unsupported.length > 0) {
+			console.error(`Unsupported event role(s): ${unsupported.join(', ')}`);
+			console.error(`Supported event roles: ${Array.from(supportedEventRoles).join(', ')}`);
+			process.exit(1);
+		}
+	}
+
+	return value;
+}
+
+function formatEventRoles(eventRoles) {
+	const entries = Object.entries(eventRoles);
+	if (entries.length === 0) {
+		return '{}';
+	}
+
+	return entries.map(([eventId, roles]) => `${eventId}:${roles.join(',')}`).join(';');
 }
 
 function loadDotEnvFile(filePath) {

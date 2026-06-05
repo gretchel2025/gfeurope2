@@ -6,6 +6,7 @@ import {
 	sanitizeRedirectTo,
 	type PasswordAuthMode
 } from '$lib/infrastructure/auth/accessPolicy';
+import { publicRoutes } from '$lib/navigation/adminRoutes';
 
 export type ServerData = {
 	hasGoogleAuth: boolean;
@@ -29,7 +30,7 @@ export const load: PageServerLoad = (event): ServerData => {
 			supabaseUrl: appConfig.supabaseUrl,
 			enableLiveDevPasswordAuth: appConfig.enableLiveDevPasswordAuth
 		}),
-		callbackURL: redirectTo ?? (mode === 'live-dev' ? '/' : '/api'),
+		callbackURL: redirectTo ?? publicRoutes(appConfig.appEventId).home,
 		authError: event.url.searchParams.has('error')
 	};
 };

@@ -70,7 +70,7 @@
     <rect x="56" y="250" width="158" height="28" rx="4" fill="#fffdf8"/>
     <text x="135" y="272" text-anchor="middle" class="card-title">Open Booking</text>
     <rect x="54" y="286" width="162" height="24" rx="5" class="teal-fill"/>
-    <text x="135" y="303" text-anchor="middle" class="path">/newbooking</text>
+    <text x="135" y="303" text-anchor="middle" class="path">/events/gfeu2026/newbooking</text>
     <text x="135" y="330" text-anchor="middle" class="body">load ticket counters</text>
     <text x="135" y="352" text-anchor="middle" class="body">redirect if sold out</text>
 
@@ -126,7 +126,7 @@
     <rect x="1276" y="250" width="172" height="28" rx="4" fill="#fffdf8"/>
     <text x="1362" y="272" text-anchor="middle" class="card-title">Success Page</text>
     <rect x="1266" y="286" width="192" height="24" rx="5" class="purple-fill"/>
-    <text x="1362" y="303" text-anchor="middle" class="path">/newbooking/success</text>
+    <text x="1362" y="303" text-anchor="middle" class="path">/events/gfeu2026/newbooking/success</text>
     <text x="1362" y="330" text-anchor="middle" class="body">booking state is</text>
     <text x="1362" y="352" text-anchor="middle" class="body">UNPAID + reserved</text>
   </g>
@@ -258,5 +258,5 @@
     <text x="1294" y="922" class="body-small">• Cloudinary QR storage</text>
   </g>
 
-  <text x="768" y="1000" text-anchor="middle" class="micro">Source paths: /newbooking, booking details/cancel/summary routes, BookingService, TicketService, NotificationService, Supabase repositories.</text>
+  <text x="768" y="1000" text-anchor="middle" class="micro">Source paths: /events/gfeu2026/newbooking, admin booking details/cancel/summary routes, BookingService, TicketService, NotificationService, Supabase repositories.</text>
 </svg>

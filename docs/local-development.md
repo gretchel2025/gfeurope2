@@ -97,6 +97,7 @@ users in `77 Labs Test`.
    LOCAL_DEV_AUTH_EMAIL=admin@example.test
    LOCAL_DEV_AUTH_PASSWORD=password
    LOCAL_DEV_AUTH_ROLES=tester,admin,superuser
+   LOCAL_DEV_AUTH_EVENT_ROLES=gfeu2026:admin
    ```
 
 5. Create or update the local Supabase email/password user:
@@ -168,10 +169,13 @@ App data lives in the `grandfeasteu` schema. Tables use clean domain names
 keyed by `event_id`; `ticket_types` stores per-event pricing and discount rules;
 `ticket_counters.counter_id` uses the same stable ids as `ticket_types.ticket_type_id`.
 The booking, ticket, and counter tables include `event_id`, currently defaulting to
-`gfeu2026`. Repository queries always scope by `APP_EVENT_ID`. App-data tables have RLS
-enabled and no anon/authenticated policies; server code uses the service-role key. The
-`grandfeasteu` schema is exposed to Supabase's Data API only so the server-side
-service-role client can access it.
+`gfeu2026`. Public and admin routes resolve the event id from URLs such as
+`/events/gfeu2026/newbooking` and `/admin/events/gfeu2026/bookings`; repositories and
+services are built per request event id. `APP_EVENT_ID` is the default event for `/`
+redirects and bootstrap/setup defaults. App-data tables have RLS enabled and no
+anon/authenticated policies; server code uses the service-role key. The `grandfeasteu`
+schema is exposed to Supabase's Data API only so the server-side service-role client can
+access it.
 
 Local schema changes must still use the repository migration workflow. Create migrations
 with `npx supabase migration new <descriptive_name>`, edit the generated SQL file, apply
@@ -188,24 +192,30 @@ and ask the user for explicit permission before running `npx supabase migration 
 
 ## Access Roles
 
-Access is controlled by Supabase Auth `app_metadata.roles`. The app recognizes these
-roles:
+Access is controlled by Supabase Auth `app_metadata.roles` and
+`app_metadata.event_roles`. The app recognizes these roles:
 
 - `tester`: can access public pages on the live development site.
-- `admin`: can access production/local admin pages, and can access live development admin
-  pages only when combined with `tester`.
-- `superuser`: counts as admin-level permission but does not imply `tester`.
+- `event_roles[event_id]` containing `admin`: can access admin pages for that event.
+- `superuser`: bypasses event-admin checks and live-dev tester checks.
 
 Live development (`dev.grandfeast.eu` and the Netlify `dev` branch URL) requires a signed-in
 user with `tester` for every non-auth page. Production and local public pages remain open.
-Admin routes under `/api` require `admin` or `superuser`; on live development they also
-require `tester`.
+Admin routes under `/admin/events/<event_id>` require `event_roles[event_id]` containing
+`admin`, or `superuser`; on live development they also require `tester` unless the user
+has `superuser`.
 
 Do not use `user_metadata` for authorization; users can edit it. Assign roles only in
 provider-owned `app_metadata`, for example:
 
 ```json
-{ "roles": ["tester", "admin", "superuser"] }
+{
+	"roles": ["tester"],
+	"event_roles": {
+		"gfeu2026": ["admin"],
+		"gfeu2025": []
+	}
+}
 ```
 
 For a local Supabase user, sign in once so the user exists, then grant local roles:
@@ -214,10 +224,11 @@ For a local Supabase user, sign in once so the user exists, then grant local rol
 make grant-local-roles EMAIL=you@example.com
 ```
 
-The default grants `tester`, `admin`, and `superuser`. To grant a narrower set:
+The default grants `tester`, `admin`, and `superuser`, plus
+`event_roles.gfeu2026=["admin"]`. To grant a narrower set:
 
 ```bash
-make grant-local-roles EMAIL=you@example.com ROLES=admin
+make grant-local-roles EMAIL=you@example.com ROLES=tester EVENT_ROLES=gfeu2026:admin
 ```
 
 If the browser is already signed in when roles change, sign out and back in once so the

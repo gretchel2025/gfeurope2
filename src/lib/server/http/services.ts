@@ -32,11 +32,7 @@ import { customAlphabet } from 'nanoid/non-secure';
 /** Shared id generator used for booking and ticket ids. */
 const randomIdGenerator = customAlphabet('23456789ABCDEFGHJKLMNPRSTUVWXYZ', 10);
 
-/** Repository implementations used by the service layer. */
-const bookingRepository = new SupabaseBookingRepository();
 const eventRepository = new SupabaseEventRepository();
-const ticketRepository = new SupabaseTicketRepository();
-const ticketCounterRepository = new SupabaseTicketCounterRepository();
 const ticketTypeRepository = new SupabaseTicketTypeRepository();
 
 /** Infrastructure adapters used by the service layer. */
@@ -47,42 +43,58 @@ const qrCodeGenerator = new DefaultQrCodeGenerator();
 const eventLogger = new PinoEventLogger();
 const systemSettingsStore = new InMemorySystemSettingsStore();
 
-/** Ready-to-use application services imported by SvelteKit routes. */
-export const ticketCounterService = new TicketCounterService(ticketCounterRepository);
 export const ticketTypeService = new TicketTypeService(ticketTypeRepository);
-export const notificationService = new NotificationService(
-	bookingRepository,
-	ticketRepository,
-	emailSender
-);
-export const ticketService = new TicketService(
-	bookingRepository,
-	ticketRepository,
-	imageStorage,
-	qrCodeGenerator,
-	eventLogger,
-	appConfig.appBaseUrl,
-	(size) => randomIdGenerator(size)
-);
-export const bookingService = new BookingService(
-	bookingRepository,
-	eventRepository,
-	ticketCounterService,
-	ticketTypeService,
-	ticketService,
-	notificationService,
-	eventLogger,
-	(size) => randomIdGenerator(size)
-);
 export const reportingService = new ReportingService();
 export const systemService = new SystemService(systemSettingsStore);
 export { paymentProofStorage };
 
+export type EventServices = ReturnType<typeof createEventServices>;
+
+export function createEventServices(eventId: string) {
+	const bookingRepository = new SupabaseBookingRepository(undefined, eventId);
+	const ticketRepository = new SupabaseTicketRepository(undefined, eventId);
+	const ticketCounterRepository = new SupabaseTicketCounterRepository(undefined, eventId);
+	const ticketCounterService = new TicketCounterService(ticketCounterRepository);
+	const notificationService = new NotificationService(
+		bookingRepository,
+		ticketRepository,
+		emailSender
+	);
+	const ticketService = new TicketService(
+		bookingRepository,
+		ticketRepository,
+		imageStorage,
+		qrCodeGenerator,
+		eventLogger,
+		appConfig.appBaseUrl,
+		eventId,
+		(size) => randomIdGenerator(size)
+	);
+	const bookingService = new BookingService(
+		bookingRepository,
+		eventRepository,
+		ticketCounterService,
+		ticketTypeService,
+		ticketService,
+		notificationService,
+		eventLogger,
+		(size) => randomIdGenerator(size)
+	);
+
+	return {
+		bookingRepository,
+		ticketRepository,
+		ticketCounterRepository,
+		ticketCounterService,
+		notificationService,
+		ticketService,
+		bookingService,
+		ticketTypeService
+	};
+}
+
 /** Raw repository exports for the occasional place that needs direct repository access. */
 export const repositories = {
-	bookingRepository,
 	eventRepository,
-	ticketRepository,
-	ticketCounterRepository,
 	ticketTypeRepository
 };

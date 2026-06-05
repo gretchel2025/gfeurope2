@@ -3,8 +3,16 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-06-05
+
+- Added DB-backed event theme colors and applied them to event-scoped admin pages so
+  admins can visually distinguish which event they are managing.
+
 ## 2026-05-31
 
+- Moved public and admin pages to event-scoped routes, with `/` redirecting to the
+  default event and admin authorization now checked through Supabase
+  `app_metadata.event_roles`.
 - Hardened live-dev Supabase session lookup so stale or malformed auth cookies are treated
   as signed out instead of surfacing as a generic 500, with server-side error logging.
 - Limited browser-facing auth data to a minimal public session so Google provider tokens

@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+	import { publicRoutes } from '$lib/navigation/adminRoutes';
+
 	export let title: string;
 	export let lastUpdated: string;
 	export let intro: string;
@@ -6,13 +9,15 @@
 	export let companionHref: string;
 	export let companionLabel: string;
 	export let eyebrow: string = 'Legal';
+
+	$: publicNav = publicRoutes($page.params.event_id ?? $page.data.defaultEventId);
 </script>
 
 <section class="px-4 py-10 sm:py-14">
 	<div class="mx-auto flex max-w-5xl flex-col gap-6">
 		<div class="flex flex-wrap items-center justify-between gap-3 text-sm">
 			<a
-				href="/"
+				href={publicNav.home}
 				class="inline-flex items-center gap-2 font-semibold text-[#f3c15f] transition hover:text-white"
 			>
 				<span aria-hidden="true">←</span>

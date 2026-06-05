@@ -1,6 +1,5 @@
 import type { BookingRepository } from '$lib/application/ports';
 import type { Booking } from '$lib/domain/booking';
-import { appConfig } from '$lib/infrastructure/config/env.server';
 import { getSupabaseDataClient } from '$lib/infrastructure/db/supabase/client';
 import { throwSupabaseError } from '$lib/infrastructure/db/supabase/errors';
 import { mapBooking, type SupabaseBookingRow } from '$lib/infrastructure/db/supabase/mappers';
@@ -11,8 +10,8 @@ const tableName = 'bookings';
 
 export class SupabaseBookingRepository implements BookingRepository {
 	constructor(
-		private readonly clientOverride?: SupabaseClient,
-		private readonly eventId: string = appConfig.appEventId
+		private readonly clientOverride: SupabaseClient | undefined,
+		private readonly eventId: string
 	) {}
 
 	async insertReservation(booking: Booking): Promise<Booking> {

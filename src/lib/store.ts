@@ -1,5 +1,5 @@
-import { writable } from 'svelte/store'
+import { writable } from 'svelte/store';
 
-export let store = writable({
-    user: "Jonathan",
-})
+export const store = writable({
+	user: 'Jonathan'
+});

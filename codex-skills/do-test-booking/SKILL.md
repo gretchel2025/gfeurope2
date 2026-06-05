@@ -1,6 +1,6 @@
 ---
 name: do-test-booking
-description: "Prepare the local Grand Feast `/newbooking` flow for manual final submission. Use when Codex needs to create a repeatable local test booking setup: fill two Standard tickets, generate varied guest names, upload the fake bank-transfer receipt, open the non-refundable confirmation modal, and stop before clicking the final submit button."
+description: 'Prepare the local Grand Feast `/newbooking` flow for manual final submission. Use when Codex needs to create a repeatable local test booking setup: fill two Standard tickets, generate varied guest names, upload the fake bank-transfer receipt, open the non-refundable confirmation modal, and stop before clicking the final submit button.'
 ---
 
 # Do Test Booking

@@ -396,23 +396,26 @@
 						<strong>3. Session</strong><span>No session redirects to sign-in</span>
 					</div>
 					<div class="node">
-						<strong>4. Roles</strong><span>Missing role redirects to unauthorized</span>
+						<strong>4. Roles</strong
+						><span>Missing tester or event role redirects to unauthorized</span>
 					</div>
 				</div>
 			</section>
 
 			<section class="slide">
 				<div class="kicker">Admin Guard</div>
-				<h2>Admin now means Supabase app metadata role, not just a session.</h2>
+				<h2>Admin now means Supabase event role metadata, not just a session.</h2>
 				<p>
-					Admin routes under <code>/api</code> require a Supabase session and
-					<code>app_metadata.roles</code> with <code>admin</code> or <code>superuser</code>. On live
-					dev, the same user must also have <code>tester</code>.
+					Admin routes under <code>/admin/events/&lt;event_id&gt;</code> require a Supabase session
+					and <code>app_metadata.event_roles[event_id]</code> with <code>admin</code>, or
+					<code>superuser</code>. On live dev, non-superusers must also have <code>tester</code>.
 				</p>
 				<div class="grid">
 					<div class="card"><strong>Session</strong><span>Proves identity.</span></div>
 					<div class="card"><strong>App metadata</strong><span>Stores permissions.</span></div>
-					<div class="card"><strong>Roles</strong><span>Decide access.</span></div>
+					<div class="card">
+						<strong>Event roles</strong><span>Decide event admin access.</span>
+					</div>
 				</div>
 			</section>
 
@@ -421,8 +424,8 @@
 				<h2>Redirects now preserve intent.</h2>
 				<p>
 					Signed-out protected requests go to <code>/signin?redirectTo=...</code>. Google sign-in
-					uses that destination when present, defaults to <code>/</code> on live dev, and defaults
-					to <code>/api</code> for normal admin sign-in.
+					uses that destination when present, and direct sign-in defaults to the configured public
+					event landing page.
 				</p>
 			</section>
 

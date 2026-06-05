@@ -10,7 +10,7 @@
 	let clickedLoading = false;
 
 	const variants = {
-		primary: 'bg-blue-700 text-white hover:bg-blue-800',
+		primary: 'admin-button-primary text-white',
 		secondary: 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50',
 		success: 'bg-green-700 text-white hover:bg-green-800',
 		warning: 'bg-amber-500 text-slate-950 hover:bg-amber-600',

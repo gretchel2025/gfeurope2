@@ -59,7 +59,7 @@ flowchart TB
     end
 
     subgraph supabase["Supabase"]
-        auth["Auth\nsessions and app_metadata.roles"]
+        auth["Auth\nsessions, app_metadata.roles, event_roles"]
         data["Postgres Data API\ngrandfeasteu events, ticket_types, bookings, tickets, ticket_counters"]
         rpc["Postgres RPC\nreservation, payment, cancellation, ticket append"]
     end
@@ -147,7 +147,7 @@ routes/components -> server/http -> application services -> domain
 ```mermaid
 sequenceDiagram
     actor Visitor
-    participant Page as /newbooking page action
+    participant Page as /events/:event_id/newbooking action
     participant Form as parseCreateBookingForm
     participant Booking as BookingService
     participant Counter as TicketCounterService
@@ -164,7 +164,7 @@ sequenceDiagram
     Counter-->>Booking: current inventory counter
     Booking->>Booking: apply domain validation and compute total
     Booking->>Repo: insertReservation(booking)
-    Repo->>RPC: create booking and reserve inventory for APP_EVENT_ID
+    Repo->>RPC: create booking and reserve inventory for route event_id
     RPC-->>Repo: persisted booking row
     Repo-->>Booking: Booking
     Booking->>Email: sendBookingConfirmation(booking)
@@ -217,7 +217,7 @@ flowchart TB
     mode["getRuntimeAccessMode\nproduction, local, or live-dev"]
     required["getRequiredAccess\npublic, tester, admin"]
     session["Supabase getUser/getSession"]
-    roles["app_metadata.roles"]
+    roles["app_metadata.roles\napp_metadata.event_roles"]
     allowed["Allow request"]
     signin["Redirect to /signin?redirectTo=..."]
     denied["Redirect to /unauthorized"]
@@ -226,7 +226,7 @@ flowchart TB
     hooks --> mode
     mode --> required
     required -->|"bypass"| allowed
-    required -->|"needs tester/admin"| session
+    required -->|"needs tester/event admin"| session
     session -->|"signed out"| signin
     session -->|"signed in"| roles
     roles -->|"role policy passes"| allowed
@@ -236,10 +236,13 @@ flowchart TB
 Access policy summary:
 
 - Production and local public pages are open.
-- Production and local `/api` routes require `admin` or `superuser`.
+- Production and local `/admin/events/<event_id>` routes require
+  `event_roles[event_id]` containing `admin`, or `superuser`.
 - Live development public pages require `tester`.
-- Live development `/api` routes require `tester` plus `admin` or `superuser`.
-- Role checks use Supabase Auth `app_metadata.roles`, not user-editable metadata.
+- Live development `/admin/events/<event_id>` routes require `tester` plus
+  `event_roles[event_id]` containing `admin`, unless the user has `superuser`.
+- Role checks use Supabase Auth `app_metadata.roles` and `app_metadata.event_roles`, not
+  user-editable metadata.
 
 ## Where To Put New Work
 

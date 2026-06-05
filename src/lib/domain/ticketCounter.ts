@@ -8,15 +8,15 @@
  */
 /** Persisted counter for one ticket class. */
 export type TicketCounter = {
-    _id: string;
-    available: number;
-    reserved: number;
-    sold: number;
+	_id: string;
+	available: number;
+	reserved: number;
+	sold: number;
 };
 
 /** Delta object used when incrementing or decrementing inventory buckets. */
 export type TicketCounterDelta = {
-    available: number;
-    reserved: number;
-    sold: number;
+	available: number;
+	reserved: number;
+	sold: number;
 };

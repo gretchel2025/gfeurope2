@@ -9,7 +9,7 @@
  */
 import { appConfig, assertCloudinaryConfigured } from '$lib/infrastructure/config/env.server';
 import { logger } from '$lib/infrastructure/logging/logger';
-import { ticketCounterService } from '$lib/server/http/services';
+import { createEventServices } from '$lib/server/http/services';
 
 /** Initializes runtime infrastructure that the app expects to exist. */
 export async function bootstrapApplication(): Promise<void> {
@@ -23,6 +23,7 @@ export async function bootstrapApplication(): Promise<void> {
 
 /** Ensures ticket counters exist so the app can run against an empty database. */
 async function ensureCounters(): Promise<void> {
+	const { ticketCounterService } = createEventServices(appConfig.appEventId);
 	const counters = [
 		{
 			id: ticketCounterService.getStandardCounterId(),
