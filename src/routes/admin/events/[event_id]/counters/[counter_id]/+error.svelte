@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import AdminPage from '$lib/ui/components/admin/AdminPage.svelte';
 	import { page } from '$app/stores';
 
 	import { adminRoutes } from '$lib/navigation/adminRoutes';

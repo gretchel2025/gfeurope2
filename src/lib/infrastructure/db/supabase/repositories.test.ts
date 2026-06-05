@@ -237,7 +237,11 @@ describe('Supabase repositories', () => {
 					country: 'Ireland',
 					venue: 'Test Venue',
 					datetime: '2026-10-03T12:00:00+01:00',
-					timezone: 'Europe/Dublin'
+					timezone: 'Europe/Dublin',
+					theme_main_color: '#005B72',
+					theme_sub_color: '#E7F6F9',
+					theme_highlight_color: '#D99A32',
+					theme_on_main_color: '#FFFFFF'
 				},
 				error: null
 			})
@@ -261,6 +265,56 @@ describe('Supabase repositories', () => {
 		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
 		expect(calls).toContainEqual(['from', 'events']);
 		expect(calls).toContainEqual(['event_id', 'event-test']);
+	});
+
+	it('lists events from the app schema ordered newest first', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			select: (value: string) => {
+				calls.push(['select', value]);
+				return query;
+			},
+			order: async (key: string, value: unknown) => {
+				calls.push(['order', [key, value]]);
+				return {
+					data: [
+						{
+							event_id: 'gfeu2026',
+							title: 'Together 2026',
+							short_description: 'A Grand Feast event.',
+							country: 'Ireland',
+							venue: 'St. Helen',
+							datetime: '2026-10-03T12:00:00+01:00',
+							timezone: 'Europe/Dublin',
+							theme_main_color: '#005B72',
+							theme_sub_color: '#E7F6F9',
+							theme_highlight_color: '#D99A32',
+							theme_on_main_color: '#FFFFFF'
+						}
+					],
+					error: null
+				};
+			}
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseEventRepository(client);
+		await expect(repository.list()).resolves.toEqual([
+			expect.objectContaining({ event_id: 'gfeu2026', title: 'Together 2026' })
+		]);
+
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'events']);
+		expect(calls).toContainEqual(['order', ['datetime', { ascending: false }]]);
 	});
 
 	it('scopes ticket counter lookups to the app schema and event id', async () => {

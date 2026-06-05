@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import LegalPage from '$lib/components/public/LegalPage.svelte';
+	import LegalPage from '$lib/ui/components/public/LegalPage.svelte';
 	import { publicRoutes } from '$lib/navigation/adminRoutes';
 
 	$: publicNav = publicRoutes($page.params.event_id);

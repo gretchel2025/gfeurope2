@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ErrorDiagnostics from '$lib/components/public/ErrorDiagnostics.svelte';
+	import ErrorDiagnostics from '$lib/ui/components/public/ErrorDiagnostics.svelte';
 
 	let refreshing = false;
 

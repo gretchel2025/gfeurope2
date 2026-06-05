@@ -22,6 +22,16 @@ export class SupabaseEventRepository implements EventRepository {
 		return data ? mapEvent(data as SupabaseEventRow) : null;
 	}
 
+	async list(): Promise<Event[]> {
+		const { data, error } = await this.schema
+			.from(tableName)
+			.select('*')
+			.order('datetime', { ascending: false });
+
+		if (error) throwSupabaseError('event list failed', error);
+		return (data ?? []).map((row) => mapEvent(row as SupabaseEventRow));
+	}
+
 	private get client(): SupabaseClient {
 		return this.clientOverride ?? getSupabaseDataClient();
 	}

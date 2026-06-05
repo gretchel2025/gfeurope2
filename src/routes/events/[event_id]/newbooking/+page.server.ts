@@ -3,6 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { NotFoundError } from '$lib/application/errors';
 import type { TicketTypeConfig } from '$lib/domain/ticketType';
 import { publicRoutes } from '$lib/navigation/adminRoutes';
+import { isPublicBookingOpen } from '$lib/publicEvents';
 import { getEventContext } from '$lib/server/http/eventContext';
 import { parseCreateBookingForm, parsePaymentProofFile } from '$lib/server/http/forms';
 import { kitAction, withKitErrors } from '$lib/server/http/handlers';
@@ -51,8 +52,12 @@ export const load: PageServerLoad = withKitErrors(async (event): Promise<ServerD
 export const actions: Actions = {
 	default: kitAction(async (event) => {
 		const { eventId } = await getEventContext(event);
-		const { bookingService } = createEventServices(eventId);
 		const routes = publicRoutes(eventId);
+		if (!isPublicBookingOpen(eventId)) {
+			throw redirect(303, routes.home);
+		}
+
+		const { bookingService } = createEventServices(eventId);
 		const { request } = event;
 		const formData = await request.formData();
 		const input = await parseCreateBookingForm(formData);

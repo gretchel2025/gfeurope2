@@ -34,6 +34,7 @@ export interface BookingRepository {
 /** Persistence contract for event records. */
 export interface EventRepository {
 	findById(eventId: string): Promise<Event | null>;
+	list(): Promise<Event[]>;
 }
 
 /** Persistence contract for ticket records. */

@@ -83,7 +83,8 @@ flowchart TB
 ```mermaid
 flowchart LR
     routes["src/routes\nroute UI, loads, actions"]
-    components["src/lib/components\npublic and admin Svelte components"]
+    components["src/lib/ui/components\npublic and admin Svelte components"]
+    publicEvents["src/lib/publicEvents.ts\npublic event page registry"]
     navigation["src/lib/navigation\nroute metadata"]
 
     http["src/lib/server/http\nhandlers, guards, forms, services"]
@@ -101,6 +102,7 @@ flowchart LR
     infraLogging["infrastructure/logging\nlogger and event logger"]
 
     routes --> components
+    routes --> publicEvents
     routes --> navigation
     routes --> http
 
@@ -124,7 +126,9 @@ flowchart LR
 ## Dependency Rules
 
 - `src/routes/` adapts HTTP, page load, and form action concerns into application calls.
-- `src/lib/components/` renders UI and should not own persistence or provider logic.
+- `src/lib/ui/components/` renders UI and should not own persistence or provider logic.
+- `src/lib/publicEvents.ts` maps event ids to public page metadata, registered event
+  landing components, and archive/booking-open behavior for public routes.
 - `src/lib/application/services/` coordinates use cases and depends on domain rules plus
   ports.
 - `src/lib/domain/` stays framework-light and should not import SvelteKit, Supabase,
@@ -138,7 +142,7 @@ flowchart LR
 In short:
 
 ```txt
-routes/components -> server/http -> application services -> domain
+routes/ui components -> server/http -> application services -> domain
                                       application services -> ports <- infrastructure
 ```
 
@@ -247,7 +251,10 @@ Access policy summary:
 ## Where To Put New Work
 
 - New public or admin screens: start in `src/routes/`, reuse components from
-  `src/lib/components/`, and call application services through `src/lib/server/http/`.
+  `src/lib/ui/components/`, and call application services through `src/lib/server/http/`.
+- New public event landing pages: put event-specific Svelte components under
+  `src/lib/ui/components/public/events/`, then register their public page metadata in
+  `src/lib/publicEvents.ts`.
 - New business rules: put the rule in `src/lib/domain/` first, with co-located tests.
 - New use cases: add or extend an application service in `src/lib/application/services/`.
 - New database behavior: add a port if the application needs a new capability, then

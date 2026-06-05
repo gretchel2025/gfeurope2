@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AdminButton from '$lib/components/admin/AdminButton.svelte';
-	import AdminCard from '$lib/components/admin/AdminCard.svelte';
-	import AdminPage from '$lib/components/admin/AdminPage.svelte';
+	import AdminButton from '$lib/ui/components/admin/AdminButton.svelte';
+	import AdminCard from '$lib/ui/components/admin/AdminCard.svelte';
+	import AdminPage from '$lib/ui/components/admin/AdminPage.svelte';
 	import { page } from '$app/stores';
 
 	import { adminRoutes } from '$lib/navigation/adminRoutes';

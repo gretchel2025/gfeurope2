@@ -1,9 +1,9 @@
 <script lang="ts">
-	import AdminButton from '$lib/components/admin/AdminButton.svelte';
-	import AdminCard from '$lib/components/admin/AdminCard.svelte';
-	import AdminPage from '$lib/components/admin/AdminPage.svelte';
-	import BackLinks from '$lib/components/admin/BackLinks.svelte';
-	import DetailRow from '$lib/components/admin/DetailRow.svelte';
+	import AdminButton from '$lib/ui/components/admin/AdminButton.svelte';
+	import AdminCard from '$lib/ui/components/admin/AdminCard.svelte';
+	import AdminPage from '$lib/ui/components/admin/AdminPage.svelte';
+	import BackLinks from '$lib/ui/components/admin/BackLinks.svelte';
+	import DetailRow from '$lib/ui/components/admin/DetailRow.svelte';
 	import { formatTicketTypeLabel } from '$lib/domain/shared/enums';
 	import { page } from '$app/stores';
 

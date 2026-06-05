@@ -94,7 +94,8 @@ function makeService(
 	const eventRepository = {
 		findById: vi.fn(
 			async (eventId: string) => events.find((event) => event.event_id === eventId) ?? null
-		)
+		),
+		list: vi.fn(async () => events)
 	} satisfies EventRepository;
 
 	const ticketService = {

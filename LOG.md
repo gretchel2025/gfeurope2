@@ -5,6 +5,12 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-05
 
+- Moved UI-facing Svelte components under `src/lib/ui/components/` and updated project
+  guidance to distinguish UI components from public event page configuration.
+- Gave the `/events` index its own neutral public theme, separate from event-specific
+  public landing page themes.
+- Added event-specific public landing pages with a `/events` index, keeping 2026 as the
+  active ticket sales page and making 2025 an archive-only event page.
 - Added DB-backed event theme colors and applied them to event-scoped admin pages so
   admins can visually distinguish which event they are managing.
 

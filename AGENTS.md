@@ -2,7 +2,15 @@
 
 ## Project Structure & Module Organization
 
-This is a SvelteKit app. Application routes live in `src/routes/`, shared UI components in `src/lib/components/`, and domain logic in `src/lib/domain/`. Application services and port interfaces live under `src/lib/application/`, while infrastructure adapters are grouped under `src/lib/infrastructure/` for auth, bootstrap, config, Supabase repositories, email, logging, media, and system settings. Server-side HTTP helpers live in `src/lib/server/http/`, navigation metadata lives in `src/lib/navigation/`, and static assets live in `static/`. Tests are co-located with the code they cover, for example `src/lib/domain/booking.test.ts`.
+This is a SvelteKit app. Application routes live in `src/routes/`, UI-facing Svelte
+components in `src/lib/ui/components/`, public event page registry/configuration in
+`src/lib/publicEvents.ts`, and domain logic in `src/lib/domain/`. Application services
+and port interfaces live under `src/lib/application/`, while infrastructure adapters are
+grouped under `src/lib/infrastructure/` for auth, bootstrap, config, Supabase
+repositories, email, logging, media, and system settings. Server-side HTTP helpers live
+in `src/lib/server/http/`, navigation metadata lives in `src/lib/navigation/`, and static
+assets live in `static/`. Tests are co-located with the code they cover, for example
+`src/lib/domain/booking.test.ts`.
 
 For deployment, DNS, Supabase, Google OAuth, and external account context, read `docs/infrastructure.md` before making infrastructure-sensitive changes.
 

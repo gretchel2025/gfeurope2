@@ -1,8 +1,8 @@
 <script lang="ts">
-	import AdminButton from '$lib/components/admin/AdminButton.svelte';
-	import AdminCard from '$lib/components/admin/AdminCard.svelte';
-	import AdminPage from '$lib/components/admin/AdminPage.svelte';
-	import DetailRow from '$lib/components/admin/DetailRow.svelte';
+	import AdminButton from '$lib/ui/components/admin/AdminButton.svelte';
+	import AdminCard from '$lib/ui/components/admin/AdminCard.svelte';
+	import AdminPage from '$lib/ui/components/admin/AdminPage.svelte';
+	import DetailRow from '$lib/ui/components/admin/DetailRow.svelte';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;

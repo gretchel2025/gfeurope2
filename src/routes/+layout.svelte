@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { signOutCurrentUser as signOutAuth } from '$lib/infrastructure/auth/authClient';
 	import { adminRoutes, publicRoutes } from '$lib/navigation/adminRoutes';
+	import { getPublicEventPage } from '$lib/publicEvents';
 	import '../app.css';
 
 	type AdminThemeEvent = {
@@ -41,9 +42,16 @@
 	}
 
 	$: activeEventId = $page.params.event_id ?? $page.data.defaultEventId;
+	$: activePublicEventPage = getPublicEventPage($page.params.event_id);
 	$: publicNav = publicRoutes(activeEventId);
 	$: adminNav = adminRoutes(activeEventId);
 	$: isAdminRoute = $page.url.pathname.startsWith('/admin');
+	$: isEventsIndex = $page.url.pathname === '/events';
+	$: publicHomeHref = isEventsIndex ? '/events' : publicNav.home;
+	$: publicHeaderTitle = activePublicEventPage?.headerTitle ?? 'Grand Feast EU UK';
+	$: publicFooterKicker = activePublicEventPage?.footerKicker ?? 'Events archive';
+	$: publicFooterTitle = activePublicEventPage?.footerTitle ?? 'Grand Feast Europe and UK';
+	$: publicFooterYear = activePublicEventPage?.footerCopyrightYear ?? new Date().getUTCFullYear();
 	$: adminThemeStyle = getAdminThemeStyle($page.data.event as AdminThemeEvent | undefined);
 </script>
 
@@ -114,15 +122,15 @@
 		<slot />
 	</div>
 {:else}
-	<div class="public-site-shell">
+	<div class="public-site-shell" class:events-index-shell={isEventsIndex}>
 		<header class="public-content px-4 py-5 md:px-8">
 			<div
 				class="mx-auto flex max-w-6xl flex-col gap-4 rounded-xl border border-white/10 bg-[#021821]/80 px-4 py-4 shadow-xl backdrop-blur md:flex-row md:items-center md:justify-between md:px-5"
 			>
 				<div class="flex items-center justify-between">
-					<a href={publicNav.home} on:click={closeMenu} class="group">
+					<a href={publicHomeHref} on:click={closeMenu} class="group">
 						<p class="conference-kicker">Grand Feast</p>
-						<h1 class="text-2xl font-black tracking-normal text-white">Europe and UK 2026</h1>
+						<h1 class="text-2xl font-black tracking-normal text-white">{publicHeaderTitle}</h1>
 					</a>
 
 					<button
@@ -140,32 +148,46 @@
 					<ul class="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
 						<li>
 							<a
-								href={publicNav.home}
+								href={publicHomeHref}
 								class="font-semibold text-[#fff3df]/80 transition hover:text-white"
 								on:click={closeMenu}>Home</a
 							>
 						</li>
-						<li>
-							<a
-								href={`${publicNav.home}#speakers`}
-								class="font-semibold text-[#fff3df]/80 transition hover:text-white"
-								on:click={closeMenu}>Speakers</a
-							>
-						</li>
-						<li>
-							<a
-								href={`${publicNav.home}#details`}
-								class="font-semibold text-[#fff3df]/80 transition hover:text-white"
-								on:click={closeMenu}>Details</a
-							>
-						</li>
-						<li>
-							<a
-								href={publicNav.newBooking}
-								class="conference-button px-4 py-2 text-sm"
-								on:click={closeMenu}>Buy Tickets</a
-							>
-						</li>
+						{#if activePublicEventPage}
+							<li>
+								<a
+									href={`${publicNav.home}#${activePublicEventPage.status === 'archived' ? 'message' : 'speakers'}`}
+									class="font-semibold text-[#fff3df]/80 transition hover:text-white"
+									on:click={closeMenu}
+								>
+									{activePublicEventPage.status === 'archived' ? 'Message' : 'Speakers'}
+								</a>
+							</li>
+							<li>
+								<a
+									href={`${publicNav.home}#details`}
+									class="font-semibold text-[#fff3df]/80 transition hover:text-white"
+									on:click={closeMenu}>Details</a
+								>
+							</li>
+							{#if activePublicEventPage.showBuyTickets}
+								<li>
+									<a
+										href={publicNav.newBooking}
+										class="conference-button px-4 py-2 text-sm"
+										on:click={closeMenu}>Buy Tickets</a
+									>
+								</li>
+							{:else}
+								<li>
+									<a
+										href={`${publicNav.home}#tickets`}
+										class="font-semibold text-[#fff3df]/80 transition hover:text-white"
+										on:click={closeMenu}>Tickets</a
+									>
+								</li>
+							{/if}
+						{/if}
 					</ul>
 				</nav>
 			</div>
@@ -179,9 +201,11 @@
 			<div class="mx-auto max-w-5xl">
 				<div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
 					<div>
-						<p class="conference-kicker">Together in Dublin</p>
-						<p class="mt-2 text-lg font-black text-white">Grand Feast EU and UK 2026</p>
-						<p class="mt-1 text-sm text-[#fff3df]/70">© 2026 Grand Feast Europe and UK.</p>
+						<p class="conference-kicker">{publicFooterKicker}</p>
+						<p class="mt-2 text-lg font-black text-white">{publicFooterTitle}</p>
+						<p class="mt-1 text-sm text-[#fff3df]/70">
+							© {publicFooterYear} Grand Feast Europe and UK.
+						</p>
 					</div>
 					<div class="flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
 						<a href={publicNav.conditions} class="text-[#fff3df]/75 transition hover:text-white">

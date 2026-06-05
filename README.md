@@ -1,7 +1,8 @@
 # Grand Feast EU/UK Ticketing
 
-SvelteKit app for the Grand Feast EU and UK ticketing and admin site. The checked-in
-public pages are currently configured for the 2025 EU and UK Grand Feast in Oslo, Norway.
+SvelteKit app for the Grand Feast EU and UK ticketing and admin site. The active public
+sales page is currently the 2026 Dublin event, while the 2025 Oslo event remains available
+as an archive/portfolio page.
 
 ## Environments
 
@@ -62,7 +63,8 @@ npm run build         # production build
 ## Project Structure
 
 - `src/routes/` contains SvelteKit routes.
-- `src/lib/components/` contains shared UI components.
+- `src/lib/ui/components/` contains UI-facing Svelte components.
+- `src/lib/publicEvents.ts` contains public event page registry/configuration.
 - `src/lib/domain/` contains framework-light domain models and business rules.
 - `src/lib/application/` contains application services and ports.
 - `src/lib/infrastructure/` contains adapters for auth, bootstrap, config, Supabase, email,
