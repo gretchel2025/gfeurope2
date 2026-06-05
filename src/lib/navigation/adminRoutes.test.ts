@@ -20,6 +20,7 @@ describe('event route builders', () => {
 		expect(routes.booking.list).toBe(`/admin/events/${eventId}/bookings`);
 		expect(routes.booking.details('B123')).toBe(`/admin/events/${eventId}/bookings/B123`);
 		expect(routes.ticket.details('T123')).toBe(`/admin/events/${eventId}/tickets/T123`);
+		expect(routes.ticket.checkin('T123')).toBe(`/admin/events/${eventId}/tickets/T123/checkin`);
 		expect(routes.ticketCounter.details('STANDARD')).toBe(
 			`/admin/events/${eventId}/counters/STANDARD`
 		);

@@ -56,10 +56,18 @@
 								<p class="text-xs font-black uppercase tracking-[0.14em] text-slate-500">
 									Metadata
 								</p>
-								<pre
-									class="mt-2 max-h-72 min-w-0 overflow-auto whitespace-pre-wrap break-words rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">{formatMetadata(
-										event.metadata
-									)}</pre>
+								<details class="audit-metadata-toggle mt-1 min-w-0">
+									<summary
+										class="cursor-pointer list-none text-sm font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900"
+									>
+										<span class="details-closed">Show details</span>
+										<span class="details-open">Hide details</span>
+									</summary>
+									<pre
+										class="mt-2 max-h-72 min-w-0 overflow-auto whitespace-pre-wrap break-words rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">{formatMetadata(
+											event.metadata
+										)}</pre>
+								</details>
 							</div>
 						</div>
 					</article>
@@ -93,10 +101,18 @@
 									{event.entity_type}: {event.entity_id}
 								</td>
 								<td class="py-3">
-									<pre
-										class="max-h-80 min-w-0 overflow-auto whitespace-pre-wrap break-words rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">{formatMetadata(
-											event.metadata
-										)}</pre>
+									<details class="audit-metadata-toggle min-w-0">
+										<summary
+											class="cursor-pointer list-none text-sm font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900"
+										>
+											<span class="details-closed">Show details</span>
+											<span class="details-open">Hide details</span>
+										</summary>
+										<pre
+											class="mt-2 max-h-80 min-w-0 overflow-auto whitespace-pre-wrap break-words rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">{formatMetadata(
+												event.metadata
+											)}</pre>
+									</details>
 								</td>
 							</tr>
 						{/each}
@@ -106,3 +122,21 @@
 		{/if}
 	</AdminCard>
 </div>
+
+<style>
+	.audit-metadata-toggle > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.audit-metadata-toggle .details-open {
+		display: none;
+	}
+
+	.audit-metadata-toggle[open] .details-closed {
+		display: none;
+	}
+
+	.audit-metadata-toggle[open] .details-open {
+		display: inline;
+	}
+</style>

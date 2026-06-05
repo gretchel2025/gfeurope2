@@ -29,9 +29,12 @@
 		<AdminCard title="Ticket">
 			<dl>
 				<DetailRow label="Ticket ID">
-					<a class="font-semibold text-blue-700 hover:underline" href="details"
-						>{data.aTicket.ticket_id}</a
+					<a
+						class="font-semibold text-blue-700 hover:underline"
+						href={routes.ticket.details(data.aTicket.ticket_id)}
 					>
+						{data.aTicket.ticket_id}
+					</a>
 				</DetailRow>
 				<DetailRow label="Booking Ref">
 					<a

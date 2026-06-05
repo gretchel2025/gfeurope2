@@ -36,7 +36,7 @@
 					</a>
 				</DetailRow>
 				<DetailRow label="Name" value={data.aTicket.name} />
-				<DetailRow label="Type" value={formatTicketTypeLabel(data.aTicket.ticket_type)} />
+				<DetailRow label="Ticket Type" value={formatTicketTypeLabel(data.aTicket.ticket_type)} />
 				<DetailRow label="Status" value={data.aTicket.status} />
 			</dl>
 		</AdminCard>
@@ -49,7 +49,9 @@
 					class="mx-auto h-48 w-48 rounded border border-slate-300"
 				/>
 				<p class="break-all text-xs text-slate-600">{data.checkin.targetURL}</p>
-				<AdminButton href="./checkin" fullWidth>View check-in</AdminButton>
+				<AdminButton href={routes.ticket.checkin(data.aTicket.ticket_id)} fullWidth>
+					View check-in
+				</AdminButton>
 			</div>
 		</AdminCard>
 
