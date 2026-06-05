@@ -90,6 +90,34 @@ npm run build         # production build
 - Admin event pages use DB-backed event theme colors from the `events` table to help
   operators distinguish which event they are managing.
 
+## Permissions Model
+
+Authorization uses Supabase Auth `app_metadata`, not user-editable `user_metadata`.
+There are two permission layers:
+
+- `roles`: global app roles such as `tester`, `admin`, and `superuser`.
+- `event_roles`: per-event grants such as `gfeu2026: ["admin"]`.
+
+Route access:
+
+- `/admin` is an admin directory. A signed-in user can open it if they have global
+  `admin`, at least one event admin grant, or `superuser`.
+- `/admin/events/<event_id>` requires `event_roles[event_id]` containing `admin`, or
+  `superuser`.
+- `/admin/global` and `/admin/global/*` require `superuser`.
+- On live-dev, non-superusers also need `tester` to access protected pages. `superuser`
+  bypasses that live-dev tester requirement.
+
+Examples:
+
+| Supabase `app_metadata`                                                         | What the user can access                                             |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `{ "event_roles": { "gfeu2026": ["admin"] } }`                                  | `/admin`, `/admin/events/gfeu2026`                                   |
+| `{ "event_roles": { "gfeu2025": ["admin"], "gfeu2026": ["admin"] } }`           | `/admin`, `/admin/events/gfeu2025`, `/admin/events/gfeu2026`         |
+| `{ "roles": ["admin"] }`                                                        | `/admin`; no event admin routes unless event grants are also present |
+| `{ "roles": ["superuser"] }`                                                    | `/admin`, all `/admin/events/<event_id>` pages, and `/admin/global`  |
+| `{ "roles": ["tester"], "event_roles": { "gfeu2026": ["admin"] } }` on live-dev | `/admin`, `/admin/events/gfeu2026`, plus live-dev public pages       |
+
 ## Documentation
 
 - Architecture map: [`docs/architecture.md`](docs/architecture.md)
