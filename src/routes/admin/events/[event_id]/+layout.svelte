@@ -26,17 +26,9 @@
 				<p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Managing event</p>
 				<h2 class="mt-1 text-lg font-black text-slate-950">{managedEvent.title}</h2>
 			</div>
-			<div class="flex flex-wrap gap-2 text-sm font-semibold text-slate-700">
-				<span class="admin-event-pill rounded-full border px-3 py-1">
-					{managedEvent.event_id}
-				</span>
-				<span class="admin-event-pill rounded-full border px-3 py-1">
-					{managedEvent.country}
-				</span>
-				<span class="admin-event-pill rounded-full border px-3 py-1">
-					{formatEventDate(managedEvent.datetime)}
-				</span>
-			</div>
+			<p class="admin-event-meta text-sm font-semibold">
+				{managedEvent.event_id} • {managedEvent.country} • {formatEventDate(managedEvent.datetime)}
+			</p>
 		</div>
 	</section>
 {/if}

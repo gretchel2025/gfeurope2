@@ -47,15 +47,14 @@
 							style={eventThemeStyle(eventRoute)}
 						>
 							<div>
-								<p class="event-card-kicker text-xs font-bold uppercase tracking-[0.14em]">
-									{eventRoute.event_id}
-								</p>
-								<h2 class="mt-1 text-lg font-semibold text-slate-950">{eventRoute.title}</h2>
-								<p class="event-card-meta mt-1 text-sm">
-									{eventRoute.country} • {formatEventDate(eventRoute.datetime)}
+								<h2 class="text-lg font-semibold text-slate-950">{eventRoute.title}</h2>
+								<p class="event-card-meta mt-2 text-sm font-semibold">
+									{eventRoute.event_id} • {eventRoute.country} • {formatEventDate(
+										eventRoute.datetime
+									)}
 								</p>
 							</div>
-							<AdminButton href={eventRoute.href}>Open admin</AdminButton>
+							<AdminButton href={eventRoute.href} variant="secondary">Open admin</AdminButton>
 						</article>
 					{/each}
 				</div>

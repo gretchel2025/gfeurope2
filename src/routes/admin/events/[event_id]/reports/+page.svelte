@@ -34,7 +34,7 @@
 							</p>
 							<h2 class="mt-1 text-xl font-black text-slate-950">{cityStat.cityName}</h2>
 						</div>
-						<p class="rounded-full bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">
+						<p class="text-sm font-bold text-blue-700">
 							{formatPercent(cityStat.percentOfPaidTickets)} of paid tickets
 						</p>
 					</div>
@@ -79,7 +79,7 @@
 								unpaid booking{cityStat.unpaidBookings === 1 ? '' : 's'}
 							</p>
 						</div>
-						<p class="rounded-full bg-white px-3 py-1 text-sm font-bold text-amber-700">
+						<p class="text-sm font-bold text-amber-700">
 							€{cityStat.amountPending.toFixed(2)} pending
 						</p>
 					</div>
@@ -99,7 +99,7 @@
 								{#each cityStat.referenceNumbers as referenceNo}
 									<a
 										href={routes.booking.details(referenceNo)}
-										class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50"
+										class="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50"
 									>
 										{referenceNo}
 									</a>
