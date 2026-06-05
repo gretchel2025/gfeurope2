@@ -86,6 +86,85 @@ describe('access policy', () => {
 		});
 	});
 
+	it('allows the admin directory for any admin-level account', () => {
+		expect(accessFor({ pathname: '/admin', signedIn: false })).toEqual({
+			allowed: false,
+			reason: 'sign-in-required'
+		});
+		expect(
+			accessFor({
+				pathname: '/admin',
+				signedIn: true,
+				roles: []
+			})
+		).toEqual({
+			allowed: false,
+			reason: 'permission-denied'
+		});
+		expect(
+			accessFor({
+				pathname: '/admin',
+				signedIn: true,
+				roles: ['admin']
+			})
+		).toEqual({
+			allowed: true
+		});
+		expect(
+			accessFor({
+				pathname: '/admin',
+				signedIn: true,
+				roles: [],
+				eventRoles: { gfeu2026: ['admin'] }
+			})
+		).toEqual({
+			allowed: true
+		});
+		expect(
+			accessFor({
+				pathname: '/admin',
+				signedIn: true,
+				roles: ['superuser']
+			})
+		).toEqual({
+			allowed: true
+		});
+	});
+
+	it('keeps event and global admin routes scoped to their specific permissions', () => {
+		expect(
+			accessFor({
+				pathname: '/admin/events/gfeu2026',
+				signedIn: true,
+				roles: ['admin'],
+				eventRoles: {}
+			})
+		).toEqual({
+			allowed: false,
+			reason: 'permission-denied'
+		});
+		expect(
+			accessFor({
+				pathname: '/admin/global/events',
+				signedIn: true,
+				roles: ['admin'],
+				eventRoles: { gfeu2026: ['admin'] }
+			})
+		).toEqual({
+			allowed: false,
+			reason: 'permission-denied'
+		});
+		expect(
+			accessFor({
+				pathname: '/admin/global/events',
+				signedIn: true,
+				roles: ['superuser']
+			})
+		).toEqual({
+			allowed: true
+		});
+	});
+
 	it('requires tester roles for live dev public pages', () => {
 		expect(accessFor({ hostname: 'dev.grandfeast.eu', pathname: '/events/gfeu2026' })).toEqual({
 			allowed: false,

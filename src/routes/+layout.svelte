@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { signOutCurrentUser as signOutAuth } from '$lib/infrastructure/auth/authClient';
-	import { adminRoutes, publicRoutes } from '$lib/navigation/adminRoutes';
+	import { adminIndexRoute, publicRoutes } from '$lib/navigation/adminRoutes';
 	import { getPublicEventPage } from '$lib/publicEvents';
 	import '../app.css';
 
@@ -11,6 +11,13 @@
 		theme_sub_color?: string;
 		theme_highlight_color?: string;
 		theme_on_main_color?: string;
+	};
+
+	const neutralAdminTheme = {
+		theme_main_color: '#334155',
+		theme_sub_color: '#EEF2F7',
+		theme_highlight_color: '#64748B',
+		theme_on_main_color: '#FFFFFF'
 	};
 
 	let isMenuOpen = false;
@@ -44,15 +51,20 @@
 	$: activeEventId = $page.params.event_id ?? $page.data.defaultEventId;
 	$: activePublicEventPage = getPublicEventPage($page.params.event_id);
 	$: publicNav = publicRoutes(activeEventId);
-	$: adminNav = adminRoutes(activeEventId);
 	$: isAdminRoute = $page.url.pathname.startsWith('/admin');
+	$: isGlobalAdminRoute =
+		$page.url.pathname === '/admin' ||
+		$page.url.pathname === '/admin/global' ||
+		$page.url.pathname.startsWith('/admin/global/');
 	$: isEventsIndex = $page.url.pathname === '/events';
 	$: publicHomeHref = isEventsIndex ? '/events' : publicNav.home;
 	$: publicHeaderTitle = activePublicEventPage?.headerTitle ?? 'Grand Feast EU UK';
 	$: publicFooterKicker = activePublicEventPage?.footerKicker ?? 'Events archive';
 	$: publicFooterTitle = activePublicEventPage?.footerTitle ?? 'Grand Feast Europe and UK';
 	$: publicFooterYear = activePublicEventPage?.footerCopyrightYear ?? new Date().getUTCFullYear();
-	$: adminThemeStyle = getAdminThemeStyle($page.data.event as AdminThemeEvent | undefined);
+	$: adminThemeStyle = getAdminThemeStyle(
+		isGlobalAdminRoute ? neutralAdminTheme : ($page.data.event as AdminThemeEvent | undefined)
+	);
 </script>
 
 {#if isAdminRoute}
@@ -135,7 +147,7 @@
 
 					<button
 						type="button"
-						class="conference-button-secondary px-3 py-2 text-sm md:hidden"
+						class="public-header-menu-button conference-button-secondary px-3 py-2 text-sm"
 						aria-expanded={isMenuOpen}
 						aria-controls="site-nav"
 						on:click={toggleMenu}
@@ -216,7 +228,7 @@
 						</a>
 						<a href={publicNav.faq} class="text-[#fff3df]/75 transition hover:text-white">FAQ</a>
 						<a
-							href={adminNav.home}
+							href={adminIndexRoute}
 							target="_self"
 							rel="noopener"
 							class="text-[#fff3df]/75 transition hover:text-white"

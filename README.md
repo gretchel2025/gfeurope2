@@ -78,10 +78,12 @@ npm run build         # production build
 - Public event pages are event-scoped under `/events/<event_id>`.
 - The public events index lives at `/events` and uses a neutral, non-event-specific theme.
 - Public booking is event-scoped at `/events/<event_id>/newbooking`.
-- Admin pages are event-scoped under `/admin/events/<event_id>` and require
+- `/admin` is a neutral directory of admin routes available to the signed-in user.
+- Event admin pages are event-scoped under `/admin/events/<event_id>` and require
   event-specific admin grants.
+- Global admin pages live under `/admin/global` and require `superuser`.
 - Global auth stays outside event scope at `/signin` and `/auth/callback`; redirects carry
-  the original event URL through `redirectTo`.
+  the original admin or event URL through `redirectTo`.
 - Public event marketing pages use independent Svelte components under
   `src/lib/ui/components/public/events/` so archived and future events can have distinct
   designs.

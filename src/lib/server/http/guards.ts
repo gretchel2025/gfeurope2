@@ -9,7 +9,7 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { AuthenticationRequiredError, PermissionDeniedError } from '$lib/application/errors';
 import type { SessionUser } from '$lib/domain/user';
-import { hasEventAdminAccess, isSuperUser } from '$lib/domain/user';
+import { hasAnyAdminAccess, hasEventAdminAccess, isSuperUser } from '$lib/domain/user';
 import {
 	getAuthSession,
 	getSessionEventRoles,
@@ -32,6 +32,30 @@ export async function requireAdminSession(
 	const roles = getSessionRoles(session);
 	const eventRoles = getSessionEventRoles(session);
 	if (!hasEventAdminAccess(roles, eventRoles, eventId)) {
+		throw new PermissionDeniedError(`user ${currentUser._id} unauthorized`);
+	}
+
+	return {
+		session,
+		user: {
+			...currentUser,
+			isASuperUser: isSuperUser(roles)
+		}
+	};
+}
+
+/** Requires any admin-level session and returns the normalized session user. */
+export async function requireAnyAdminSession(
+	session: AppSession | null
+): Promise<{ session: AppSession; user: SessionUser }> {
+	const currentUser = getSessionUser(session);
+	if (!currentUser.wasFound || !session) {
+		throw new AuthenticationRequiredError('sign in required');
+	}
+
+	const roles = getSessionRoles(session);
+	const eventRoles = getSessionEventRoles(session);
+	if (!hasAnyAdminAccess(roles, eventRoles)) {
 		throw new PermissionDeniedError(`user ${currentUser._id} unauthorized`);
 	}
 

@@ -125,26 +125,30 @@ Hosted projects:
 
 App data schema: `grandfeasteu`
 
-Canonical app routes are event-scoped:
+Canonical app routes are split between public event pages, event admin pages, global admin
+pages, and global auth pages:
 
 - Public events index: `/events`
 - Public event pages: `/events/<event_id>`, `/events/<event_id>/newbooking`,
   `/events/<event_id>/privacy`, `/events/<event_id>/conditions`, and
   `/events/<event_id>/faq`
+- Admin directory: `/admin`
 - Admin event pages: `/admin/events/<event_id>` and child routes such as
   `/admin/events/<event_id>/bookings`, `/tickets`, `/counters`, `/reports`, and `/system`
+- Global admin pages: `/admin/global` and child routes such as `/admin/global/events`
 - Global auth pages: `/signin`, `/auth/callback`, and `/unauthorized`
 
 The root path `/` redirects to `/events/<APP_EVENT_ID>`. Authentication remains global;
-protected event-admin URLs redirect to `/signin?redirectTo=<original event URL>` and then
-return to that event URL after sign-in. Old non-root URLs such as `/newbooking`, `/api`,
+protected admin URLs redirect to `/signin?redirectTo=<original admin URL>` and then
+return to that admin URL after sign-in. Old non-root URLs such as `/newbooking`, `/api`,
 `/privacy`, `/conditions`, and `/faq` are not canonical app routes after the event route
 split.
 
 Public event page theming is handled per event in Svelte components registered through
-`src/lib/publicEvents.ts`. The `/events` index uses a neutral theme. Admin pages share the
-admin shell and use DB-backed theme colors from each `events` row so operators can
-distinguish the managed event.
+`src/lib/publicEvents.ts`. The `/events` index uses a neutral theme. `/admin` and
+`/admin/global/*` use neutral admin styling. Event admin pages share the admin shell and
+use DB-backed theme colors from each `events` row so operators can distinguish the
+managed event.
 
 App data tables:
 
@@ -214,18 +218,21 @@ Hosted authorization uses Supabase Auth `app_metadata.roles` and
 can edit it.
 
 - `tester` grants access to public pages on live development.
+- `admin` grants access to the neutral `/admin` directory.
 - `event_roles[event_id]` containing `admin` grants admin access for that event.
 - `superuser` bypasses event-admin checks and live-dev tester checks.
 
 Expected role combinations:
 
 - `tester`: live-dev public pages only.
+- `tester` plus `admin`: live-dev public pages and the `/admin` directory.
 - `tester` plus `event_roles.gfeu2026=["admin"]`: live-dev public pages and
-  `/admin/events/gfeu2026`.
+  `/admin`, `/admin/events/gfeu2026`.
 - `tester` plus `event_roles.gfeu2025=["admin"]`: live-dev public pages and
-  `/admin/events/gfeu2025`.
+  `/admin`, `/admin/events/gfeu2025`.
 - `tester` alone cannot access admin pages.
-- `superuser`: global operator access across public/admin event pages.
+- `superuser`: global operator access across public/admin event pages and
+  `/admin/global`.
 
 Example metadata:
 
@@ -386,9 +393,14 @@ First-class access policy code:
 Access policy behavior:
 
 - Production and local public pages are open.
+- `/admin` requires any admin-level access: `roles.admin`, at least one
+  `event_roles[event_id].admin`, or `superuser`.
 - Production and local `/admin/events/<event_id>` requires
   `event_roles[event_id]` containing `admin`, or `superuser`.
+- `/admin/global/*` requires `superuser`.
 - Live dev public pages require a signed-in user with `tester`.
+- Live dev `/admin` requires `tester` plus any admin-level access, unless the user has
+  `superuser`.
 - Live dev `/admin/events/<event_id>` requires `tester` plus
   `event_roles[event_id]` containing `admin`, unless the user has `superuser`.
 - Signed-out protected requests redirect to `/signin?redirectTo=...`.

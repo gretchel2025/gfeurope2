@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-05
 
+- Added a neutral `/admin` directory, superuser-only `/admin/global/events`, and distinct
+  admin access semantics for directory, event, and global admin routes.
 - Documented the event-scoped public/admin route model and the split between neutral,
   public event-specific, and DB-backed admin event theming.
 - Moved UI-facing Svelte components under `src/lib/ui/components/` and updated project

@@ -169,13 +169,14 @@ App data lives in the `grandfeasteu` schema. Tables use clean domain names
 keyed by `event_id`; `ticket_types` stores per-event pricing and discount rules;
 `ticket_counters.counter_id` uses the same stable ids as `ticket_types.ticket_type_id`.
 The booking, ticket, and counter tables include `event_id`, currently defaulting to
-`gfeu2026`. Public and admin routes resolve the event id from URLs such as
+`gfeu2026`. Event-scoped public and admin routes resolve the event id from URLs such as
 `/events/gfeu2026/newbooking` and `/admin/events/gfeu2026/bookings`; repositories and
-services are built per request event id. `APP_EVENT_ID` is the default event for `/`
-redirects and bootstrap/setup defaults. App-data tables have RLS enabled and no
-anon/authenticated policies; server code uses the service-role key. The `grandfeasteu`
-schema is exposed to Supabase's Data API only so the server-side service-role client can
-access it.
+services for those routes are built per request event id. Global admin routes such as
+`/admin` and `/admin/global/events` are not scoped to one event. `APP_EVENT_ID` is the
+default event for `/` redirects and bootstrap/setup defaults. App-data tables have RLS
+enabled and no anon/authenticated policies; server code uses the service-role key. The
+`grandfeasteu` schema is exposed to Supabase's Data API only so the server-side
+service-role client can access it.
 
 Use canonical event routes in local testing:
 
@@ -184,13 +185,15 @@ Use canonical event routes in local testing:
 - `/events/gfeu2026` shows the active 2026 public sales page.
 - `/events/gfeu2025` shows the archive-only 2025 public page.
 - `/events/gfeu2026/newbooking` opens the current booking flow.
+- `/admin` shows the neutral admin directory for routes available to the signed-in user.
 - `/admin/events/gfeu2026` and `/admin/events/gfeu2025` open event-scoped admin tools
   when the signed-in user has the matching event admin grant.
+- `/admin/global/events` shows the superuser-only global events list.
 
 Public event landing pages can have independent marketing themes. The global `/events`
-index should remain neutral. Admin pages use DB-backed colors from the selected
-`events` row so local testing should make it visually obvious when switching between
-admin events.
+index and global admin pages should remain neutral. Event admin pages use DB-backed
+colors from the selected `events` row so local testing should make it visually obvious
+when switching between admin events.
 
 Local schema changes must still use the repository migration workflow. Create migrations
 with `npx supabase migration new <descriptive_name>`, edit the generated SQL file, apply
@@ -211,14 +214,17 @@ Access is controlled by Supabase Auth `app_metadata.roles` and
 `app_metadata.event_roles`. The app recognizes these roles:
 
 - `tester`: can access public pages on the live development site.
+- `admin`: can access the `/admin` directory.
 - `event_roles[event_id]` containing `admin`: can access admin pages for that event.
 - `superuser`: bypasses event-admin checks and live-dev tester checks.
 
 Live development (`dev.grandfeast.eu` and the Netlify `dev` branch URL) requires a signed-in
 user with `tester` for every non-auth page. Production and local public pages remain open.
-Admin routes under `/admin/events/<event_id>` require `event_roles[event_id]` containing
-`admin`, or `superuser`; on live development they also require `tester` unless the user
-has `superuser`.
+The `/admin` directory requires `roles.admin`, at least one event admin grant, or
+`superuser`. Admin routes under `/admin/events/<event_id>` require
+`event_roles[event_id]` containing `admin`, or `superuser`. Global admin routes under
+`/admin/global` require `superuser`. On live development, non-superusers also require
+`tester`.
 
 Do not use `user_metadata` for authorization; users can edit it. Assign roles only in
 provider-owned `app_metadata`, for example:

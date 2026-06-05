@@ -76,6 +76,14 @@ export function hasAdminAccess(roles: UserRole[]): boolean {
 	return hasUserRole(roles, 'admin') || isSuperUser(roles);
 }
 
+export function hasAnyEventAdminAccess(eventRoles: EventRoleMap): boolean {
+	return Object.values(eventRoles).some((roles) => roles.includes('admin'));
+}
+
+export function hasAnyAdminAccess(roles: UserRole[], eventRoles: EventRoleMap): boolean {
+	return hasAdminAccess(roles) || hasAnyEventAdminAccess(eventRoles);
+}
+
 export function hasEventAdminAccess(
 	roles: UserRole[],
 	eventRoles: EventRoleMap,

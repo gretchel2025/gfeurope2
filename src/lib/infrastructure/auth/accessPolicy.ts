@@ -1,6 +1,8 @@
 import {
+	hasAnyAdminAccess,
 	hasEventAdminAccess,
 	hasTesterAccess,
+	isSuperUser,
 	type EventRoleMap,
 	type UserRole
 } from '$lib/domain/user';
@@ -8,6 +10,7 @@ import {
 export type RuntimeAccessMode = 'local' | 'production' | 'live-dev';
 export type AccessDenialReason = 'sign-in-required' | 'permission-denied';
 export type PasswordAuthMode = 'none' | 'local' | 'live-dev';
+export type AdminAccessScope = 'none' | 'directory' | 'event' | 'global';
 
 export type RuntimeAccessInput = {
 	dev: boolean;
@@ -19,6 +22,7 @@ export type RequiredAccess = {
 	mode: RuntimeAccessMode;
 	pathname: string;
 	eventId: string | null;
+	adminAccessScope: AdminAccessScope;
 	bypass: boolean;
 	requiresTester: boolean;
 	requiresAdmin: boolean;
@@ -84,16 +88,17 @@ export function getRequiredAccess(input: {
 	pathname: string;
 }): RequiredAccess {
 	const bypass = isAuthBypassPath(input.pathname);
-	const adminPath = isAdminPath(input.pathname);
+	const adminAccessScope = getAdminAccessScope(input.pathname);
 	const eventId = getPathEventId(input.pathname);
 
 	return {
 		mode: input.mode,
 		pathname: input.pathname,
 		eventId,
+		adminAccessScope,
 		bypass,
 		requiresTester: !bypass && input.mode === 'live-dev',
-		requiresAdmin: !bypass && adminPath
+		requiresAdmin: !bypass && adminAccessScope !== 'none'
 	};
 }
 
@@ -107,7 +112,7 @@ export function evaluateAccess(input: {
 		return { allowed: true };
 	}
 
-	if (!input.requiredAccess.requiresTester && !input.requiredAccess.requiresAdmin) {
+	if (!input.requiredAccess.requiresTester && input.requiredAccess.adminAccessScope === 'none') {
 		return { allowed: true };
 	}
 
@@ -125,14 +130,33 @@ export function evaluateAccess(input: {
 		};
 	}
 
-	if (
-		input.requiredAccess.requiresAdmin &&
-		!hasEventAdminAccess(input.roles, input.eventRoles, input.requiredAccess.eventId)
-	) {
-		return {
-			allowed: false,
-			reason: 'permission-denied'
-		};
+	if (input.requiredAccess.requiresAdmin) {
+		if (
+			input.requiredAccess.adminAccessScope === 'directory' &&
+			!hasAnyAdminAccess(input.roles, input.eventRoles)
+		) {
+			return {
+				allowed: false,
+				reason: 'permission-denied'
+			};
+		}
+
+		if (input.requiredAccess.adminAccessScope === 'global' && !isSuperUser(input.roles)) {
+			return {
+				allowed: false,
+				reason: 'permission-denied'
+			};
+		}
+
+		if (
+			input.requiredAccess.adminAccessScope === 'event' &&
+			!hasEventAdminAccess(input.roles, input.eventRoles, input.requiredAccess.eventId)
+		) {
+			return {
+				allowed: false,
+				reason: 'permission-denied'
+			};
+		}
 	}
 
 	return { allowed: true };
@@ -157,6 +181,22 @@ export function isLocalSupabaseUrl(value: string): boolean {
 
 export function isAdminPath(pathname: string): boolean {
 	return pathname === '/admin' || pathname.startsWith('/admin/');
+}
+
+export function getAdminAccessScope(pathname: string): AdminAccessScope {
+	if (pathname === '/admin') {
+		return 'directory';
+	}
+
+	if (pathname === '/admin/global' || pathname.startsWith('/admin/global/')) {
+		return 'global';
+	}
+
+	if (pathname.startsWith('/admin/')) {
+		return 'event';
+	}
+
+	return 'none';
 }
 
 export function isAuthBypassPath(pathname: string): boolean {

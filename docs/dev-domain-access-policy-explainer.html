@@ -406,8 +406,10 @@
 				<div class="kicker">Admin Guard</div>
 				<h2>Admin now means Supabase event role metadata, not just a session.</h2>
 				<p>
-					Admin routes under <code>/admin/events/&lt;event_id&gt;</code> require a Supabase session
-					and <code>app_metadata.event_roles[event_id]</code> with <code>admin</code>, or
+					The <code>/admin</code> directory requires any admin-level access. Event routes under
+					<code>/admin/events/&lt;event_id&gt;</code> require
+					<code>app_metadata.event_roles[event_id]</code> with <code>admin</code>, or
+					<code>superuser</code>. Global routes under <code>/admin/global</code> require
 					<code>superuser</code>. On live dev, non-superusers must also have <code>tester</code>.
 				</p>
 				<div class="grid">

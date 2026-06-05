@@ -14,6 +14,13 @@ export const globalRoutes = {
 	unauthorized: '/unauthorized'
 };
 
+export const adminIndexRoute = '/admin';
+
+export const globalAdminRoutes = {
+	home: '/admin/global',
+	events: '/admin/global/events'
+};
+
 export function publicRoutes(eventId: string) {
 	const eventBase = `/events/${encodeSegment(eventId)}`;
 	return {

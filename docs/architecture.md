@@ -148,7 +148,8 @@ routes/ui components -> server/http -> application services -> domain
 
 ## Route Model
 
-The app uses event-scoped URLs for public event pages and admin tools:
+The app uses event-scoped URLs for public event pages and event admin tools, with a
+separate neutral admin directory and superuser-only global admin branch:
 
 - `/` redirects to `/events/<APP_EVENT_ID>`.
 - `/events` is a global public index grouped by event year.
@@ -156,9 +157,12 @@ The app uses event-scoped URLs for public event pages and admin tools:
 - `/events/<event_id>/newbooking` is the public booking flow for one event.
 - `/events/<event_id>/privacy`, `/conditions`, and `/faq` are shared legal/help pages
   rendered in the context of one event.
+- `/admin` is a neutral directory of admin routes available to the signed-in user.
 - `/admin/events/<event_id>` is the admin dashboard for one event.
 - `/admin/events/<event_id>/bookings`, `/tickets`, `/counters`, `/reports`, and
   `/system` are event-scoped admin tools.
+- `/admin/global` is the superuser-only global admin branch.
+- `/admin/global/events` is the read-only global event record list for v1.
 - `/signin`, `/auth/callback`, and `/unauthorized` are global auth/access routes.
 
 Old non-root URLs such as `/newbooking`, `/api`, `/privacy`, `/conditions`, and `/faq`
@@ -167,9 +171,11 @@ build repositories/services for that request event. `APP_EVENT_ID` is only the d
 event for root redirects and setup/bootstrap defaults.
 
 When a signed-out user opens a protected admin URL, the app redirects through global
-`/signin?redirectTo=<original event URL>` and returns to the same event-scoped admin URL
-after sign-in. Admin authorization is event-specific through
-`app_metadata.event_roles[eventId]`.
+`/signin?redirectTo=<original admin URL>` and returns to the same admin URL after
+sign-in. `/admin` requires any admin-level access through `roles.admin`, at least one
+`event_roles[eventId].admin`, or `superuser`. Event admin authorization remains
+event-specific through `app_metadata.event_roles[eventId]`, while `/admin/global` requires
+`superuser`.
 
 ## Theming Model
 
@@ -186,6 +192,8 @@ The app deliberately separates public marketing themes from operational admin th
 - `/admin/events/<event_id>` pages share the admin UI but use DB-backed event theme
   colors from `events.theme_main_color`, `theme_sub_color`, `theme_highlight_color`, and
   `theme_on_main_color` to make the managed event visually obvious while scrolling.
+- `/admin` and `/admin/global/*` use neutral admin styling because they are not scoped to
+  one event.
 
 ## Key Flow: Booking Reservation
 
@@ -281,9 +289,14 @@ flowchart TB
 Access policy summary:
 
 - Production and local public pages are open.
+- `/admin` requires any admin-level access: `roles.admin`, at least one
+  `event_roles[event_id].admin`, or `superuser`.
 - Production and local `/admin/events/<event_id>` routes require
   `event_roles[event_id]` containing `admin`, or `superuser`.
+- `/admin/global/*` routes require `superuser`.
 - Live development public pages require `tester`.
+- Live development `/admin` requires `tester` plus any admin-level access, unless the
+  user has `superuser`.
 - Live development `/admin/events/<event_id>` routes require `tester` plus
   `event_roles[event_id]` containing `admin`, unless the user has `superuser`.
 - Role checks use Supabase Auth `app_metadata.roles` and `app_metadata.event_roles`, not
@@ -296,6 +309,9 @@ Access policy summary:
 - New public event landing pages: put event-specific Svelte components under
   `src/lib/ui/components/public/events/`, then register their public page metadata in
   `src/lib/publicEvents.ts`.
+- New event admin tools belong under `/admin/events/<event_id>` and must keep
+  event-scoped authorization.
+- New global admin tools belong under `/admin/global` and must require `superuser`.
 - New business rules: put the rule in `src/lib/domain/` first, with co-located tests.
 - New use cases: add or extend an application service in `src/lib/application/services/`.
 - New database behavior: add a port if the application needs a new capability, then

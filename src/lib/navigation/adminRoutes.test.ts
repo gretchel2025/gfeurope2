@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { adminRoutes, publicRoutes } from './adminRoutes';
+import { adminIndexRoute, adminRoutes, globalAdminRoutes, publicRoutes } from './adminRoutes';
 
 describe('event route builders', () => {
 	it.each(['gfeu2025', 'gfeu2026'])('builds public event routes for %s', (eventId) => {
@@ -22,5 +22,11 @@ describe('event route builders', () => {
 		expect(routes.ticketCounter.details('STANDARD')).toBe(
 			`/admin/events/${eventId}/counters/STANDARD`
 		);
+	});
+
+	it('builds admin directory and global admin routes', () => {
+		expect(adminIndexRoute).toBe('/admin');
+		expect(globalAdminRoutes.home).toBe('/admin/global');
+		expect(globalAdminRoutes.events).toBe('/admin/global/events');
 	});
 });

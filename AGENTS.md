@@ -16,13 +16,15 @@ For deployment, DNS, Supabase, Google OAuth, and external account context, read 
 
 ## Event Routing & Theming
 
-Canonical public and admin pages are event-scoped. Public event pages live under
-`/events/<event_id>`, public booking lives under `/events/<event_id>/newbooking`, and
-admin pages live under `/admin/events/<event_id>` with child routes such as
-`/admin/events/<event_id>/bookings`. The root path `/` redirects to the default event
-from `APP_EVENT_ID`. The `/events` index is global and uses a neutral theme. Auth routes
-remain global (`/signin`, `/auth/callback`, `/unauthorized`); protected event-admin
-URLs should redirect through `/signin?redirectTo=<original event URL>`.
+Canonical public event pages and event admin pages are event-scoped. Public event pages
+live under `/events/<event_id>`, public booking lives under `/events/<event_id>/newbooking`,
+and event admin pages live under `/admin/events/<event_id>` with child routes such as
+`/admin/events/<event_id>/bookings`. `/admin` is a neutral admin directory for users
+with any admin-level access, and `/admin/global` is a superuser-only branch for
+global-scope tools. The root path `/` redirects to the default event from `APP_EVENT_ID`.
+The `/events` index is global and uses a neutral theme. Auth routes remain global
+(`/signin`, `/auth/callback`, `/unauthorized`); protected admin URLs should redirect
+through `/signin?redirectTo=<original admin URL>`.
 
 Public event landing pages are intentionally independent marketing surfaces. Put
 event-specific public page components under `src/lib/ui/components/public/events/` and

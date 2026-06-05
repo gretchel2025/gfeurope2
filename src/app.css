@@ -428,6 +428,16 @@ body {
 	color: #ffffff;
 }
 
+.public-header-menu-button {
+	display: inline-flex;
+}
+
+@media (min-width: 48rem) {
+	.public-header-menu-button {
+		display: none;
+	}
+}
+
 .button-spinner {
 	display: none;
 	width: 1rem;
