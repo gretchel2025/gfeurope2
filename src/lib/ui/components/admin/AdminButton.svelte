@@ -6,6 +6,7 @@
 	export let fullWidth = false;
 	export let loading = false;
 	export let loadingText = 'Working...';
+	export let submitLoading = true;
 
 	let clickedLoading = false;
 
@@ -29,7 +30,7 @@
 		.join(' ');
 
 	function handleClick() {
-		if (type === 'submit' && !isDisabled) {
+		if (type === 'submit' && submitLoading && !isDisabled) {
 			window.setTimeout(() => {
 				clickedLoading = true;
 			}, 0);

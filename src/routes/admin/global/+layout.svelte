@@ -17,7 +17,7 @@
 
 <nav class="admin-nav border-b border-slate-200/80 px-4 py-3 text-sm text-slate-700">
 	<div class="mx-auto flex max-w-6xl flex-wrap gap-x-4 gap-y-2 font-semibold">
-		<a href={adminIndexRoute} class="hover:text-slate-950">Admin directory</a>
+		<a href={adminIndexRoute} class="hover:text-slate-950">Admin</a>
 		<a href={globalAdminRoutes.events} class="hover:text-slate-950">Events</a>
 	</div>
 </nav>

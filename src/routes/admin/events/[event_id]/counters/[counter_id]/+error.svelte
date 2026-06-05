@@ -20,7 +20,7 @@
 				on:click={refreshPage}>Refresh</button
 			>
 			<a href={routes.home} class="text-sm font-semibold text-blue-700 hover:underline">
-				Admin home
+				Dashboard
 			</a>
 		</div>
 	</section>

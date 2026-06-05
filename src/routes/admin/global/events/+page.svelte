@@ -20,7 +20,8 @@
 	title="Events"
 	subtitle="Read-only global view of event records."
 	backHref={adminIndexRoute}
-	backLabel="Admin directory"
+	backLabel="Admin"
+	showBackLink={true}
 >
 	<AdminCard title="All events" subtitle="Global-scope event records from the database.">
 		{#if data.events.length > 0}

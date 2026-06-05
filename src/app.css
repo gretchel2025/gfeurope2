@@ -107,6 +107,16 @@ body {
 	color: color-mix(in srgb, var(--admin-event-on-main) 82%, var(--admin-event-highlight));
 }
 
+.admin-shell .admin-event-home-link {
+	color: var(--admin-event-on-main);
+	text-decoration: underline;
+	text-underline-offset: 0.22em;
+}
+
+.admin-shell .admin-event-home-link:hover {
+	color: color-mix(in srgb, var(--admin-event-on-main) 78%, var(--admin-event-highlight));
+}
+
 .admin-shell .admin-nav a:hover {
 	color: var(--admin-event-main);
 }

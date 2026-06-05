@@ -39,7 +39,7 @@
 	title="Booking Details"
 	subtitle={`Reference ${booking.reference_no}`}
 	backHref={routes.booking.list}
-	backLabel="Back to booking list"
+	backLabel="Back to Bookings"
 >
 	<AdminButton
 		slot="actions"
@@ -168,9 +168,9 @@
 
 	<BackLinks
 		links={[
-			{ href: routes.booking.list, label: 'List bookings' },
+			{ href: routes.booking.list, label: 'Bookings' },
 			{ href: routes.booking.search(), label: 'Search' },
-			{ href: routes.home, label: 'Admin home' }
+			{ href: routes.home, label: 'Dashboard' }
 		]}
 	/>
 </AdminPage>

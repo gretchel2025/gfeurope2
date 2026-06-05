@@ -59,4 +59,8 @@
 			</AdminCard>
 		{/each}
 	</div>
+
+	<div class="flex justify-start sm:justify-end">
+		<AdminButton href={routes.booking.search()} variant="secondary">Search bookings</AdminButton>
+	</div>
 </AdminPage>

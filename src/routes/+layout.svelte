@@ -105,9 +105,9 @@
 					<ul class="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
 						<li>
 							<a
-								href={publicNav.home}
+								href={adminIndexRoute}
 								class="text-slate-600 transition hover:text-slate-950"
-								on:click={closeMenu}>Home</a
+								on:click={closeMenu}>Admin Home</a
 							>
 						</li>
 						{#if $page.data.session?.user}
@@ -227,6 +227,9 @@
 							Privacy Policy
 						</a>
 						<a href={publicNav.faq} class="text-[#fff3df]/75 transition hover:text-white">FAQ</a>
+						<a href="/events" class="text-[#fff3df]/75 transition hover:text-white">
+							All Events
+						</a>
 						<a
 							href={adminIndexRoute}
 							target="_self"

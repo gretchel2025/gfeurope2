@@ -16,7 +16,7 @@
 	title="Audit"
 	subtitle="Event-scoped operational history. Rows load only when requested."
 	backHref={routes.home}
-	backLabel="Back to dashboard"
+	backLabel="Dashboard"
 >
 	<AuditHistorySection
 		title="Event History"
@@ -28,7 +28,7 @@
 
 	<BackLinks
 		links={[
-			{ href: routes.home, label: 'Admin home' },
+			{ href: routes.home, label: 'Dashboard' },
 			{ href: routes.booking.list, label: 'Bookings' },
 			{ href: routes.ticket.list, label: 'Tickets' }
 		]}

@@ -10,7 +10,7 @@
 	export let links: BackLink[] | undefined = undefined;
 
 	$: resolvedLinks = links ?? [
-		{ href: adminRoutes($page.params.event_id).home, label: 'Admin home' }
+		{ href: adminRoutes($page.params.event_id).home, label: 'Dashboard' }
 	];
 </script>
 

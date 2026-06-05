@@ -44,7 +44,7 @@
 				href={routes.home}
 				class="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
 			>
-				Admin home
+				Dashboard
 			</a>
 		</div>
 	</section>

@@ -11,7 +11,7 @@
 	<section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
 		<div class="flex flex-wrap gap-4 text-sm font-semibold">
 			<a href={routes.booking.list} class="text-blue-700 hover:underline">Bookings list</a>
-			<a href={routes.home} class="text-blue-700 hover:underline">Admin home</a>
+			<a href={routes.home} class="text-blue-700 hover:underline">Dashboard</a>
 		</div>
 	</section>
 </AdminPage>

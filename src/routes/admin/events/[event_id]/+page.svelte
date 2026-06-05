@@ -33,13 +33,14 @@
 </script>
 
 <AdminPage
-	title="Admin Dashboard"
+	title="Dashboard"
 	subtitle="Operational tools for bookings, tickets, reports, and event setup."
+	showBackLink={false}
 >
 	<div class="grid gap-4 md:grid-cols-3">
 		<AdminCard title="Bookings" subtitle="Find reservations and manage payment state.">
 			<div class="flex flex-wrap gap-2">
-				<AdminButton href={routes.booking.list}>List bookings</AdminButton>
+				<AdminButton href={routes.booking.list}>Bookings</AdminButton>
 				<AdminButton href={routes.booking.search()} variant="secondary">Search</AdminButton>
 			</div>
 		</AdminCard>
@@ -74,7 +75,7 @@
 		</div>
 	</AdminCard>
 
-	<AdminCard title="System" subtitle="Super-user operations and booking availability.">
-		<AdminButton href={routes.system} variant="secondary">System settings</AdminButton>
+	<AdminCard title="Event" subtitle="Event-wide settings">
+		<AdminButton href={routes.system} variant="secondary">Update</AdminButton>
 	</AdminCard>
 </AdminPage>

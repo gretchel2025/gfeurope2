@@ -90,9 +90,9 @@
 	<BackLinks
 		links={[
 			{ href: routes.booking.details(booking.reference_no), label: 'Booking details' },
-			{ href: routes.booking.list, label: 'List bookings' },
+			{ href: routes.booking.list, label: 'Bookings' },
 			{ href: routes.booking.search(), label: 'Search' },
-			{ href: routes.home, label: 'Admin home' }
+			{ href: routes.home, label: 'Dashboard' }
 		]}
 	/>
 </AdminPage>

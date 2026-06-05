@@ -17,7 +17,7 @@
 	title="Ticket Counter"
 	subtitle={`Inventory for ${data.ticketCounter._id}`}
 	backHref={routes.home}
-	backLabel="Back to dashboard"
+	backLabel="Dashboard"
 >
 	<AdminCard
 		title={data.ticketCounter._id}

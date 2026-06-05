@@ -67,7 +67,7 @@
 	<BackLinks
 		links={[
 			{ href: routes.ticket.list, label: 'List tickets' },
-			{ href: routes.home, label: 'Admin home' }
+			{ href: routes.home, label: 'Dashboard' }
 		]}
 	/>
 </AdminPage>

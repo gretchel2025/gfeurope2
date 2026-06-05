@@ -5,7 +5,8 @@
 	export let title: string;
 	export let subtitle = '';
 	export let backHref: string | undefined = undefined;
-	export let backLabel = 'Admin home';
+	export let backLabel = 'Dashboard';
+	export let showBackLink = false;
 
 	$: resolvedBackHref = backHref ?? adminRoutes($page.params.event_id).home;
 </script>
@@ -14,10 +15,15 @@
 	<section class="mx-auto flex w-full min-w-0 max-w-5xl flex-col gap-6">
 		<header class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 			<div class="min-w-0">
-				<a href={resolvedBackHref} class="text-sm font-semibold text-blue-700 hover:underline"
-					>{backLabel}</a
+				{#if showBackLink}
+					<a href={resolvedBackHref} class="text-sm font-semibold text-blue-700 hover:underline"
+						>{backLabel}</a
+					>
+				{/if}
+				<h1
+					class:mt-2={showBackLink}
+					class="break-words text-3xl font-bold tracking-tight text-slate-950"
 				>
-				<h1 class="mt-2 break-words text-3xl font-bold tracking-tight text-slate-950">
 					{title}
 				</h1>
 				{#if subtitle}
