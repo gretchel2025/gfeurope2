@@ -54,7 +54,7 @@
 									)}
 								</p>
 							</div>
-							<AdminButton href={eventRoute.href} variant="secondary">Open admin</AdminButton>
+							<AdminButton href={eventRoute.href} variant="secondary">Manage bookings</AdminButton>
 						</article>
 					{/each}
 				</div>
@@ -67,9 +67,12 @@
 
 		{#if data.canAccessGlobalAdmin}
 			<AdminCard title="Global admin" subtitle="Superuser-only tools for global-scope data.">
-				<AdminButton href={globalAdminRoutes.home} variant="secondary"
-					>Open global admin</AdminButton
-				>
+				<div class="flex flex-wrap gap-2">
+					<AdminButton href={globalAdminRoutes.home} variant="secondary">
+						Events Maintenance
+					</AdminButton>
+					<AdminButton href={globalAdminRoutes.users} variant="secondary">Admin users</AdminButton>
+				</div>
 			</AdminCard>
 		{/if}
 	</section>

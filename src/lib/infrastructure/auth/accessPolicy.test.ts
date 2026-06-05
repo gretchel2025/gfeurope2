@@ -156,7 +156,27 @@ describe('access policy', () => {
 		});
 		expect(
 			accessFor({
+				pathname: '/admin/global/users',
+				signedIn: true,
+				roles: ['admin'],
+				eventRoles: { gfeu2026: ['admin'] }
+			})
+		).toEqual({
+			allowed: false,
+			reason: 'permission-denied'
+		});
+		expect(
+			accessFor({
 				pathname: '/admin/global/events',
+				signedIn: true,
+				roles: ['superuser']
+			})
+		).toEqual({
+			allowed: true
+		});
+		expect(
+			accessFor({
+				pathname: '/admin/global/users',
 				signedIn: true,
 				roles: ['superuser']
 			})

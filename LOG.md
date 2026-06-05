@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-05
 
+- Added a read-only superuser `/admin/global/users` directory for Supabase Auth users
+  with tester, admin, superuser, or event-admin grants.
 - Added event-admin error styling so 404/error states under `/admin/events/<event_id>`
   keep the admin shell, event context, and admin diagnostics.
 - Deferred admin payment proof previews behind `show_payment_proof_image=true` so

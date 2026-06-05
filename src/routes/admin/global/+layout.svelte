@@ -19,6 +19,7 @@
 	<div class="mx-auto flex max-w-6xl flex-wrap gap-x-4 gap-y-2 font-semibold">
 		<a href={adminIndexRoute} class="hover:text-slate-950">Admin</a>
 		<a href={globalAdminRoutes.events} class="hover:text-slate-950">Events</a>
+		<a href={globalAdminRoutes.users} class="hover:text-slate-950">Users</a>
 	</div>
 </nav>
 

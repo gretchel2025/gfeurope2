@@ -29,5 +29,6 @@ describe('event route builders', () => {
 		expect(adminIndexRoute).toBe('/admin');
 		expect(globalAdminRoutes.home).toBe('/admin/global');
 		expect(globalAdminRoutes.events).toBe('/admin/global/events');
+		expect(globalAdminRoutes.users).toBe('/admin/global/users');
 	});
 });

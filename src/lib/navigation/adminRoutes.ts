@@ -18,7 +18,8 @@ export const adminIndexRoute = '/admin';
 
 export const globalAdminRoutes = {
 	home: '/admin/global',
-	events: '/admin/global/events'
+	events: '/admin/global/events',
+	users: '/admin/global/users'
 };
 
 export function publicRoutes(eventId: string) {

@@ -163,6 +163,8 @@ separate neutral admin directory and superuser-only global admin branch:
   and `/system` are event-scoped admin tools.
 - `/admin/global` is the superuser-only global admin branch.
 - `/admin/global/events` is the read-only global event record list for v1.
+- `/admin/global/users` is the read-only Supabase Auth admin/tester user directory for
+  v1.
 - `/signin`, `/auth/callback`, and `/unauthorized` are global auth/access routes.
 
 Old non-root URLs such as `/newbooking`, `/api`, `/privacy`, `/conditions`, and `/faq`
@@ -367,6 +369,8 @@ Access policy summary:
 - New event admin tools belong under `/admin/events/<event_id>` and must keep
   event-scoped authorization.
 - New global admin tools belong under `/admin/global` and must require `superuser`.
+- Global user maintenance starts as read-only `/admin/global/users`; future grant/revoke
+  actions should stay server-only and write Supabase Auth `app_metadata`.
 - New business rules: put the rule in `src/lib/domain/` first, with co-located tests.
 - New use cases: add or extend an application service in `src/lib/application/services/`.
 - New database behavior: add a port if the application needs a new capability, then

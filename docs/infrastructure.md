@@ -136,6 +136,7 @@ pages, and global auth pages:
 - Admin event pages: `/admin/events/<event_id>` and child routes such as
   `/admin/events/<event_id>/bookings`, `/tickets`, `/counters`, `/reports`, and `/system`
 - Global admin pages: `/admin/global` and child routes such as `/admin/global/events`
+  and `/admin/global/users`
 - Global auth pages: `/signin`, `/auth/callback`, and `/unauthorized`
 
 The root path `/` redirects to `/events/<APP_EVENT_ID>`. Authentication remains global;
@@ -148,7 +149,8 @@ Public event page theming is handled per event in Svelte components registered t
 `src/lib/publicEvents.ts`. The `/events` index uses a neutral theme. `/admin` and
 `/admin/global/*` use neutral admin styling. Event admin pages share the admin shell and
 use DB-backed theme colors from each `events` row so operators can distinguish the
-managed event.
+managed event. `/admin/global/users` is a read-only superuser view of Supabase Auth users
+with tester, admin, superuser, or event-admin grants; mutations are not exposed in v1.
 
 App data tables:
 

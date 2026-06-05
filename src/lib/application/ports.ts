@@ -12,6 +12,7 @@ import type { Event } from '$lib/domain/event';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
 import type { TicketTypeConfig } from '$lib/domain/ticketType';
+import type { AdminUser } from '$lib/domain/adminUser';
 import type { TicketStatus } from '$lib/domain/shared/enums';
 import type {
 	AuditEntityType,
@@ -78,6 +79,11 @@ export interface TicketTypeRepository {
 	findById(eventId: string, ticketTypeId: string): Promise<TicketTypeConfig | null>;
 	list(eventId: string): Promise<TicketTypeConfig[]>;
 	listActive(eventId: string): Promise<TicketTypeConfig[]>;
+}
+
+/** Server-only contract for Supabase Auth admin user visibility. */
+export interface AdminUserRepository {
+	list(): Promise<AdminUser[]>;
 }
 
 /** Outbound email delivery contract. */

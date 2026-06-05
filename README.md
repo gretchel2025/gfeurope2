@@ -81,7 +81,8 @@ npm run build         # production build
 - `/admin` is a neutral directory of admin routes available to the signed-in user.
 - Event admin pages are event-scoped under `/admin/events/<event_id>` and require
   event-specific admin grants.
-- Global admin pages live under `/admin/global` and require `superuser`.
+- Global admin pages live under `/admin/global` and require `superuser`; v1 global tools
+  include read-only event records and admin/tester user visibility.
 - Global auth stays outside event scope at `/signin` and `/auth/callback`; redirects carry
   the original admin or event URL through `redirectTo`.
 - Public event marketing pages use independent Svelte components under
@@ -152,6 +153,11 @@ Examples:
 | `{ "roles": ["admin"] }`                                                        | `/admin`; no event admin routes unless event grants are also present |
 | `{ "roles": ["superuser"] }`                                                    | `/admin`, all `/admin/events/<event_id>` pages, and `/admin/global`  |
 | `{ "roles": ["tester"], "event_roles": { "gfeu2026": ["admin"] } }` on live-dev | `/admin`, `/admin/events/gfeu2026`, plus live-dev public pages       |
+
+Superusers can inspect global-scope operational records under `/admin/global`. The
+read-only `/admin/global/users` page lists Supabase Auth users with `tester`, `admin`,
+`superuser`, or event-admin grants; role changes remain an operational action outside the
+UI for now.
 
 ## Documentation
 

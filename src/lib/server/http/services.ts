@@ -6,6 +6,7 @@
  * Composition happens in one place, which makes the rest of the app import ready
  * to use services instead of repeatedly constructing dependencies by hand.
  */
+import { AdminUserService } from '$lib/application/services/adminUserService';
 import { AuditEventService } from '$lib/application/services/auditEventService';
 import { BookingService } from '$lib/application/services/bookingService';
 import { NotificationService } from '$lib/application/services/notificationService';
@@ -30,6 +31,7 @@ import { PinoEventLogger } from '$lib/infrastructure/logging/eventLogger';
 import { logger } from '$lib/infrastructure/logging/logger';
 import { InMemorySystemSettingsStore } from '$lib/infrastructure/system/inMemorySystemSettingsStore';
 import { appConfig } from '$lib/infrastructure/config/env.server';
+import { SupabaseAdminUserRepository } from '$lib/infrastructure/auth/adminUserRepository';
 import { customAlphabet } from 'nanoid/non-secure';
 
 /** Shared id generator used for booking and ticket ids. */
@@ -38,6 +40,7 @@ const randomIdGenerator = customAlphabet('23456789ABCDEFGHJKLMNPRSTUVWXYZ', 10);
 const eventRepository = new SupabaseEventRepository();
 const ticketTypeRepository = new SupabaseTicketTypeRepository();
 const auditEventRepository = new SupabaseAuditEventRepository();
+const adminUserRepository = new SupabaseAdminUserRepository();
 
 /** Infrastructure adapters used by the service layer. */
 const emailSender = new ResendEmailSender();
@@ -48,6 +51,7 @@ const eventLogger = new PinoEventLogger();
 const systemSettingsStore = new InMemorySystemSettingsStore();
 
 export const ticketTypeService = new TicketTypeService(ticketTypeRepository);
+export const adminUserService = new AdminUserService(adminUserRepository);
 export const reportingService = new ReportingService();
 export const systemService = new SystemService(systemSettingsStore);
 export { paymentProofStorage };
