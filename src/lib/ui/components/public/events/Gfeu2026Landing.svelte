@@ -114,12 +114,51 @@
 
 <section id="speakers" class="px-4 py-20">
 	<div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-		<div class="conference-panel p-3">
-			<img
-				src="https://res.cloudinary.com/dg2u7fmoc/image/upload/v1748121253/poster2_rdfj6w.png"
-				alt="Grand Feast EU and UK 2026"
-				class="relative z-10 h-auto w-full"
-			/>
+		<div
+			class="conference-panel relative min-h-[28rem] overflow-hidden p-6 sm:min-h-[36rem] sm:p-8"
+			aria-label="Grand Feast EU and UK 2026 Together visual"
+		>
+			<div class="absolute inset-0 bg-[#003847]"></div>
+			<div
+				class="absolute -left-24 top-20 h-14 w-[140%] rotate-[-18deg] bg-[#f3c15f]/18"
+				aria-hidden="true"
+			></div>
+			<div
+				class="absolute -right-32 bottom-28 h-16 w-[140%] rotate-[-18deg] bg-[#d64b55]/18"
+				aria-hidden="true"
+			></div>
+			<div
+				class="absolute inset-x-0 top-12 rotate-[-8deg] border-y border-[#f3c15f]/20 py-5 text-center text-6xl font-black uppercase leading-none text-white/5 sm:text-8xl"
+				aria-hidden="true"
+			>
+				Together
+			</div>
+			<div
+				class="absolute inset-x-0 bottom-16 rotate-[-8deg] border-y border-white/10 py-5 text-center text-6xl font-black uppercase leading-none text-white/5 sm:text-8xl"
+				aria-hidden="true"
+			>
+				Dublin
+			</div>
+
+			<div class="relative z-10 flex min-h-[25rem] flex-col justify-between sm:min-h-[32rem]">
+				<div>
+					<p class="conference-kicker">Grand Feast EU and UK</p>
+					<p class="mt-4 text-5xl font-black uppercase leading-none text-white sm:text-7xl">
+						Together
+					</p>
+					<p class="mt-2 text-5xl font-black uppercase leading-none text-[#f3c15f] sm:text-7xl">
+						2026
+					</p>
+				</div>
+
+				<div class="space-y-5 border-t border-white/15 pt-6">
+					<p class="text-xl font-black text-white">Dublin • October 3, 2026</p>
+					<p class="max-w-sm text-base leading-7 text-[#fff3df]/78">
+						One body, one voice, one table. A gathering for worship, community, and renewal.
+					</p>
+					<p class="font-black uppercase tracking-[0.2em] text-[#f3c15f]">Ephesians 2:21</p>
+				</div>
+			</div>
 		</div>
 
 		<div class="conference-panel p-6 sm:p-8">

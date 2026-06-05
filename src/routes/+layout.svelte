@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { signOutCurrentUser as signOutAuth } from '$lib/infrastructure/auth/authClient';
-	import { adminIndexRoute, publicRoutes } from '$lib/navigation/adminRoutes';
+	import { adminIndexRoute, adminRoutes, publicRoutes } from '$lib/navigation/adminRoutes';
 	import { getPublicEventPage } from '$lib/publicEvents';
 	import '../app.css';
 
@@ -64,6 +64,9 @@
 	$: publicFooterKicker = activePublicEventPage?.footerKicker ?? 'Events archive';
 	$: publicFooterTitle = activePublicEventPage?.footerTitle ?? 'Grand Feast Europe and UK';
 	$: publicFooterYear = activePublicEventPage?.footerCopyrightYear ?? new Date().getUTCFullYear();
+	$: organizerHref = $page.params.event_id
+		? adminRoutes($page.params.event_id).home
+		: adminIndexRoute;
 	$: adminThemeStyle = getAdminThemeStyle(
 		isGlobalAdminRoute ? neutralAdminTheme : ($page.data.event as AdminThemeEvent | undefined)
 	);
@@ -231,7 +234,7 @@
 						<a href={publicNav.faq} class="text-[#fff3df]/75 transition hover:text-white">FAQ</a>
 						<a href="/events" class="text-[#fff3df]/75 transition hover:text-white"> All Events </a>
 						<a
-							href={adminIndexRoute}
+							href={organizerHref}
 							target="_self"
 							rel="noopener"
 							class="text-[#fff3df]/75 transition hover:text-white"
