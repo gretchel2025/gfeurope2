@@ -5,6 +5,12 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-05
 
+- Added event-admin error styling so 404/error states under `/admin/events/<event_id>`
+  keep the admin shell, event context, and admin diagnostics.
+- Deferred admin payment proof previews behind `show_payment_proof_image=true` so
+  booking detail pages do not load uploaded proof files unless requested.
+- Restyled `/signin` with the neutral site-wide admin shell so global auth pages do not
+  inherit event-specific public marketing chrome.
 - Made event admin dashboard ticket counter cards data-driven from all event counter rows,
   including inactive compatibility ticket types for admin inventory visibility.
 - Added first-party Supabase audit events for booking, ticket, and manual counter actions,

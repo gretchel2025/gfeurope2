@@ -74,114 +74,132 @@
 	}
 </script>
 
-<section class="public-status-page">
-	<article class="conference-panel w-full max-w-md p-8 text-center">
-		<p class="conference-kicker">Organizer Access</p>
-		<h1 class="mt-3 text-3xl font-black text-white">Log In</h1>
+<main class="admin-page-surface flex min-h-screen items-start px-4 py-8 text-slate-900">
+	<section class="mx-auto flex w-full max-w-xl flex-col gap-6">
+		<header>
+			<p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Organizer Access</p>
+			<h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-950">Sign in</h1>
+			<p class="mt-1 text-sm text-slate-600">
+				Use your Grand Feast account to access organizer tools.
+			</p>
+		</header>
 
-		{#if $page.data.session?.user}
-			<div class="mt-6 space-y-4">
-				<p class="text-[#fff3df]/75">
-					Signed in as <span class="font-semibold text-white">{$page.data.session.user.email}</span>
-				</p>
-				<button
-					on:click={signOutCurrentUser}
-					disabled={signOutLoading}
-					aria-busy={signOutLoading}
-					class={`inline-flex w-full items-center justify-center gap-2 bg-[#d64b55] px-6 py-3 font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 ${
-						signOutLoading ? 'is-loading' : ''
-					}`}
-				>
-					<span class="button-spinner" aria-hidden="true"></span>
-					<span>{signOutLoading ? 'Signing out...' : 'Sign Out'}</span>
-				</button>
-
-				<a href={data.callbackURL} class="conference-button px-4 py-3 text-sm"> Continue </a>
-			</div>
-		{:else}
-			<div class="mt-6 space-y-4">
-				<p class="text-[#fff3df]/75">Not signed in</p>
-
-				{#if data.authError || signInError}
-					<p class="text-sm text-red-200">
-						{signInError || 'Sign-in could not be completed. Please try again.'}
+		<article class="admin-card w-full rounded-lg bg-white p-6 shadow-sm sm:p-8">
+			{#if $page.data.session?.user}
+				<div class="mt-6 space-y-4">
+					<p class="text-sm text-slate-600">
+						Signed in as
+						<span class="font-semibold text-slate-950">{$page.data.session.user.email}</span>
 					</p>
-				{/if}
-
-				{#if data.hasGoogleAuth}
 					<button
-						on:click={signInWithGoogle}
-						disabled={googleSignInLoading}
-						aria-busy={googleSignInLoading}
-						class={`conference-button w-full px-6 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${
-							googleSignInLoading ? 'is-loading' : ''
+						on:click={signOutCurrentUser}
+						disabled={signOutLoading}
+						aria-busy={signOutLoading}
+						class={`inline-flex w-full items-center justify-center gap-2 rounded-md bg-red-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60 ${
+							signOutLoading ? 'is-loading' : ''
 						}`}
 					>
 						<span class="button-spinner" aria-hidden="true"></span>
-						<span>{googleSignInLoading ? 'Opening Google...' : 'Sign in with Google'}</span>
+						<span>{signOutLoading ? 'Signing out...' : 'Sign out'}</span>
 					</button>
-				{/if}
 
-				{#if hasPasswordAuth}
-					<form
-						class="public-form-card space-y-3 text-left"
-						on:submit|preventDefault={signInWithPassword}
+					<a
+						href="/admin"
+						class="inline-flex w-full items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
 					>
-						{#if isLocalPasswordAuth}
-							<p class="bg-[#d99a32]/20 px-3 py-2 text-sm font-bold text-[#f3c15f]">
-								Local dev: use admin / password.
-							</p>
-						{/if}
+						Continue
+					</a>
+				</div>
+			{:else}
+				<div class="space-y-4">
+					<p class="text-sm text-slate-600">Not signed in</p>
 
-						<div class="space-y-1">
-							<label for="password-auth-email" class="block text-sm font-bold text-white">
-								{isLocalPasswordAuth ? 'Local dev username' : 'Email'}
-							</label>
-							<input
-								id="password-auth-email"
-								type="text"
-								bind:value={passwordAuthEmail}
-								autocomplete="username"
-								required
-								class="w-full px-3 py-2"
-							/>
-						</div>
+					{#if data.authError || signInError}
+						<p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+							{signInError || 'Sign-in could not be completed. Please try again.'}
+						</p>
+					{/if}
 
-						<div class="space-y-1">
-							<label for="password-auth-password" class="block text-sm font-bold text-white">
-								Password
-							</label>
-							<input
-								id="password-auth-password"
-								type="password"
-								bind:value={passwordAuthPassword}
-								autocomplete="current-password"
-								required
-								class="w-full px-3 py-2"
-							/>
-						</div>
-
+					{#if data.hasGoogleAuth}
 						<button
-							type="submit"
-							disabled={passwordSignInLoading}
-							aria-busy={passwordSignInLoading}
-							class={`conference-button w-full px-6 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${
-								passwordSignInLoading ? 'is-loading' : ''
+							on:click={signInWithGoogle}
+							disabled={googleSignInLoading}
+							aria-busy={googleSignInLoading}
+							class={`admin-button-primary inline-flex w-full items-center justify-center gap-2 rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60 ${
+								googleSignInLoading ? 'is-loading' : ''
 							}`}
 						>
 							<span class="button-spinner" aria-hidden="true"></span>
-							<span>{passwordSignInLoading ? 'Signing in...' : 'Sign in with password'}</span>
+							<span>{googleSignInLoading ? 'Opening Google...' : 'Sign in with Google'}</span>
 						</button>
-					</form>
-				{/if}
+					{/if}
 
-				{#if !data.hasGoogleAuth && !hasPasswordAuth}
-					<p class="text-sm text-red-200">
-						No auth provider is configured for this environment. Configure Supabase Auth environment
-						variables.
-					</p>
-				{/if}
-			</div>
-		{/if}
-	</article>
-</section>
+					{#if hasPasswordAuth}
+						<form
+							class="space-y-3 rounded-md border border-slate-200 bg-slate-50 p-4 text-left"
+							on:submit|preventDefault={signInWithPassword}
+						>
+							{#if isLocalPasswordAuth}
+								<p
+									class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800"
+								>
+									Local dev: use admin / password.
+								</p>
+							{/if}
+
+							<div class="space-y-1">
+								<label for="password-auth-email" class="block text-sm font-semibold text-slate-700">
+									{isLocalPasswordAuth ? 'Local dev username' : 'Email'}
+								</label>
+								<input
+									id="password-auth-email"
+									type="text"
+									bind:value={passwordAuthEmail}
+									autocomplete="username"
+									required
+									class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-950 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+								/>
+							</div>
+
+							<div class="space-y-1">
+								<label
+									for="password-auth-password"
+									class="block text-sm font-semibold text-slate-700"
+								>
+									Password
+								</label>
+								<input
+									id="password-auth-password"
+									type="password"
+									bind:value={passwordAuthPassword}
+									autocomplete="current-password"
+									required
+									class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-950 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+								/>
+							</div>
+
+							<button
+								type="submit"
+								disabled={passwordSignInLoading}
+								aria-busy={passwordSignInLoading}
+								class={`admin-button-primary inline-flex w-full items-center justify-center gap-2 rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60 ${
+									passwordSignInLoading ? 'is-loading' : ''
+								}`}
+							>
+								<span class="button-spinner" aria-hidden="true"></span>
+								<span>{passwordSignInLoading ? 'Signing in...' : 'Sign in with password'}</span>
+							</button>
+						</form>
+					{/if}
+
+					{#if !data.hasGoogleAuth && !hasPasswordAuth}
+						<p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+							No auth provider is configured for this environment. Configure Supabase Auth
+							environment variables.
+						</p>
+					{/if}
+				</div>
+			{/if}
+		</article>
+	</section>
+</main>

@@ -52,10 +52,12 @@
 	$: activePublicEventPage = getPublicEventPage($page.params.event_id);
 	$: publicNav = publicRoutes(activeEventId);
 	$: isAdminRoute = $page.url.pathname.startsWith('/admin');
+	$: isNeutralSiteRoute = isAdminRoute || $page.url.pathname === '/signin';
 	$: isGlobalAdminRoute =
 		$page.url.pathname === '/admin' ||
 		$page.url.pathname === '/admin/global' ||
-		$page.url.pathname.startsWith('/admin/global/');
+		$page.url.pathname.startsWith('/admin/global/') ||
+		$page.url.pathname === '/signin';
 	$: isEventsIndex = $page.url.pathname === '/events';
 	$: publicHomeHref = isEventsIndex ? '/events' : publicNav.home;
 	$: publicHeaderTitle = activePublicEventPage?.headerTitle ?? 'Grand Feast EU UK';
@@ -67,7 +69,7 @@
 	);
 </script>
 
-{#if isAdminRoute}
+{#if isNeutralSiteRoute}
 	<div class="admin-shell text-slate-950" style={adminThemeStyle}>
 		<header class="admin-header border-b border-slate-200/80 px-4 py-6 md:px-8">
 			<div
@@ -106,7 +108,7 @@
 						<li>
 							<a
 								href={adminIndexRoute}
-								class="text-slate-600 transition hover:text-slate-950"
+								class="text-slate-700 underline decoration-slate-400 underline-offset-4 transition hover:text-slate-950"
 								on:click={closeMenu}>Admin Home</a
 							>
 						</li>

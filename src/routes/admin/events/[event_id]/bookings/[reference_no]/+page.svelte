@@ -31,8 +31,36 @@
 	const proofUrlPath = proofUrl.split('?')[0].toLowerCase();
 	const isImageProof = /\.(png|jpe?g|gif|webp|avif)$/.test(proofUrlPath);
 
+	function bookingDetailsHref(options: {
+		loadHistory?: boolean;
+		showPaymentProofImage?: boolean;
+		hash?: string;
+	}) {
+		const params = new URLSearchParams();
+		if (options.loadHistory) {
+			params.set('load_history', 'true');
+		}
+		if (options.showPaymentProofImage) {
+			params.set('show_payment_proof_image', 'true');
+		}
+
+		const query = params.toString();
+		return `${routes.booking.details(booking.reference_no)}${query ? `?${query}` : ''}${
+			options.hash ?? ''
+		}`;
+	}
+
 	$: routes = adminRoutes($page.params.event_id);
-	$: loadHistoryHref = `${routes.booking.details(booking.reference_no)}?load_history=true#history`;
+	$: loadHistoryHref = bookingDetailsHref({
+		loadHistory: true,
+		showPaymentProofImage: data.paymentProofImageLoaded,
+		hash: '#history'
+	});
+	$: loadPaymentProofImageHref = bookingDetailsHref({
+		loadHistory: data.historyLoaded,
+		showPaymentProofImage: true,
+		hash: '#payment-proof'
+	});
 </script>
 
 <AdminPage
@@ -41,63 +69,71 @@
 	backHref={routes.booking.list}
 	backLabel="Back to Bookings"
 >
-	<AdminButton
-		slot="actions"
-		href={routes.booking.summary(booking.reference_no)}
-		disabled={!canViewSummary}
-	>
-		View summary
-	</AdminButton>
-
 	<div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-		<AdminCard title="Reservation">
-			<dl>
-				<DetailRow label="Reference No" value={booking.reference_no} />
-				<DetailRow label="Name">{booking.name} ({booking.email})</DetailRow>
-				<DetailRow label="City" value={booking.city} />
-				<DetailRow label="Book Date" value={bookDate} />
-				<DetailRow label="Payment Status" value={booking.payment_status} />
-				<DetailRow label="Ticket Type" value={formatTicketTypeLabel(booking.ticket_type)} />
-				<DetailRow label="Amount Total" value={`EUR ${booking.amount_total}`} />
-				<DetailRow label="Guests">{booking.guests.join(', ')}</DetailRow>
-				<DetailRow label="Ticket IDs">
-					{#if booking.ticket_ids.length > 0}
-						<div class="flex flex-wrap gap-2">
-							{#each booking.ticket_ids as ticketId}
-								<a
-									href={routes.ticket.details(ticketId)}
-									class="font-semibold text-blue-700 hover:underline"
-								>
-									{ticketId}
-								</a>
-							{/each}
-						</div>
-					{:else}
-						<span class="text-slate-500">No tickets generated yet</span>
-					{/if}
-				</DetailRow>
-			</dl>
-		</AdminCard>
-
 		<div class="min-w-0 lg:col-span-2">
+			<AdminCard title="Reservation">
+				<dl>
+					<DetailRow label="Reference No" value={booking.reference_no} />
+					<DetailRow label="Name">{booking.name} ({booking.email})</DetailRow>
+					<DetailRow label="City" value={booking.city} />
+					<DetailRow label="Book Date" value={bookDate} />
+					<DetailRow label="Payment Status" value={booking.payment_status} />
+					<DetailRow label="Ticket Type" value={formatTicketTypeLabel(booking.ticket_type)} />
+					<DetailRow label="Amount Total" value={`EUR ${booking.amount_total}`} />
+					<DetailRow label="Guests">{booking.guests.join(', ')}</DetailRow>
+					<DetailRow label="Ticket IDs">
+						{#if booking.ticket_ids.length > 0}
+							<div class="flex flex-wrap gap-2">
+								{#each booking.ticket_ids as ticketId}
+									<a
+										href={routes.ticket.details(ticketId)}
+										class="font-semibold text-blue-700 hover:underline"
+									>
+										{ticketId}
+									</a>
+								{/each}
+							</div>
+						{:else}
+							<span class="text-slate-500">No tickets generated yet</span>
+						{/if}
+					</DetailRow>
+				</dl>
+			</AdminCard>
+		</div>
+
+		<div id="payment-proof" class="min-w-0 scroll-mt-6 lg:col-span-2">
 			<AdminCard title="Payment Proof" subtitle="Uploaded bank-transfer receipt.">
 				{#if booking.payment_proof_url}
 					<div class="min-w-0 space-y-4">
-						<div class="overflow-hidden rounded-md border border-slate-200 bg-white">
-							{#if isImageProof}
-								<img
-									src={booking.payment_proof_url}
-									alt={`Payment proof for ${booking.reference_no}`}
-									class="max-h-[40rem] w-full object-contain"
-								/>
-							{:else}
-								<iframe
-									src={booking.payment_proof_url}
-									title={`Payment proof for ${booking.reference_no}`}
-									class="h-[28rem] w-full"
-								/>
-							{/if}
-						</div>
+						{#if data.paymentProofImageLoaded}
+							<div class="overflow-hidden rounded-md border border-slate-200 bg-white">
+								{#if isImageProof}
+									<img
+										src={booking.payment_proof_url}
+										alt={`Payment proof for ${booking.reference_no}`}
+										class="max-h-[40rem] w-full object-contain"
+									/>
+								{:else}
+									<iframe
+										src={booking.payment_proof_url}
+										title={`Payment proof for ${booking.reference_no}`}
+										class="h-[28rem] w-full"
+									/>
+								{/if}
+							</div>
+						{:else}
+							<div class="rounded-md border border-slate-200 bg-slate-50 p-4">
+								<p class="text-sm text-slate-600">
+									Preview is not loaded to save data. Load it only when you need to inspect the
+									uploaded proof.
+								</p>
+								<div class="mt-4">
+									<AdminButton href={loadPaymentProofImageHref} variant="secondary">
+										Load image
+									</AdminButton>
+								</div>
+							</div>
+						{/if}
 						<a
 							href={booking.payment_proof_url}
 							target="_blank"
@@ -111,6 +147,16 @@
 					<p class="text-sm text-slate-600">No proof has been uploaded.</p>
 				{/if}
 			</AdminCard>
+		</div>
+
+		<div class="min-w-0 lg:col-span-2">
+			<AuditHistorySection
+				title="Booking History"
+				subtitle="Audit events related to this booking."
+				events={data.auditEvents}
+				historyLoaded={data.historyLoaded}
+				{loadHistoryHref}
+			/>
 		</div>
 
 		<div class="min-w-0 lg:col-span-2">
@@ -153,16 +199,6 @@
 					{/if}
 				</div>
 			</AdminCard>
-		</div>
-
-		<div class="min-w-0 lg:col-span-2">
-			<AuditHistorySection
-				title="Booking History"
-				subtitle="Audit events related to this booking."
-				events={data.auditEvents}
-				historyLoaded={data.historyLoaded}
-				{loadHistoryHref}
-			/>
 		</div>
 	</div>
 

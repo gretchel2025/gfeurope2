@@ -11,6 +11,7 @@ export type ServerData = {
 	aRecord: Booking;
 	auditEvents: AuditEvent[];
 	historyLoaded: boolean;
+	paymentProofImageLoaded: boolean;
 };
 
 export const load: PageServerLoad = withKitErrors(async (event): Promise<ServerData> => {
@@ -20,13 +21,15 @@ export const load: PageServerLoad = withKitErrors(async (event): Promise<ServerD
 	} = await getEventServiceContext(event);
 	const referenceNo = requireRouteParam(event.params, 'reference_no');
 	const historyLoaded = event.url.searchParams.get('load_history') === 'true';
+	const paymentProofImageLoaded = event.url.searchParams.get('show_payment_proof_image') === 'true';
 
 	return {
 		aRecord: await bookingService.getRequiredById(referenceNo),
 		auditEvents: historyLoaded
 			? await auditEventService.listByEntity(eventId, AuditEntityType.Booking, referenceNo)
 			: [],
-		historyLoaded
+		historyLoaded,
+		paymentProofImageLoaded
 	};
 });
 
