@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-06
 
+- Documented hosted deployment terminology aliases: `prod`/`production` refer to
+  `live-prod`, and `stg`/`staging` refer to `live-dev`.
 - Added Playwright e2e regression commands for local, live-dev, and production, with
   production mutation gated behind an explicit booking canary command.
 - Documented that local Playwright e2e requires local Supabase, local auth setup, and the

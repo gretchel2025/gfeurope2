@@ -20,6 +20,9 @@ commits, PRs, or logs.
 - Netlify development branch origin URL: `https://dev--grand-feast-uk-x-europe.netlify.app`
 - Local development URL: `http://localhost:5173`
 
+Terminology aliases: `prod` and `production` mean `live-prod`; `stg` and `staging` mean
+`live-dev`.
+
 Netlify tracks the long-lived `dev` and `prod` branches. Pushing or merging to `dev`
 updates the development branch deploy; pushing or merging to `prod` updates production.
 The tester-facing development URL is `https://dev.grandfeast.eu`; the Netlify branch URL is
