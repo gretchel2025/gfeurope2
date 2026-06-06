@@ -13,6 +13,8 @@ test sends, site availability checks, or command-only housekeeping.
 - Documented that hosted Netlify deploys must be triggered through the watched remote Git
   branches (`dev` for live-dev, `prod` for live-prod), with CLI usage limited to
   inspection/configuration rather than manual deploy workarounds.
+- Documented that Codex should prefer the native Netlify plugin for deploy inspection and
+  fall back to the CLI only when plugin tools are unavailable or insufficient.
 - Documented that every live-dev or live-prod deployment must be followed by its
   corresponding hosted e2e suite after Netlify reports the deploy ready.
 - Added a local-dev payment-proof upload fallback so local booking e2e can submit without

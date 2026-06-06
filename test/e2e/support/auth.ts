@@ -26,7 +26,12 @@ export async function signInWithPassword(page: Page, redirectTo: string): Promis
 			await expect(page).toHaveURL(expectPath(redirectTo), { timeout: 20_000 });
 			return;
 		} catch (error) {
-			if (attempt === 2 || !page.url().includes('/signin')) {
+			if (!page.url().includes('/signin')) {
+				await page.goto(redirectTo);
+				await expect(page).toHaveURL(expectPath(redirectTo), { timeout: 20_000 });
+				return;
+			}
+			if (attempt === 2) {
 				throw error;
 			}
 			await page.waitForTimeout(1_000);

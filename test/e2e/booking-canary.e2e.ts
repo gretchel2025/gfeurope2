@@ -70,16 +70,8 @@ test.describe('mutating booking canary', () => {
 		const secondConfirmation = page.getByTestId('danger-confirmation-second');
 		const cancellationButton = page.getByRole('button', { name: 'Proceed with cancellation' });
 
-		for (const checkbox of [
-			firstConfirmation,
-			secondConfirmation,
-			firstConfirmation,
-			secondConfirmation
-		]) {
-			if (!(await checkbox.isChecked())) {
-				await checkbox.check();
-			}
-		}
+		await page.getByLabel('I confirm that I wish to cancel this booking.').click();
+		await page.getByLabel('I understand that cancelled bookings cannot be restored.').click();
 
 		await expect(firstConfirmation).toBeChecked();
 		await expect(secondConfirmation).toBeChecked();

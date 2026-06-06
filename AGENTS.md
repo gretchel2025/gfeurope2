@@ -144,8 +144,10 @@ long-lived GitHub branches, `origin/dev` must be equal to or ahead of `origin/pr
 Deploy hosted environments by updating the watched remote Git branches only: push or
 merge to `origin/dev` for live-dev, and push or merge to `origin/prod` for live-prod.
 Do not use manual Netlify deploy commands as a workaround for normal environment deploys.
-The Netlify CLI may be used to inspect project/deploy status, environment variables, and
-logs, but the deploy trigger should remain the remote branch update.
+Prefer the Codex-native Netlify plugin for inspecting project/deploy status, environment
+variables, and logs. Fall back to the Netlify CLI only when the plugin tools are
+unavailable or do not expose the needed read/configuration operation. The deploy trigger
+should remain the remote branch update.
 
 Whenever a live-dev deploy is triggered, watch the Netlify branch deploy until it is
 ready, then run `npm run test:e2e:live-dev`. Whenever a live-prod deploy is triggered,

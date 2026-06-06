@@ -28,8 +28,10 @@ production, and local app origins.
 
 Normal hosted deploys must be triggered by updating those watched remote Git branches.
 Do not use manual Netlify deploy commands for live-dev or live-prod as a workaround for
-normal deployment. The Netlify CLI is appropriate for inspecting deploy state, logs, and
-environment configuration, but not for bypassing the Git branch deployment path.
+normal deployment. Prefer the Codex-native Netlify plugin for inspecting deploy state,
+logs, and environment configuration. Use the Netlify CLI only as a fallback when the
+plugin is unavailable or lacks the needed read/configuration operation. Neither path
+should bypass the Git branch deployment flow.
 
 Every live-dev deploy should be watched until ready and followed by
 `npm run test:e2e:live-dev`. Every live-prod deploy should be watched until ready and
