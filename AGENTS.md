@@ -147,6 +147,12 @@ Do not use manual Netlify deploy commands as a workaround for normal environment
 The Netlify CLI may be used to inspect project/deploy status, environment variables, and
 logs, but the deploy trigger should remain the remote branch update.
 
+Whenever a live-dev deploy is triggered, watch the Netlify branch deploy until it is
+ready, then run `npm run test:e2e:live-dev`. Whenever a live-prod deploy is triggered,
+watch the Netlify production deploy until it is ready, then run `npm run test:e2e:prod`.
+Production mutating e2e remains opt-in only through `npm run test:e2e:prod:mutating`
+when the user explicitly requests a production booking canary.
+
 Before any production deploy:
 
 1. Run `git fetch origin dev prod --prune`.
@@ -156,8 +162,9 @@ Before any production deploy:
    live-dev first by updating `dev`.
 4. Apply required DB migrations and data changes to live-dev first, verify live-dev, then
    apply the same migration set to live-prod.
-5. Only after live-dev is verified, promote the same commits to `prod`, push, watch the
-   Netlify production deploy, and test live-prod.
+5. Only after live-dev is verified with `npm run test:e2e:live-dev`, promote the same
+   commits to `prod`, push, watch the Netlify production deploy, and run
+   `npm run test:e2e:prod`.
 
 Use `git log --oneline origin/dev..origin/prod` to find prod-only commits that still need
 to be reconciled back to `dev`. Prod-only hotfixes are emergency exceptions only; call

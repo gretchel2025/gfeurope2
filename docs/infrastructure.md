@@ -31,6 +31,12 @@ Do not use manual Netlify deploy commands for live-dev or live-prod as a workaro
 normal deployment. The Netlify CLI is appropriate for inspecting deploy state, logs, and
 environment configuration, but not for bypassing the Git branch deployment path.
 
+Every live-dev deploy should be watched until ready and followed by
+`npm run test:e2e:live-dev`. Every live-prod deploy should be watched until ready and
+followed by `npm run test:e2e:prod`. Production mutating e2e is not part of routine
+deployment verification; run `npm run test:e2e:prod:mutating` only when explicitly
+requesting a production booking canary.
+
 Operationally, live-dev is the required staging gate for live-prod. `origin/dev` should
 be equal to or ahead of `origin/prod`; `prod` can be an ancestor of `dev`, but `dev`
 should not be behind `prod`. Production deploys should promote commits that have already
@@ -580,6 +586,8 @@ Before changing infrastructure-sensitive behavior:
   dependencies are up: local Supabase, local auth setup, and the local app server. If the
   local runtime is unavailable, ask before starting `make run-local`; do not treat
   connection refusal as an application regression by itself.
+- After any Git-triggered live-dev deploy reaches ready, run `npm run test:e2e:live-dev`.
+- After any Git-triggered live-prod deploy reaches ready, run `npm run test:e2e:prod`.
 - Run `npm run test:e2e:live-dev` for live-dev release smoke checks when the app has been
   deployed and hosted service-account credentials are available locally.
 - Run `npm run test:e2e:prod` for production release smoke checks. This includes public
