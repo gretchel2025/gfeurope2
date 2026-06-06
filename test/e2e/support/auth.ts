@@ -5,7 +5,7 @@ export async function signInWithPassword(page: Page, redirectTo: string): Promis
 	const credentials = requireAdminCredentials();
 	await page.goto(`/signin?redirectTo=${encodeURIComponent(redirectTo)}`);
 
-	const signOutButton = page.getByRole('button', { name: 'Sign out' });
+	const signOutButton = page.getByRole('button', { name: 'Sign out' }).first();
 	if (await isVisible(signOutButton)) {
 		await page.getByRole('link', { name: 'Continue' }).click();
 		await expect(page).toHaveURL(expectPath('/admin'));

@@ -26,6 +26,11 @@ The tester-facing development URL is `https://dev.grandfeast.eu`; the Netlify br
 the origin behind it. Supabase Auth redirect URLs must include the public, branch-origin,
 production, and local app origins.
 
+Normal hosted deploys must be triggered by updating those watched remote Git branches.
+Do not use manual Netlify deploy commands for live-dev or live-prod as a workaround for
+normal deployment. The Netlify CLI is appropriate for inspecting deploy state, logs, and
+environment configuration, but not for bypassing the Git branch deployment path.
+
 Operationally, live-dev is the required staging gate for live-prod. `origin/dev` should
 be equal to or ahead of `origin/prod`; `prod` can be an ancestor of `dev`, but `dev`
 should not be behind `prod`. Production deploys should promote commits that have already

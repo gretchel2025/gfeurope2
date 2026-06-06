@@ -7,15 +7,20 @@ test.describe('authenticated admin read-only smoke', () => {
 		await signInWithPassword(page, '/admin');
 	});
 
-	for (const [pathname, heading] of [
+	const eventAdminPages = [
 		['/admin', 'Admin Directory'],
 		[adminEventPath(), 'Dashboard'],
 		[adminEventPath('/bookings'), 'Bookings'],
 		[adminEventPath('/tickets'), 'Tickets'],
 		[adminEventPath('/reports'), 'Reports'],
-		[adminEventPath('/system'), 'System Settings'],
 		[adminEventPath('/audit'), 'Audit']
-	] as const) {
+	] as Array<readonly [string, string]>;
+
+	if (e2eConfig.environment !== 'live-dev') {
+		eventAdminPages.push([adminEventPath('/system'), 'System Settings']);
+	}
+
+	for (const [pathname, heading] of eventAdminPages) {
 		test(`${pathname} loads`, async ({ page }) => {
 			await page.goto(pathname);
 

@@ -15,7 +15,8 @@ as an archive/portfolio page.
 
 Operational rule: live-dev is the required pre-production gate. The `dev` branch should
 be equal to or ahead of `prod`, and production deploys should promote commits that have
-already been deployed and verified on live-dev.
+already been deployed and verified on live-dev. Hosted deploys are triggered by pushing
+the watched Git branches: `dev` for live-dev and `prod` for live-prod.
 
 ## Infographics
 

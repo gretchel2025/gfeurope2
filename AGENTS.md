@@ -141,6 +141,12 @@ Live-dev is the required staging gate before live-prod. Because Netlify deploys 
 long-lived GitHub branches, `origin/dev` must be equal to or ahead of `origin/prod`;
 `prod` may be an ancestor of `dev`, but `dev` should not be behind `prod`.
 
+Deploy hosted environments by updating the watched remote Git branches only: push or
+merge to `origin/dev` for live-dev, and push or merge to `origin/prod` for live-prod.
+Do not use manual Netlify deploy commands as a workaround for normal environment deploys.
+The Netlify CLI may be used to inspect project/deploy status, environment variables, and
+logs, but the deploy trigger should remain the remote branch update.
+
 Before any production deploy:
 
 1. Run `git fetch origin dev prod --prune`.

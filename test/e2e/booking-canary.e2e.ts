@@ -66,9 +66,25 @@ test.describe('mutating booking canary', () => {
 		await expect(page.getByText('UNPAID')).toBeVisible();
 		await page.getByRole('link', { name: 'Cancel reservation' }).click();
 
-		await page.getByTestId('danger-confirmation-first').check();
-		await page.getByTestId('danger-confirmation-second').check();
-		await page.getByRole('button', { name: 'Proceed with cancellation' }).click();
+		const firstConfirmation = page.getByTestId('danger-confirmation-first');
+		const secondConfirmation = page.getByTestId('danger-confirmation-second');
+		const cancellationButton = page.getByRole('button', { name: 'Proceed with cancellation' });
+
+		for (const checkbox of [
+			firstConfirmation,
+			secondConfirmation,
+			firstConfirmation,
+			secondConfirmation
+		]) {
+			if (!(await checkbox.isChecked())) {
+				await checkbox.check();
+			}
+		}
+
+		await expect(firstConfirmation).toBeChecked();
+		await expect(secondConfirmation).toBeChecked();
+		await expect(cancellationButton).toBeEnabled();
+		await cancellationButton.click();
 
 		await expect(page.getByRole('heading', { name: 'Booking Cancelled' })).toBeVisible({
 			timeout: 20_000

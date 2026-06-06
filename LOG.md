@@ -10,6 +10,9 @@ test sends, site availability checks, or command-only housekeeping.
 - Documented that local Playwright e2e requires local Supabase, local auth setup, and the
   app server to be running first; agents should ask before starting `make run-local` if
   the runtime is unavailable.
+- Documented that hosted Netlify deploys must be triggered through the watched remote Git
+  branches (`dev` for live-dev, `prod` for live-prod), with CLI usage limited to
+  inspection/configuration rather than manual deploy workarounds.
 - Added a local-dev payment-proof upload fallback so local booking e2e can submit without
   Cloudinary credentials while hosted environments still require Cloudinary.
 - Documented the live-dev-first deployment rule: `dev` should be equal to or ahead of
