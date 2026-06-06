@@ -13,6 +13,10 @@ as an archive/portfolio page.
 - Production branch deploy:
   [prod--grand-feast-uk-x-europe.netlify.app](https://prod--grand-feast-uk-x-europe.netlify.app/)
 
+Operational rule: live-dev is the required pre-production gate. The `dev` branch should
+be equal to or ahead of `prod`, and production deploys should promote commits that have
+already been deployed and verified on live-dev.
+
 ## Infographics
 
 ![Grand Feast app architecture current codebase map](docs/grand-feast-architecture-infographic-v2.png)

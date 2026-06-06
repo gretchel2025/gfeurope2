@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-06
 
+- Documented the live-dev-first deployment rule: `dev` should be equal to or ahead of
+  `prod`, and production deploys should promote already-verified live-dev commits.
 - Added hosted `ENABLE_EMAIL_PASSWORD_AUTH` support for managed service-account
   password login, plus a production Codex superuser setup helper with local-only secret
   storage.

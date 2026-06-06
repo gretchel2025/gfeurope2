@@ -26,6 +26,13 @@ The tester-facing development URL is `https://dev.grandfeast.eu`; the Netlify br
 the origin behind it. Supabase Auth redirect URLs must include the public, branch-origin,
 production, and local app origins.
 
+Operationally, live-dev is the required staging gate for live-prod. `origin/dev` should
+be equal to or ahead of `origin/prod`; `prod` can be an ancestor of `dev`, but `dev`
+should not be behind `prod`. Production deploys should promote commits that have already
+been deployed and verified on live-dev. If a requested production deploy target is not
+reachable from `origin/dev`, update and verify live-dev first, including any required DB
+migrations or data changes, before applying the same change to live-prod.
+
 ## DNS
 
 The registrar is Squarespace Domains, while authoritative DNS is managed in Cloudflare.
@@ -92,6 +99,20 @@ Netlify context mapping:
 
 - `production` / `prod` branch: `77 Labs Prod`
 - `branch-deploy` / `dev` branch: `77 Labs Test`
+
+Before promoting to production, run:
+
+```bash
+git fetch origin dev prod --prune
+git merge-base --is-ancestor origin/prod origin/dev
+git log --oneline origin/dev..origin/prod
+```
+
+The merge-base command should pass, and the log command should be empty in steady state.
+If `origin/dev..origin/prod` shows commits, reconcile those commits into `dev` and verify
+the live-dev deploy before continuing with normal production work. Emergency prod-only
+hotfixes must be explicitly treated as exceptions and reconciled back to `dev`
+immediately after production is stable.
 
 For Netlify `branch-deploy` context, use:
 

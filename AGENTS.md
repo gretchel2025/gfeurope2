@@ -135,6 +135,29 @@ workflows with ad hoc SQL when the goal is to verify production behavior. Normal
 admin actions should write the same `grandfeasteu.audit_events` rows as a human
 superuser.
 
+## Deployment Promotion Rule
+
+Live-dev is the required staging gate before live-prod. Because Netlify deploys from the
+long-lived GitHub branches, `origin/dev` must be equal to or ahead of `origin/prod`;
+`prod` may be an ancestor of `dev`, but `dev` should not be behind `prod`.
+
+Before any production deploy:
+
+1. Run `git fetch origin dev prod --prune`.
+2. Confirm the steady-state invariant:
+   `git merge-base --is-ancestor origin/prod origin/dev`.
+3. If a production target commit is not already reachable from `origin/dev`, deploy it to
+   live-dev first by updating `dev`.
+4. Apply required DB migrations and data changes to live-dev first, verify live-dev, then
+   apply the same migration set to live-prod.
+5. Only after live-dev is verified, promote the same commits to `prod`, push, watch the
+   Netlify production deploy, and test live-prod.
+
+Use `git log --oneline origin/dev..origin/prod` to find prod-only commits that still need
+to be reconciled back to `dev`. Prod-only hotfixes are emergency exceptions only; call
+them out explicitly and reconcile them back into `dev` immediately after production is
+stable.
+
 ## Activity Logging
 
 Keep `LOG.md` as a concise running record of meaningful project activity. Add entries for changes that affect app behavior, infrastructure, deployment, provider configuration, data/auth/email behavior, or operational procedures. Do not log routine checks or one-off verification tasks such as sending a test email, confirming a site is live, running standard tests, or checking command output unless the result changes project state or reveals a decision worth preserving.
