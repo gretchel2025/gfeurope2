@@ -36,6 +36,7 @@ export interface BookingRepository {
 	markPaid(referenceNo: string): Promise<void>;
 	cancelReservation(referenceNo: string): Promise<void>;
 	appendTicketId(referenceNo: string, ticketId: string): Promise<void>;
+	markTicketsSentToClient(referenceNo: string): Promise<void>;
 }
 
 /** Persistence contract for append-only domain audit events. */

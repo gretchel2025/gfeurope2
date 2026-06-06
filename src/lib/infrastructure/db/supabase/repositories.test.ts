@@ -25,6 +25,7 @@ describe('Supabase repositories', () => {
 		amount_total: 40,
 		guests: ['Ada Lovelace', 'Grace Hopper'],
 		ticket_ids: [],
+		tickets_sent_to_client: false,
 		payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 	};
 	const ticket: Ticket = {
@@ -93,6 +94,7 @@ describe('Supabase repositories', () => {
 						amount_total: booking.amount_total,
 						guests: booking.guests,
 						ticket_ids: booking.ticket_ids,
+						tickets_sent_to_client: booking.tickets_sent_to_client,
 						payment_proof_url: booking.payment_proof_url
 					},
 					error: null
@@ -184,6 +186,34 @@ describe('Supabase repositories', () => {
 					p_event_id: 'event-test',
 					p_reference_no: 'B123',
 					p_ticket_id: 'T123'
+				}
+			]
+		]);
+	});
+
+	it('marks event-scoped booking tickets as sent to the client', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			rpc: async (name: string, params: Record<string, unknown>) => {
+				calls.push([name, params]);
+				return { data: null, error: null };
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseBookingRepository(client, 'event-test');
+		await repository.markTicketsSentToClient('B123');
+
+		expect(calls).toEqual([
+			['schema', 'grandfeasteu'],
+			[
+				'mark_booking_tickets_sent_to_client',
+				{
+					p_event_id: 'event-test',
+					p_reference_no: 'B123'
 				}
 			]
 		]);

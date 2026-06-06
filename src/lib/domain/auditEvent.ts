@@ -5,6 +5,7 @@ export const AuditAction = {
 	BookingCancelled: 'booking.cancelled',
 	BookingTicketsGenerated: 'booking.tickets_generated',
 	BookingTicketsEmailSent: 'booking.tickets_email_sent',
+	BookingMarkedTicketsAsSent: 'booking.marked_tickets_as_sent',
 	TicketCreated: 'ticket.created',
 	TicketCheckedIn: 'ticket.checked_in',
 	TicketCheckedOut: 'ticket.checked_out',

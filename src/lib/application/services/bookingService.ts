@@ -94,6 +94,7 @@ export class BookingService {
 			).totalAmount,
 			guests: input.guests,
 			ticket_ids: [],
+			tickets_sent_to_client: false,
 			payment_proof_url: input.payment_proof_url
 		};
 

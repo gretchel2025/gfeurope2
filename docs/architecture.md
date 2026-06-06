@@ -311,6 +311,7 @@ Current audit action values are:
 - `booking.cancelled`
 - `booking.tickets_generated`
 - `booking.tickets_email_sent`
+- `booking.marked_tickets_as_sent`
 - `ticket.created`
 - `ticket.checked_in`
 - `ticket.checked_out`
@@ -319,7 +320,10 @@ Current audit action values are:
 Audit actor types are `public`, `admin`, and `system`. Audit entity types are `booking`,
 `ticket`, and `ticket_counter`. Metadata should capture useful operational context such as
 ticket type, quantity, amount, generated ticket ids, and previous/new state where useful.
-It must not store secrets, tokens, API keys, uploaded file contents, payment proof URLs,
+Ticket email sends use both `booking.tickets_email_sent` after delivery succeeds and
+`booking.marked_tickets_as_sent` after the booking `tickets_sent_to_client` flag is
+persisted. Metadata must not store secrets, tokens, API keys, uploaded file contents,
+payment proof URLs,
 or email bodies.
 
 ## Runtime Access Model

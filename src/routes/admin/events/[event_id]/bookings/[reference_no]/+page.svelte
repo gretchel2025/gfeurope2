@@ -81,6 +81,10 @@
 					<DetailRow label="Ticket Type" value={formatTicketTypeLabel(booking.ticket_type)} />
 					<DetailRow label="Amount Total" value={`EUR ${booking.amount_total}`} />
 					<DetailRow label="Guests">{booking.guests.join(', ')}</DetailRow>
+					<DetailRow
+						label="Tickets Email Sent"
+						value={booking.tickets_sent_to_client ? 'Yes' : 'No'}
+					/>
 					<DetailRow label="Ticket IDs">
 						{#if booking.ticket_ids.length > 0}
 							<div class="flex flex-wrap gap-2">

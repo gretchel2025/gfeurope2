@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-06
 
+- Added `bookings.tickets_sent_to_client` so admin ticket email sends persist a
+  booking-level `Tickets Email Sent` state and audit the follow-up flag update.
 - Added `booking.tickets_email_sent` audit events after successful admin ticket email sends.
 
 ## 2026-06-05

@@ -26,6 +26,7 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 		amount_total: 35,
 		guests: ['Ada Lovelace'],
 		ticket_ids: [],
+		tickets_sent_to_client: false,
 		...overrides
 	};
 }
@@ -90,7 +91,8 @@ function makeService(
 		list: vi.fn(async () => bookings),
 		markPaid: vi.fn(),
 		cancelReservation: vi.fn(),
-		appendTicketId: vi.fn()
+		appendTicketId: vi.fn(),
+		markTicketsSentToClient: vi.fn()
 	} satisfies BookingRepository;
 
 	const eventRepository = {

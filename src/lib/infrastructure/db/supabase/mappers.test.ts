@@ -26,6 +26,7 @@ describe('Supabase persistence mappers', () => {
 				amount_total: '65.00',
 				guests: ['Ada'],
 				ticket_ids: ['T123'],
+				tickets_sent_to_client: true,
 				payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 			})
 		).toEqual({
@@ -40,6 +41,7 @@ describe('Supabase persistence mappers', () => {
 			amount_total: 65,
 			guests: ['Ada'],
 			ticket_ids: ['T123'],
+			tickets_sent_to_client: true,
 			payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 		});
 	});

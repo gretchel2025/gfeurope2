@@ -7,7 +7,7 @@
  * Splitting those concerns keeps templates near the use cases while still
  * allowing the actual sending mechanism to be swapped out cleanly.
  */
-import { NotFoundError } from '$lib/application/errors';
+import { ConflictError, NotFoundError } from '$lib/application/errors';
 import type { BookingRepository, EmailSender, TicketRepository } from '$lib/application/ports';
 import type { AuditEventService } from '$lib/application/services/auditEventService';
 import {
@@ -84,6 +84,23 @@ export class NotificationService {
 				payment_status: booking.payment_status
 			}
 		});
+		await this.bookingRepository.markTicketsSentToClient(booking.reference_no);
+		await this.auditEventService.record({
+			...actor,
+			event_id: booking.event_id,
+			action: AuditAction.BookingMarkedTicketsAsSent,
+			entity_type: AuditEntityType.Booking,
+			entity_id: booking.reference_no,
+			metadata: {
+				booking_reference_no: booking.reference_no,
+				email: booking.email,
+				ticket_type: booking.ticket_type,
+				quantity: tickets.length,
+				ticket_ids: tickets.map((ticket) => ticket.ticket_id),
+				previous_tickets_sent_to_client: booking.tickets_sent_to_client,
+				tickets_sent_to_client: true
+			}
+		});
 	}
 
 	/** Sends a reminder for a booking that is still awaiting payment. */
@@ -120,12 +137,22 @@ export class NotificationService {
 
 	/** Loads all concrete ticket records for the given booking. */
 	private async loadTickets(booking: Booking) {
+		if (booking.ticket_ids.length === 0) {
+			throw new ConflictError('booking has no generated tickets');
+		}
+
 		const tickets = await Promise.all(
 			booking.ticket_ids.map(
 				async (ticketId) => await this.ticketRepository.findByTicketId(ticketId)
 			)
 		);
-		return tickets.filter((ticket): ticket is NonNullable<typeof ticket> => Boolean(ticket));
+		const loadedTickets = tickets.filter((ticket): ticket is NonNullable<typeof ticket> =>
+			Boolean(ticket)
+		);
+		if (loadedTickets.length !== booking.ticket_ids.length) {
+			throw new ConflictError('booking ticket records are incomplete');
+		}
+		return loadedTickets;
 	}
 }
 

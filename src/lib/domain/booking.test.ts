@@ -21,6 +21,7 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 		amount_total: 35,
 		guests: ['Ada'],
 		ticket_ids: [],
+		tickets_sent_to_client: false,
 		...overrides
 	};
 }

@@ -23,6 +23,7 @@ export type Booking = {
 	amount_total: number;
 	guests: string[];
 	ticket_ids: string[];
+	tickets_sent_to_client: boolean;
 	payment_proof_url?: string;
 };
 

@@ -24,6 +24,7 @@ export type SupabaseBookingRow = {
 	amount_total: number | string;
 	guests: string[] | null;
 	ticket_ids: string[] | null;
+	tickets_sent_to_client?: boolean | null;
 	payment_proof_url?: string | null;
 };
 
@@ -105,6 +106,7 @@ export function mapBooking(row: SupabaseBookingRow): Booking {
 		amount_total: Number(row.amount_total),
 		guests: row.guests ?? [],
 		ticket_ids: row.ticket_ids ?? [],
+		tickets_sent_to_client: row.tickets_sent_to_client ?? false,
 		payment_proof_url: row.payment_proof_url ?? undefined
 	};
 }

@@ -193,8 +193,8 @@ Audit event fields use these stable values:
 
 - `action`: `booking.created`, `booking.payment_reminder_sent`, `booking.marked_paid`,
   `booking.cancelled`, `booking.tickets_generated`, `booking.tickets_email_sent`,
-  `ticket.created`, `ticket.checked_in`, `ticket.checked_out`, and
-  `ticket_counter.available_added`
+  `booking.marked_tickets_as_sent`, `ticket.created`, `ticket.checked_in`,
+  `ticket.checked_out`, and `ticket_counter.available_added`
 - `actor_type`: `public`, `admin`, or `system`
 - `entity_type`: `booking`, `ticket`, or `ticket_counter`
 
