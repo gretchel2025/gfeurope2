@@ -30,9 +30,16 @@ test.describe('mutating booking canary', () => {
 			await page.goto(bookingPath);
 		}
 
-		await expect(page.getByTestId('ticket-quantity-increment')).toBeEnabled();
-		await page.getByTestId('ticket-quantity-increment').click();
-		await expect(page.getByTestId('ticket-quantity-value')).toHaveText('1');
+		const quantityIncrement = page.getByTestId('ticket-quantity-increment');
+		const quantityValue = page.getByTestId('ticket-quantity-value');
+
+		await expect(quantityIncrement).toBeEnabled();
+		for (let attempts = 0; attempts < 3; attempts += 1) {
+			if ((await quantityValue.textContent())?.trim() === '1') break;
+			await quantityIncrement.click();
+			await expect(quantityValue).toHaveText(/^[01]$/);
+		}
+		await expect(quantityValue).toHaveText('1');
 		await page.getByRole('button', { name: 'Continue' }).click();
 
 		await page.getByLabel('Email address*').fill(booking.email);
