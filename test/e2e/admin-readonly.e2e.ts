@@ -25,7 +25,7 @@ test.describe('authenticated admin read-only smoke', () => {
 			await page.goto(pathname);
 
 			await expect(page).toHaveURL(expectPath(pathname));
-			await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+			await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
 		});
 	}
 
@@ -34,7 +34,7 @@ test.describe('authenticated admin read-only smoke', () => {
 
 		await page.goto('/admin/global');
 		await expect(page).toHaveURL(expectPath('/admin/global/events'));
-		await expect(page.getByRole('heading', { name: 'Events' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Events', exact: true })).toBeVisible();
 
 		for (const [pathname, heading] of [
 			['/admin/global/events', 'Events'],
@@ -42,7 +42,7 @@ test.describe('authenticated admin read-only smoke', () => {
 		] as const) {
 			await page.goto(pathname);
 			await expect(page).toHaveURL(expectPath(pathname));
-			await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+			await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
 		}
 	});
 });
