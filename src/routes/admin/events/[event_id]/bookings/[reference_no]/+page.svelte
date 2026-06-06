@@ -70,7 +70,7 @@
 	backLabel="Back to Bookings"
 >
 	<div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-		<div class="min-w-0 lg:col-span-2">
+		<div class="min-w-0 [&>.admin-card]:h-full">
 			<AdminCard title="Reservation">
 				<dl>
 					<DetailRow label="Reference No" value={booking.reference_no} />
@@ -102,6 +102,48 @@
 						{/if}
 					</DetailRow>
 				</dl>
+			</AdminCard>
+		</div>
+
+		<div class="min-w-0 [&>.admin-card]:h-full">
+			<AdminCard title="Actions" subtitle="Use these when the booking changes state.">
+				<div class="space-y-3">
+					{#if canSendPaymentReminderEmail}
+						<form action="?/sendPaymentReminderEmail" method="POST">
+							<AdminButton type="submit" variant="warning" fullWidth
+								>Send payment reminder</AdminButton
+							>
+						</form>
+					{/if}
+
+					<form action="?/markPaid" method="POST">
+						<AdminButton type="submit" variant="success" disabled={!canMarkAsPaid} fullWidth
+							>Mark paid</AdminButton
+						>
+					</form>
+
+					{#if canGenerateTicketsAction}
+						<form action="?/generateTickets" method="POST">
+							<AdminButton type="submit" fullWidth>Generate tickets</AdminButton>
+						</form>
+					{/if}
+
+					{#if canSendTicketsEmail}
+						<form action="?/sendTicketsEmail" method="POST">
+							<AdminButton type="submit" fullWidth>Email tickets</AdminButton>
+						</form>
+					{/if}
+
+					{#if canCancel}
+						<AdminButton
+							href={routes.booking.cancel(booking.reference_no)}
+							variant="danger"
+							fullWidth
+						>
+							Cancel reservation
+						</AdminButton>
+					{/if}
+				</div>
 			</AdminCard>
 		</div>
 
@@ -142,7 +184,7 @@
 							href={booking.payment_proof_url}
 							target="_blank"
 							rel="noreferrer"
-							class="inline-flex w-full min-w-0 items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+							class="inline-flex min-w-0 break-words text-sm font-semibold text-blue-700 underline underline-offset-4 transition hover:text-blue-900"
 						>
 							Open proof in new tab
 						</a>
@@ -161,48 +203,6 @@
 				historyLoaded={data.historyLoaded}
 				{loadHistoryHref}
 			/>
-		</div>
-
-		<div class="min-w-0 lg:col-span-2">
-			<AdminCard title="Actions" subtitle="Use these when the booking changes state.">
-				<div class="space-y-3">
-					{#if canSendPaymentReminderEmail}
-						<form action="?/sendPaymentReminderEmail" method="POST">
-							<AdminButton type="submit" variant="warning" fullWidth
-								>Send payment reminder</AdminButton
-							>
-						</form>
-					{/if}
-
-					<form action="?/markPaid" method="POST">
-						<AdminButton type="submit" variant="success" disabled={!canMarkAsPaid} fullWidth
-							>Mark paid</AdminButton
-						>
-					</form>
-
-					{#if canGenerateTicketsAction}
-						<form action="?/generateTickets" method="POST">
-							<AdminButton type="submit" fullWidth>Generate tickets</AdminButton>
-						</form>
-					{/if}
-
-					{#if canSendTicketsEmail}
-						<form action="?/sendTicketsEmail" method="POST">
-							<AdminButton type="submit" fullWidth>Email tickets</AdminButton>
-						</form>
-					{/if}
-
-					{#if canCancel}
-						<AdminButton
-							href={routes.booking.cancel(booking.reference_no)}
-							variant="danger"
-							fullWidth
-						>
-							Cancel reservation
-						</AdminButton>
-					{/if}
-				</div>
-			</AdminCard>
 		</div>
 	</div>
 
