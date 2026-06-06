@@ -28,7 +28,7 @@ export const load: PageServerLoad = (event): ServerData => {
 		passwordAuthMode: getPasswordAuthMode({
 			mode,
 			supabaseUrl: appConfig.supabaseUrl,
-			enableLiveDevPasswordAuth: appConfig.enableLiveDevPasswordAuth
+			enableEmailPasswordAuth: appConfig.enableEmailPasswordAuth
 		}),
 		callbackURL: redirectTo ?? publicRoutes(appConfig.appEventId).home,
 		authError: event.url.searchParams.has('error')

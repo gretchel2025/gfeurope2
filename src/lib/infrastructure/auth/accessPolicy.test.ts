@@ -312,12 +312,12 @@ describe('access policy', () => {
 		expect(getPathEventId('/signin')).toBeNull();
 	});
 
-	it('enables password auth only for local Supabase or flagged live dev', () => {
+	it('enables password auth for local Supabase or flagged hosted deployments', () => {
 		expect(
 			getPasswordAuthMode({
 				mode: 'local',
 				supabaseUrl: 'http://127.0.0.1:54321',
-				enableLiveDevPasswordAuth: false
+				enableEmailPasswordAuth: false
 			})
 		).toBe('local');
 
@@ -325,9 +325,17 @@ describe('access policy', () => {
 			getPasswordAuthMode({
 				mode: 'live-dev',
 				supabaseUrl: 'https://guoqhigzyfisvtnlrbjw.supabase.co',
-				enableLiveDevPasswordAuth: true
+				enableEmailPasswordAuth: true
 			})
-		).toBe('live-dev');
+		).toBe('deployment');
+
+		expect(
+			getPasswordAuthMode({
+				mode: 'production',
+				supabaseUrl: 'https://erhrykkyhsygnonyfbis.supabase.co',
+				enableEmailPasswordAuth: true
+			})
+		).toBe('deployment');
 	});
 
 	it('keeps password auth disabled outside the approved modes', () => {
@@ -335,7 +343,7 @@ describe('access policy', () => {
 			getPasswordAuthMode({
 				mode: 'live-dev',
 				supabaseUrl: 'https://guoqhigzyfisvtnlrbjw.supabase.co',
-				enableLiveDevPasswordAuth: false
+				enableEmailPasswordAuth: false
 			})
 		).toBe('none');
 
@@ -343,7 +351,7 @@ describe('access policy', () => {
 			getPasswordAuthMode({
 				mode: 'production',
 				supabaseUrl: 'https://erhrykkyhsygnonyfbis.supabase.co',
-				enableLiveDevPasswordAuth: true
+				enableEmailPasswordAuth: false
 			})
 		).toBe('none');
 
@@ -351,7 +359,7 @@ describe('access policy', () => {
 			getPasswordAuthMode({
 				mode: 'local',
 				supabaseUrl: 'https://guoqhigzyfisvtnlrbjw.supabase.co',
-				enableLiveDevPasswordAuth: true
+				enableEmailPasswordAuth: true
 			})
 		).toBe('none');
 	});

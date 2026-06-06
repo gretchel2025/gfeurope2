@@ -9,7 +9,7 @@ import {
 
 export type RuntimeAccessMode = 'local' | 'production' | 'live-dev';
 export type AccessDenialReason = 'sign-in-required' | 'permission-denied';
-export type PasswordAuthMode = 'none' | 'local' | 'live-dev';
+export type PasswordAuthMode = 'none' | 'local' | 'deployment';
 export type AdminAccessScope = 'none' | 'directory' | 'event' | 'global';
 
 export type RuntimeAccessInput = {
@@ -70,14 +70,14 @@ export function getRuntimeAccessMode(input: RuntimeAccessInput): RuntimeAccessMo
 export function getPasswordAuthMode(input: {
 	mode: RuntimeAccessMode;
 	supabaseUrl: string;
-	enableLiveDevPasswordAuth: boolean;
+	enableEmailPasswordAuth: boolean;
 }): PasswordAuthMode {
 	if (input.mode === 'local' && isLocalSupabaseUrl(input.supabaseUrl)) {
 		return 'local';
 	}
 
-	if (input.mode === 'live-dev' && input.enableLiveDevPasswordAuth) {
-		return 'live-dev';
+	if (input.mode !== 'local' && input.enableEmailPasswordAuth) {
+		return 'deployment';
 	}
 
 	return 'none';

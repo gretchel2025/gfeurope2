@@ -38,6 +38,9 @@ setup-local-auth:
 setup-live-dev-service-accounts:
 	node scripts/setup-live-dev-service-accounts.mjs
 
+setup-prod-service-account:
+	node scripts/setup-prod-service-account.mjs
+
 lint:
 	npm run lint
 

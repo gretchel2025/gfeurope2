@@ -112,6 +112,29 @@ read-only `/admin/global/users` page lists Supabase Auth users with `tester`, `a
 `superuser`, or event-admin grants; role changes remain an operational action outside the
 UI for now.
 
+Hosted email/password sign-in is controlled by one deploy-context flag:
+`ENABLE_EMAIL_PASSWORD_AUTH=true`. Use it for live-dev or production only when a managed
+service-account password login is intended. Service-account passwords and hosted
+service-role keys stay in each operator's local untracked `.env` or password manager, not
+in Netlify.
+
+The production Codex service account uses local `.env` keys:
+
+```bash
+PROD_CODEX_SUPERUSER_EMAIL=codex-prod@grandfeast.eu
+PROD_CODEX_SUPERUSER_PASSWORD=
+PROD_SUPABASE_URL=https://erhrykkyhsygnonyfbis.supabase.co
+PROD_SUPABASE_SERVICE_ROLE_KEY=
+```
+
+Run `make setup-prod-service-account` to create or rotate it. The helper refuses any
+Supabase URL except `77 Labs Prod`, confirms the email, and writes
+`roles=["superuser"]` to `app_metadata`. The account must use the normal app UI/routes
+and application services for operational verification; do not bypass audit-sensitive
+workflows with ad hoc SQL when the goal is to verify production behavior. Normal mutating
+admin actions should write the same `grandfeasteu.audit_events` rows as a human
+superuser.
+
 ## Activity Logging
 
 Keep `LOG.md` as a concise running record of meaningful project activity. Add entries for changes that affect app behavior, infrastructure, deployment, provider configuration, data/auth/email behavior, or operational procedures. Do not log routine checks or one-off verification tasks such as sending a test email, confirming a site is live, running standard tests, or checking command output unless the result changes project state or reveals a decision worth preserving.
@@ -201,6 +224,8 @@ migrations just because they exist after a pull.
   update an offline-friendly local Supabase email/password user.
 - `make grant-local-roles EMAIL=you@example.com [ROLES=tester,admin,superuser] [EVENT_ROLES=gfeu2026:admin]`: grant
   local Supabase Auth roles and event roles after first local sign-in.
+- `make setup-prod-service-account`: create or rotate the production Codex superuser
+  service account from local-only `PROD_*` values in `.env`.
 - `npm run build` or `make build`: create the production build.
 - `npm run check` or `make test-unit`: run Svelte/TypeScript validation with `svelte-check`.
 - `npm run test`: run Vitest once.
@@ -222,6 +247,6 @@ Recent commits use short, imperative, lowercase subjects like `refactor legal pa
 
 ## Security & Configuration Tips
 
-Do not commit secrets. Copy `.env.example` to `.env` for local development and fill in values such as `APP_BASE_URL`, `APP_EVENT_ID`, `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and server-only `SUPABASE_SERVICE_ROLE_KEY`. The app also reads initial ticket counter values, `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, and Cloudinary credentials. Local development uses the Supabase CLI stack; never point local work at hosted production/test unless you are intentionally verifying hosted behavior. Resend and Cloudinary can be left empty unless those integrations are needed locally.
+Do not commit secrets. Copy `.env.example` to `.env` for local development and fill in values such as `APP_BASE_URL`, `APP_EVENT_ID`, `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and server-only `SUPABASE_SERVICE_ROLE_KEY`. Hosted password auth is controlled by `ENABLE_EMAIL_PASSWORD_AUTH`; service-account passwords and hosted service-role keys stay in local untracked `.env` values or a password manager, not in Netlify. The app also reads initial ticket counter values, `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, and Cloudinary credentials. Local development uses the Supabase CLI stack; never point local work at hosted production/test unless you are intentionally verifying hosted behavior. Resend and Cloudinary can be left empty unless those integrations are needed locally.
 
 Auth uses Supabase Auth with Google OAuth. Application roles live in Supabase Auth `app_metadata.roles` and event admin grants live in `app_metadata.event_roles`; do not use user-editable metadata for authorization. Booking, ticket, and counter data lives in the `grandfeasteu` Supabase schema (`events`, `ticket_types`, `bookings`, `tickets`, `ticket_counters`) scoped by event route ids such as `/events/gfeu2026` and `/admin/events/gfeu2026`; `APP_EVENT_ID` is only the default event for root redirects and setup/bootstrap defaults. Production uses `77 Labs Prod`, live development uses `77 Labs Test`, and local development uses the Supabase CLI local database.

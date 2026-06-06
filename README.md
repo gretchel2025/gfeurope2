@@ -112,6 +112,11 @@ Global roles live in `app_metadata.roles`; event admin grants live in
 `/admin/events/<event_id>` requires that event's admin grant or `superuser`, and
 `/admin/global` is superuser-only.
 
+Codex service-account access uses the same Supabase Auth and app authorization model as
+human operators. Hosted email/password login is enabled only when the deploy context sets
+`ENABLE_EMAIL_PASSWORD_AUTH=true`; service-account passwords stay in local untracked
+`.env` files or a password manager, not in Netlify.
+
 ## Documentation
 
 - Architecture map: [`docs/architecture.md`](docs/architecture.md)

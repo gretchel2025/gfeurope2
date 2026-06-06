@@ -84,6 +84,12 @@ they are not read by the public app, are not Netlify env vars, and must not be c
 Use `make setup-live-dev-service-accounts` to create or rotate the live-dev Supabase Auth
 users in `77 Labs Test`.
 
+For production Codex verification, keep the production service-account values in local
+`.env` as `PROD_*` values and run `make setup-prod-service-account`. Do not add the
+production password or production service-role key to Netlify; Netlify only needs the
+non-secret `ENABLE_EMAIL_PASSWORD_AUTH=true` flag in contexts where hosted password login
+is allowed.
+
 ## First-Time Local Auth Setup
 
 1. Copy `.env.example` to `.env`.

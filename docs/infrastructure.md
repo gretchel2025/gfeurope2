@@ -82,8 +82,8 @@ Important deployment-related env vars:
 - `PUBLIC_SUPABASE_URL`
 - `PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `ENABLE_LIVE_DEV_PASSWORD_AUTH`, branch-deploy only, enables the live-dev
-  email/password form for service-account testing
+- `ENABLE_EMAIL_PASSWORD_AUTH`, enables the hosted email/password form for explicitly
+  managed service-account access in the current deploy context
 - `SECRETS_SCAN_OMIT_KEYS`, set to `SUPABASE_SERVICE_ROLE_KEY` so Netlify does not block
   deploys on legitimate server-side references to the secret env var name
 - `CONTEXT` and `BRANCH`, supplied by Netlify
@@ -101,11 +101,14 @@ APP_EVENT_ID=gfeu2026
 PUBLIC_SUPABASE_URL=<77 Labs Test Supabase URL>
 PUBLIC_SUPABASE_PUBLISHABLE_KEY=<77 Labs Test publishable key>
 SUPABASE_SERVICE_ROLE_KEY=<77 Labs Test service-role key>
-ENABLE_LIVE_DEV_PASSWORD_AUTH=true
+ENABLE_EMAIL_PASSWORD_AUTH=true
 ```
 
-The `dev` branch deploy is rebuilt automatically when `dev` is pushed. After changing
-Netlify env vars, trigger a redeploy so the branch deploy runtime picks up the new values.
+For Netlify `production` context, use the matching `77 Labs Prod` Supabase values and set
+`ENABLE_EMAIL_PASSWORD_AUTH=true` only when the Codex production service account is
+intended to be usable. The `dev` branch deploy is rebuilt automatically when `dev` is
+pushed. After changing Netlify env vars, trigger a redeploy so the runtime picks up the
+new values.
 
 ## Database
 
@@ -279,15 +282,16 @@ Example metadata:
 }
 ```
 
-Live-dev service-account password auth:
+Hosted service-account password auth:
 
-- `77 Labs Test` may enable Supabase email/password auth for automation-friendly
-  service accounts. Production should remain Google-only.
-- Netlify branch deploys use `ENABLE_LIVE_DEV_PASSWORD_AUTH=true` to show the password
-  form on live-dev. Production ignores this flag.
+- `77 Labs Test` and `77 Labs Prod` may enable Supabase email/password auth for
+  automation-friendly service accounts.
+- Netlify deploy contexts use `ENABLE_EMAIL_PASSWORD_AUTH=true` to show the hosted
+  password form. Leave it false in any context where service-account password access is
+  not intended.
 - Service account passwords are not Netlify env vars and are never committed. Store them
   only in each developer's untracked local `.env` or password manager.
-- Local `.env` may define:
+- Local `.env` may define live-dev accounts:
 
   ```bash
   LIVE_DEV_CODEX_TESTER_EMAIL=codex-tester@grandfeast.eu
@@ -304,6 +308,21 @@ Live-dev service-account password auth:
 - `codex-tester@grandfeast.eu` gets `roles=["tester"]`.
 - `codex-admin@grandfeast.eu` gets `roles=["tester"]` plus
   `event_roles.gfeu2026=["admin"]`.
+- Local `.env` may also define the production Codex superuser service account:
+
+  ```bash
+  PROD_CODEX_SUPERUSER_EMAIL=codex-prod@grandfeast.eu
+  PROD_CODEX_SUPERUSER_PASSWORD=
+  PROD_SUPABASE_URL=https://erhrykkyhsygnonyfbis.supabase.co
+  PROD_SUPABASE_SERVICE_ROLE_KEY=
+  ```
+
+- Run `make setup-prod-service-account` to create or update the production account. The
+  helper refuses any Supabase URL except `77 Labs Prod`, confirms the email, and writes
+  `roles=["superuser"]` to `app_metadata`.
+- The production Codex account is an ordinary signed-in app user. Any mutating admin
+  action it performs should go through the same application services and first-party
+  audit-event writes as a human superuser action.
 
 Local Supabase role setup:
 
