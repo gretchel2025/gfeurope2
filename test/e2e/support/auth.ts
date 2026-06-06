@@ -17,10 +17,21 @@ export async function signInWithPassword(page: Page, redirectTo: string): Promis
 	}
 
 	const emailLabel = e2eConfig.environment === 'local' ? /Local dev username|Email/i : /^Email$/i;
-	await page.getByLabel(emailLabel).fill(credentials.email);
-	await page.getByLabel('Password').fill(credentials.password);
-	await page.getByRole('button', { name: 'Sign in with password' }).click();
-	await expect(page).toHaveURL(expectPath(redirectTo), { timeout: 20_000 });
+	for (let attempt = 1; attempt <= 2; attempt += 1) {
+		await page.getByLabel(emailLabel).fill(credentials.email);
+		await page.getByLabel('Password').fill(credentials.password);
+		await page.getByRole('button', { name: 'Sign in with password' }).click();
+
+		try {
+			await expect(page).toHaveURL(expectPath(redirectTo), { timeout: 20_000 });
+			return;
+		} catch (error) {
+			if (attempt === 2 || !page.url().includes('/signin')) {
+				throw error;
+			}
+			await page.waitForTimeout(1_000);
+		}
+	}
 }
 
 async function isVisible(locator: Locator): Promise<boolean> {
