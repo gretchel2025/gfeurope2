@@ -30,8 +30,9 @@ test.describe('mutating booking canary', () => {
 			await page.goto(bookingPath);
 		}
 
-		await expect(page.getByRole('button', { name: '+' })).toBeEnabled();
-		await page.getByRole('button', { name: '+' }).click();
+		await expect(page.getByTestId('ticket-quantity-increment')).toBeEnabled();
+		await page.getByTestId('ticket-quantity-increment').click();
+		await expect(page.getByTestId('ticket-quantity-value')).toHaveText('1');
 		await page.getByRole('button', { name: 'Continue' }).click();
 
 		await page.getByLabel('Email address*').fill(booking.email);

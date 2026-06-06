@@ -253,7 +253,11 @@ migrations just because they exist after a pull.
 - `npm run check` or `make test-unit`: run Svelte/TypeScript validation with `svelte-check`.
 - `npm run test`: run Vitest once.
 - `npm run test:watch`: run Vitest in watch mode.
-- `npm run test:e2e`: run Playwright e2e against a running local app.
+- `npm run test:e2e`: run Playwright e2e against local Supabase plus the local app. When
+  asked to run local e2e, first ensure required dependencies are up: local Supabase,
+  local auth setup, and the local app server. If they are not already running, ask before
+  starting `make run-local`. The goal is to test app behavior with its required runtime,
+  not to verify that the app fails when dependencies are absent.
 - `npm run test:e2e:live-dev`: run Playwright e2e against `https://dev.grandfeast.eu`.
 - `npm run test:e2e:prod`: run read-only plus authenticated admin e2e against production.
 - `npm run test:e2e:prod:mutating`: run the production booking canary only when explicitly

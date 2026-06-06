@@ -571,6 +571,10 @@ Before changing infrastructure-sensitive behavior:
 - Run `npm run check`, `npm run test`, and `npm run lint` for code changes.
 - Run `npm run build` when changing routes, deployment config, auth wiring, or server load
   behavior.
+- Run `npm run test:e2e` for local release smoke checks only after required local
+  dependencies are up: local Supabase, local auth setup, and the local app server. If the
+  local runtime is unavailable, ask before starting `make run-local`; do not treat
+  connection refusal as an application regression by itself.
 - Run `npm run test:e2e:live-dev` for live-dev release smoke checks when the app has been
   deployed and hosted service-account credentials are available locally.
 - Run `npm run test:e2e:prod` for production release smoke checks. This includes public

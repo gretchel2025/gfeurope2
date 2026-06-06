@@ -7,6 +7,9 @@ test sends, site availability checks, or command-only housekeeping.
 
 - Added Playwright e2e regression commands for local, live-dev, and production, with
   production mutation gated behind an explicit booking canary command.
+- Documented that local Playwright e2e requires local Supabase, local auth setup, and the
+  app server to be running first; agents should ask before starting `make run-local` if
+  the runtime is unavailable.
 - Added a local-dev payment-proof upload fallback so local booking e2e can submit without
   Cloudinary credentials while hosted environments still require Cloudinary.
 - Documented the live-dev-first deployment rule: `dev` should be equal to or ahead of

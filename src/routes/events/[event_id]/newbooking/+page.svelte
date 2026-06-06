@@ -494,14 +494,21 @@
 									<button
 										type="button"
 										class="conference-button-secondary h-12 w-12 text-2xl"
+										data-testid="ticket-quantity-decrement"
 										on:click={decreaseQuantity}
 									>
 										−
 									</button>
-									<div class="min-w-16 text-center text-4xl font-black text-white">{quantity}</div>
+									<div
+										class="min-w-16 text-center text-4xl font-black text-white"
+										data-testid="ticket-quantity-value"
+									>
+										{quantity}
+									</div>
 									<button
 										type="button"
 										class="conference-button-secondary h-12 w-12 text-2xl"
+										data-testid="ticket-quantity-increment"
 										on:click={increaseQuantity}
 										disabled={quantity >= maxQuantity}
 									>

@@ -209,12 +209,20 @@ when switching between admin events.
 
 ## Local E2E Checks
 
-Playwright e2e tests expect the target app to already be running. For local checks, start
-the local Supabase stack and app with `make run-local`, then run:
+Playwright e2e tests expect the target app to already be running. For local checks,
+`make run-local` is a required prerequisite because it starts the local Supabase stack,
+seeds local auth, and starts the app. Start it first, then run:
 
 ```bash
 npm run test:e2e
 ```
+
+If an agent is asked to run local e2e, it should first ensure required dependencies are
+up: local Supabase, local auth setup, and the local app server. If they are not already
+running, it should ask before starting `make run-local`. The goal of local e2e is to test
+application behavior with its required runtime, not to verify that the app fails when
+dependencies are absent. A connection-refused result means the local runtime was not
+prepared; it is not a product test failure by itself.
 
 The local run uses the local-only `admin` / `password` login unless `E2E_ADMIN_EMAIL` and
 `E2E_ADMIN_PASSWORD` are set. The mutating booking canary creates one Standard booking,
