@@ -571,3 +571,10 @@ Before changing infrastructure-sensitive behavior:
 - Run `npm run check`, `npm run test`, and `npm run lint` for code changes.
 - Run `npm run build` when changing routes, deployment config, auth wiring, or server load
   behavior.
+- Run `npm run test:e2e:live-dev` for live-dev release smoke checks when the app has been
+  deployed and hosted service-account credentials are available locally.
+- Run `npm run test:e2e:prod` for production release smoke checks. This includes public
+  read-only checks and authenticated admin read-only checks.
+- Do not run production mutating e2e as routine deployment verification. Only run
+  `npm run test:e2e:prod:mutating` when the user explicitly requests a production booking
+  canary; it requires `E2E_ALLOW_PROD_MUTATION=true`.

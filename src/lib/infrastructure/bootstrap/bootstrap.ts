@@ -15,7 +15,11 @@ import { createEventServices } from '$lib/server/http/services';
 export async function bootstrapApplication(): Promise<void> {
 	logger.info('[INFO] bootstrapApplication() initializing app...');
 
-	assertCloudinaryConfigured();
+	if (appConfig.dev) {
+		logger.warn('[WARN] bootstrap: skipping Cloudinary startup check in local dev');
+	} else {
+		assertCloudinaryConfigured();
+	}
 	await ensureCounters();
 
 	logger.info('[INFO] bootstrapApplication() initialization done');

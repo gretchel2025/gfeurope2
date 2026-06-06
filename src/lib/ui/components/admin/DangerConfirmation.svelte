@@ -13,6 +13,7 @@
 			<input
 				class="mt-1 h-4 w-4 rounded border-red-300"
 				type="checkbox"
+				data-testid="danger-confirmation-first"
 				bind:checked={firstChecked}
 			/>
 			<span>{firstLabel}</span>
@@ -22,6 +23,7 @@
 			<input
 				class="mt-1 h-4 w-4 rounded border-red-300"
 				type="checkbox"
+				data-testid="danger-confirmation-second"
 				bind:checked={secondChecked}
 			/>
 			<span>{secondLabel}</span>

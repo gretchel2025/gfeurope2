@@ -253,6 +253,11 @@ migrations just because they exist after a pull.
 - `npm run check` or `make test-unit`: run Svelte/TypeScript validation with `svelte-check`.
 - `npm run test`: run Vitest once.
 - `npm run test:watch`: run Vitest in watch mode.
+- `npm run test:e2e`: run Playwright e2e against a running local app.
+- `npm run test:e2e:live-dev`: run Playwright e2e against `https://dev.grandfeast.eu`.
+- `npm run test:e2e:prod`: run read-only plus authenticated admin e2e against production.
+- `npm run test:e2e:prod:mutating`: run the production booking canary only when explicitly
+  requested; requires `E2E_ALLOW_PROD_MUTATION=true`.
 - `npm run lint`: run Prettier check and ESLint.
 - `npm run format`: format the repository with Prettier.
 
@@ -262,7 +267,7 @@ Use TypeScript and Svelte throughout the app. Follow the existing formatting rul
 
 ## Testing Guidelines
 
-Place unit tests next to the implementation and name them `*.test.ts`. Current coverage focuses on domain logic, so new business rules should add or update tests in `src/lib/domain/` first. Run `npm run test`, `npm run check`, and `npm run lint` before opening a merge request; run `npm run build` when routes, server loading, or deployment behavior changes.
+Place unit tests next to the implementation and name them `*.test.ts`. Current coverage focuses on domain logic, so new business rules should add or update tests in `src/lib/domain/` first. Run `npm run test`, `npm run check`, and `npm run lint` before opening a merge request; run `npm run build` when routes, server loading, or deployment behavior changes. Use Playwright e2e for release smoke checks against local, live-dev, and production. Mutating e2e is routine on local/live-dev but must not run against production unless the user explicitly requests it.
 
 ## Commit & Pull Request Guidelines
 

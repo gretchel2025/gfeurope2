@@ -60,6 +60,7 @@ make run-local        # start local Supabase, seed local auth, and run the app
 make run              # start the Vite dev server
 npm run check         # Svelte and TypeScript validation
 npm run test          # Vitest once
+npm run test:e2e      # Playwright e2e against a running local app
 npm run lint          # Prettier check and ESLint
 npm run build         # production build
 ```

@@ -207,6 +207,25 @@ index and global admin pages should remain neutral. Event admin pages use DB-bac
 colors from the selected `events` row so local testing should make it visually obvious
 when switching between admin events.
 
+## Local E2E Checks
+
+Playwright e2e tests expect the target app to already be running. For local checks, start
+the local Supabase stack and app with `make run-local`, then run:
+
+```bash
+npm run test:e2e
+```
+
+The local run uses the local-only `admin` / `password` login unless `E2E_ADMIN_EMAIL` and
+`E2E_ADMIN_PASSWORD` are set. The mutating booking canary creates one Standard booking,
+uploads `test/resources/fake-bank-transfer-receipt.jpg`, then cancels the unpaid
+reservation through admin UI. Local dev stores payment proof inline when Cloudinary env
+vars are empty, so Cloudinary is not required for local e2e booking submission.
+
+Set `E2E_BASE_URL` to target another already-running local origin, and `E2E_EVENT_ID` to
+target a different event id. Do not point local e2e at hosted databases unless the goal is
+explicit hosted verification.
+
 Local schema changes must still use the repository migration workflow. Create migrations
 with `npx supabase migration new <descriptive_name>`, edit the generated SQL file, apply
 with `npx supabase migration up --local`, and verify with `npx supabase migration list

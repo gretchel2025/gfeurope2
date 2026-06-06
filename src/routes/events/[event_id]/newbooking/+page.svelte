@@ -412,6 +412,7 @@
 						<div class="grid gap-4 md:grid-cols-2">
 							{#each ticketOptions as option}
 								<label
+									data-testid={`ticket-option-${option.ticket_type_id}`}
 									class={`conference-card block p-5 text-left transition focus-within:ring-2 focus-within:ring-[#f3c15f]/40 ${
 										ticketType === option.ticket_type_id
 											? 'border-[#f3c15f] ring-2 ring-[#f3c15f]/35'
@@ -776,6 +777,7 @@
 					{:else}
 						<button
 							type="submit"
+							data-testid="reserve-booking-button"
 							class={`conference-button px-8 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${
 								isSubmitting ? 'is-loading' : ''
 							}`}
@@ -869,6 +871,7 @@
 					<div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 						<button
 							type="button"
+							data-testid="cancel-non-refundable-submit"
 							class="conference-button-secondary px-6 py-3 text-sm"
 							on:click={cancelNonRefundableConfirmation}
 							disabled={isSubmitting}
@@ -877,6 +880,7 @@
 						</button>
 						<button
 							type="button"
+							data-testid="confirm-non-refundable-submit"
 							class={`conference-button px-6 py-3 text-sm ${isSubmitting ? 'is-loading' : ''}`}
 							aria-busy={isSubmitting}
 							disabled={isSubmitting}

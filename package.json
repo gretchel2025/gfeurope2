@@ -11,7 +11,12 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"test:e2e": "npm run test:e2e:local",
+		"test:e2e:local": "E2E_ENV=local playwright test",
+		"test:e2e:live-dev": "E2E_ENV=live-dev playwright test",
+		"test:e2e:prod": "E2E_ENV=prod playwright test",
+		"test:e2e:prod:mutating": "E2E_ENV=prod E2E_ALLOW_PROD_MUTATION=true playwright test"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.60.0",

@@ -5,6 +5,10 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-06
 
+- Added Playwright e2e regression commands for local, live-dev, and production, with
+  production mutation gated behind an explicit booking canary command.
+- Added a local-dev payment-proof upload fallback so local booking e2e can submit without
+  Cloudinary credentials while hosted environments still require Cloudinary.
 - Documented the live-dev-first deployment rule: `dev` should be equal to or ahead of
   `prod`, and production deploys should promote already-verified live-dev commits.
 - Added hosted `ENABLE_EMAIL_PASSWORD_AUTH` support for managed service-account
