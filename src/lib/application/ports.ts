@@ -73,6 +73,7 @@ export interface TicketRepository {
 	insert(ticket: Ticket): Promise<string>;
 	findByTicketId(ticketId: string): Promise<Ticket | null>;
 	list(): Promise<Ticket[]>;
+	updateName(ticketId: string, name: string): Promise<void>;
 	updateStatus(ticketId: string, status: TicketStatus): Promise<void>;
 	deleteByTicketId(ticketId: string): Promise<void>;
 }

@@ -101,6 +101,43 @@ export class TicketService {
 		return await this.ticketRepository.list();
 	}
 
+	/** Updates only the ticket holder name for admin correction requests. */
+	async updateName(
+		ticketId: string,
+		name: string,
+		actor: AuditActor = systemAuditActor
+	): Promise<void> {
+		const newName = this.normalizeTicketName(name);
+		const ticket = await this.getRequiredById(ticketId);
+		const previousName = ticket.name;
+		if (previousName === newName) {
+			return;
+		}
+
+		await this.ticketRepository.updateName(ticketId, newName);
+		await this.auditEventService.record({
+			...actor,
+			event_id: this.eventId,
+			action: AuditAction.TicketNameUpdated,
+			entity_type: AuditEntityType.Ticket,
+			entity_id: ticket.ticket_id,
+			metadata: {
+				ticket_id: ticket.ticket_id,
+				previous_ticket_guest_name: previousName,
+				ticket_guest_name: newName,
+				ticket_type: ticket.ticket_type,
+				booking_reference_no: ticket.booking_reference_no,
+				status: ticket.status
+			}
+		});
+		this.eventLogger.log('TICKET_NAME_UPDATED', 'system', {
+			ticket_id: ticket.ticket_id,
+			previous_ticket_guest_name: previousName,
+			ticket_guest_name: newName,
+			related_booking_reference_no: ticket.booking_reference_no
+		});
+	}
+
 	/** Deletes a ticket by id. */
 	async deleteById(ticketId: string): Promise<void> {
 		await this.ticketRepository.deleteByTicketId(ticketId);
@@ -195,5 +232,16 @@ export class TicketService {
 		const part1 = this.randomIdGenerator(3);
 		const part2 = this.randomIdGenerator(4);
 		return `T${part1}-${part2}`;
+	}
+
+	private normalizeTicketName(name: string): string {
+		const normalized = name.trim().replace(/\s+/g, ' ');
+		if (!normalized) {
+			throw new ValidationError('ticket name is required');
+		}
+		if (normalized.length > 160) {
+			throw new ValidationError('ticket name must be 160 characters or fewer');
+		}
+		return normalized;
 	}
 }

@@ -23,6 +23,15 @@ test sends, site availability checks, or command-only housekeeping.
   on admin booking details so failed confirmation sends are visible to operators.
 - Added Resend confirmation email delivery tracking so provider webhook events can mark
   booking confirmations as delivered or failed, and clarified admin email success copy.
+- Updated GFEU event branding to Grand Feast Europe across public pages, email templates,
+  sender examples, and event description data.
+- Added the same €5 end-of-August early-bird discount to GrandFeast Plus ticket data and
+  public ticket-card display.
+- Disabled event-index links for archived or past events while leaving them listed with
+  disabled View event controls.
+- Added Bro Bo Sanchez as the main event speaker in the GFEU 2026 public landing message.
+- Added an admin-only ticket holder name edit action with a `ticket.name_updated` audit
+  event for customer-requested corrections.
 
 ## 2026-06-06
 
@@ -193,7 +202,7 @@ test sends, site availability checks, or command-only housekeeping.
 - Migrated transactional email delivery from Postmark to Resend using the verified
   `grandfeast.eu` sending domain.
 - Configured Resend environment variables for live dev and production, with mail sent
-  from `Grand Feast EU and UK <help@grandfeast.eu>`.
+  from `Grand Feast Europe <help@grandfeast.eu>`.
 - Redeployed live dev from the `dev` branch after the Resend migration.
 - Added local Supabase Google OAuth provider configuration using env-based client
   credentials.

@@ -754,6 +754,42 @@ describe('Supabase repositories', () => {
 		]);
 	});
 
+	it('updates ticket names in the app schema with event id scoping', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			update: (value: Record<string, unknown>) => {
+				calls.push(['update', value]);
+				return query;
+			},
+			eq: (column: string, value: unknown) => {
+				calls.push(['eq', [column, value]]);
+				return query;
+			},
+			then: (resolve: (value: { data: null; error: null }) => void) => {
+				resolve({ data: null, error: null });
+			}
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseTicketRepository(client, 'event-test');
+		await repository.updateName('T123', 'Grace Hopper');
+
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'tickets']);
+		expect(calls).toContainEqual(['update', { name: 'Grace Hopper' }]);
+		expect(calls).toContainEqual(['eq', ['event_id', 'event-test']]);
+		expect(calls).toContainEqual(['eq', ['ticket_id', 'T123']]);
+	});
+
 	it('wraps failed counter increments as infrastructure errors', async () => {
 		const client = {
 			schema: () => client,

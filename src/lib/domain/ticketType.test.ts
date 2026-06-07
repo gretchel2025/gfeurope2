@@ -56,6 +56,26 @@ describe('ticket type pricing', () => {
 		);
 	});
 
+	it('applies the GrandFeast Plus early bird flat discount before expiry', () => {
+		const ticketType = makeTicketType({
+			ticket_type_id: 'GRAND_FEAST_PLUS',
+			label: 'GrandFeast Plus',
+			base_price: 65,
+			early_bird_discount_available_until: '2026-08-31T23:59:59+01:00',
+			early_bird_discount_amount: 5
+		});
+
+		expect(computeTicketPricing(ticketType, 1, new Date('2026-08-01T12:00:00+01:00'))).toEqual(
+			expect.objectContaining({
+				unitPrice: 60,
+				subtotalAmount: 65,
+				discountAmount: 5,
+				totalAmount: 60,
+				earlyBirdDiscountActive: true
+			})
+		);
+	});
+
 	it('applies bulk discount rate when minimum quantity is reached', () => {
 		const ticketType = makeTicketType({
 			ticket_type_id: 'GRAND_FEAST_PLUS',

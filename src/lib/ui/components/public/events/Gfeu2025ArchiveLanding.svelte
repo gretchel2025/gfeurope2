@@ -31,7 +31,7 @@
 						Called To More
 					</h1>
 					<p class="text-2xl font-black uppercase leading-tight text-[#fff5e5] sm:text-4xl">
-						Grand Feast EU and UK 2025
+						Grand Feast Europe 2025
 					</p>
 					<p class="max-w-2xl text-xl font-bold text-[#f3d6a0]">September 20, 2025</p>
 					<p class="max-w-2xl text-lg italic leading-8 text-white/78">
@@ -44,7 +44,7 @@
 			<div class="archive-poster-frame">
 				<img
 					src="/poster2.png"
-					alt="Called To More Grand Feast EU and UK 2025 poster with Bo Sanchez"
+					alt="Called To More Grand Feast Europe 2025 poster with Bo Sanchez"
 					class="h-auto w-full"
 				/>
 			</div>
@@ -56,7 +56,7 @@
 			<div class="archive-image-panel">
 				<img
 					src="/poster1.png"
-					alt="Called To More archive banner for Grand Feast EU and UK 2025"
+					alt="Called To More archive banner for Grand Feast Europe 2025"
 					class="h-full w-full object-cover"
 				/>
 			</div>

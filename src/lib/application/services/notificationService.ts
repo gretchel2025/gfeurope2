@@ -29,10 +29,15 @@ import type { Ticket } from '$lib/domain/ticket';
 const supportEmail = 'help@grandfeast.eu';
 
 const eventDetails = {
-	name: 'Grand Feast EU and UK 2026',
-	formalName: '2026 EU and UK Grand Feast in Dublin',
+	name: 'Grand Feast Europe 2026',
+	formalName: 'Grand Feast Europe 2026 in Dublin',
 	date: 'October 3, 2026',
-	time: ['12:00 PM Registration', '12:30 PM Holy Mass', '1:30 PM Event Proper'],
+	time: [
+		'12:00 PM Registration',
+		'1:00 PM Holy Mass',
+		'2:00 PM Event Proper',
+		'4:30 PM End of Program'
+	],
 	venue: "St. Helen's Hotel",
 	address: ['Stillorgan Road, Blackrock, Ireland', 'Dublin A94 V6W3']
 };
@@ -213,7 +218,7 @@ function buildReservationEmail(booking: Booking): string {
 			${paragraph(
 				`If you need help with your booking, please contact us at <a href="mailto:${supportEmail}" style="color:#005b72;font-weight:700;">${supportEmail}</a>.`
 			)}
-			${paragraph('Best regards,<br><strong>Grand Feast EU and UK Team</strong>')}
+			${paragraph('Best regards,<br><strong>Grand Feast Europe Team</strong>')}
 		`
 	});
 }
@@ -246,7 +251,7 @@ function buildTicketsEmail(booking: Booking, tickets: Ticket[]): string {
 			${guestList(booking.guests)}
 			${eventDetailsBlock()}
 			${paragraph('We hope you have a great time at the event!')}
-			${paragraph('Have a blessed day!<br><strong>Grand Feast EU and UK Team</strong>')}
+			${paragraph('Have a blessed day!<br><strong>Grand Feast Europe Team</strong>')}
 		`
 	});
 }
@@ -276,7 +281,7 @@ function buildPaymentReminderEmail(booking: Booking): string {
 			${paragraph(
 				`If you need help with your booking, please contact us at <a href="mailto:${supportEmail}" style="color:#005b72;font-weight:700;">${supportEmail}</a>.`
 			)}
-			${paragraph('Best regards,<br><strong>Grand Feast EU and UK Team</strong>')}
+			${paragraph('Best regards,<br><strong>Grand Feast Europe Team</strong>')}
 		`
 	});
 }
@@ -334,7 +339,7 @@ function buildEmailShell(input: {
 								<tr>
 									<td style="padding:22px 28px;background:#052a3a;color:#fff3df;">
 										<p style="margin:0;font-size:13px;line-height:1.6;">
-											<strong>Grand Feast EU and UK Team</strong><br>
+											<strong>Grand Feast Europe Team</strong><br>
 											Need help? <a href="mailto:${supportEmail}" style="color:#f3c15f;font-weight:700;">${supportEmail}</a>
 										</p>
 									</td>

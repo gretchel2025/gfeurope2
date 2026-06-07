@@ -313,6 +313,7 @@ Current audit action values are:
 - `booking.tickets_email_sent`
 - `booking.marked_tickets_as_sent`
 - `ticket.created`
+- `ticket.name_updated`
 - `ticket.checked_in`
 - `ticket.checked_out`
 - `ticket_counter.available_added`

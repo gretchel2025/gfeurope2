@@ -63,9 +63,12 @@
 			<div class="bg-white rounded-lg p-6 shadow-md mb-6">
 				<h2 class="text-2xl font-bold text-yellow-600 mb-4">Event Details</h2>
 				<ul class="list-disc pl-5 space-y-1">
-					<li>2026 EU and UK Grand Feast in Dublin</li>
+					<li>Grand Feast Europe 2026 in Dublin</li>
 					<li>Date: October 3, 2026</li>
-					<li>Time: 12:00 PM Registration, 12:30 PM Holy Mass, 1:30 PM Event Proper</li>
+					<li>
+						Time: 12:00 PM Registration, 1:00 PM Holy Mass, 2:00 PM Event Proper, 4:30 PM
+						End of Program
+					</li>
 					<li>Venue: St. Helen's Hotel</li>
 					<li>Address: Stillorgan Road, Blackrock, Ireland, Dublin A94 V6W3</li>
 				</ul>
@@ -74,7 +77,7 @@
 			<div class="text-center text-sm text-gray-600">
 				<p>We hope you have a great time at the event!</p>
 				<p class="mt-1">Have a blessed day!</p>
-				<p>The Grand Feast EU and UK Team</p>
+				<p>The Grand Feast Europe Team</p>
 			</div>
 
 			<div class="text-center mt-6">

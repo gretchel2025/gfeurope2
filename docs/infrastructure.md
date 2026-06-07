@@ -233,8 +233,8 @@ Audit event fields use these stable values:
 
 - `action`: `booking.created`, `booking.payment_reminder_sent`, `booking.marked_paid`,
   `booking.cancelled`, `booking.tickets_generated`, `booking.tickets_email_sent`,
-  `booking.marked_tickets_as_sent`, `ticket.created`, `ticket.checked_in`,
-  `ticket.checked_out`, and `ticket_counter.available_added`
+  `booking.marked_tickets_as_sent`, `ticket.created`, `ticket.name_updated`,
+  `ticket.checked_in`, `ticket.checked_out`, and `ticket_counter.available_added`
 - `actor_type`: `public`, `admin`, or `system`
 - `entity_type`: `booking`, `ticket`, or `ticket_counter`
 
@@ -511,7 +511,7 @@ Required Supabase app_metadata: tester plus event_roles for administered event i
 ## Optional Integrations
 
 Resend sends transactional emails from the verified `grandfeast.eu` domain.
-The primary transactional sender is `Grand Feast EU and UK <help@grandfeast.eu>`,
+The primary transactional sender is `Grand Feast Europe <help@grandfeast.eu>`,
 with Resend configured in `eu-west-1` and MAIL FROM / bounce handling on
 `send.grandfeast.eu`. Live-dev and local development use the same sender and reply-to
 identity.

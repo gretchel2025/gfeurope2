@@ -349,7 +349,7 @@
 			<h1 class="conference-section-title text-4xl sm:text-5xl">Reserve Your Seat</h1>
 
 			<h2 class="text-xl font-black tracking-normal text-[#f3c15f] sm:text-2xl">
-				Grand Feast EU and UK 2026 • Dublin • October 3, 2026
+				Grand Feast Europe 2026 • Dublin • October 3, 2026
 			</h2>
 		</hgroup>
 
@@ -807,7 +807,7 @@
 
 			<aside class="conference-panel h-fit p-5 lg:sticky lg:top-6">
 				<p class="conference-kicker">Your Booking</p>
-				<h3 class="mt-2 text-2xl font-black text-white">Grand Feast EU and UK 2026</h3>
+				<h3 class="mt-2 text-2xl font-black text-white">Grand Feast Europe 2026</h3>
 				<p class="mt-2 text-sm text-[#fff3df]/70">
 					St. Helen's Hotel<br />
 					October 3, 2026

@@ -63,6 +63,7 @@ describe('NotificationService audit events', () => {
 		expect(message).toContain('BIC/SWIFT');
 		expect(message).toContain('BOFIIE2DXXX');
 		expect(message).toContain('ada@example.com');
+		expectEventSchedule(message);
 	});
 
 	it('records booking.tickets_email_sent after the ticket email sends', async () => {
@@ -115,6 +116,8 @@ describe('NotificationService audit events', () => {
 
 		await service.sendTicketsEmail('BREF001');
 
+		const message = send.mock.calls[0][0].message;
+		expectEventSchedule(message);
 		expect(emailSender.send).toHaveBeenCalledOnce();
 		expect(bookingRepository.markTicketsSentToClient).toHaveBeenCalledWith('BREF001');
 		expect(auditEventService.record).toHaveBeenCalledWith(
@@ -348,3 +351,12 @@ describe('NotificationService audit events', () => {
 		expect(auditEventService.record).not.toHaveBeenCalled();
 	});
 });
+
+function expectEventSchedule(message: string) {
+	expect(message).toContain('12:00 PM Registration');
+	expect(message).toContain('1:00 PM Holy Mass');
+	expect(message).toContain('2:00 PM Event Proper');
+	expect(message).toContain('4:30 PM End of Program');
+	expect(message).not.toContain('12:30 PM Holy Mass');
+	expect(message).not.toContain('1:30 PM Event Proper');
+}

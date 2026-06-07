@@ -49,8 +49,8 @@ describe('ResendEmailSender', () => {
 	it('sends html email through Resend with configured sender identity', async () => {
 		Object.assign(appConfig.integrations, {
 			resendApiKey: 're_test',
-			emailFrom: 'Grand Feast EU and UK <help@grandfeast.eu>',
-			emailReplyTo: 'Grand Feast EU and UK <help@grandfeast.eu>'
+			emailFrom: 'Grand Feast Europe <help@grandfeast.eu>',
+			emailReplyTo: 'Grand Feast Europe <help@grandfeast.eu>'
 		});
 		const send = vi.fn().mockResolvedValue({
 			data: { id: 'email_123' },
@@ -66,9 +66,9 @@ describe('ResendEmailSender', () => {
 		});
 
 		expect(send).toHaveBeenCalledWith({
-			from: 'Grand Feast EU and UK <help@grandfeast.eu>',
+			from: 'Grand Feast Europe <help@grandfeast.eu>',
 			to: 'ada@example.com',
-			replyTo: 'Grand Feast EU and UK <help@grandfeast.eu>',
+			replyTo: 'Grand Feast Europe <help@grandfeast.eu>',
 			subject: 'Hello',
 			html: '<p>Welcome</p>',
 			tags: [{ name: 'category', value: 'transactional' }]
@@ -98,7 +98,7 @@ describe('ResendEmailSender', () => {
 	it('wraps Resend failures as email errors', async () => {
 		Object.assign(appConfig.integrations, {
 			resendApiKey: 're_test',
-			emailFrom: 'Grand Feast EU and UK <help@grandfeast.eu>',
+			emailFrom: 'Grand Feast Europe <help@grandfeast.eu>',
 			emailReplyTo: ''
 		});
 		const send = vi.fn().mockResolvedValue({
@@ -123,7 +123,7 @@ describe('ResendEmailSender', () => {
 		vi.useFakeTimers();
 		Object.assign(appConfig.integrations, {
 			resendApiKey: 're_test',
-			emailFrom: 'Grand Feast EU and UK <help@grandfeast.eu>',
+			emailFrom: 'Grand Feast Europe <help@grandfeast.eu>',
 			emailReplyTo: ''
 		});
 		const send = vi.fn(

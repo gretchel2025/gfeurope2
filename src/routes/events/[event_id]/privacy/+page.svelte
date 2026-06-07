@@ -66,7 +66,7 @@
 		</li>
 		<li>
 			<p>
-				<strong>Website</strong> refers to The Feast Europe and UK (referred to as either
+				<strong>Website</strong> refers to The Feast Europe (referred to as either
 				&quot;Company&quot;, &quot;We&quot;, &quot;Us&quot;, or &quot;Our&quot; in this Agreement),
 				accessible from
 				<a href="https://www.grandfeast.eu" rel="external nofollow noopener" target="_blank"

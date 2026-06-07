@@ -70,11 +70,11 @@ tickets, and counters are referenced by `entity_type` plus `entity_id`.
 Current audit actions are `booking.created`, `booking.payment_reminder_sent`,
 `booking.marked_paid`, `booking.cancelled`, `booking.tickets_generated`,
 `booking.tickets_email_sent`, `booking.marked_tickets_as_sent`, `ticket.created`,
-`ticket.checked_in`, `ticket.checked_out`, and `ticket_counter.available_added`. Actor
-types are `public`, `admin`, and `system`. Entity types are `booking`, `ticket`, and
-`ticket_counter`. Audit metadata may include operational identifiers and state changes,
-but must not include secrets, tokens, uploaded file contents, payment proof URLs, or email
-bodies.
+`ticket.name_updated`, `ticket.checked_in`, `ticket.checked_out`, and
+`ticket_counter.available_added`. Actor types are `public`, `admin`, and `system`.
+Entity types are `booking`, `ticket`, and `ticket_counter`. Audit metadata may include
+operational identifiers and state changes, but must not include secrets, tokens, uploaded
+file contents, payment proof URLs, or email bodies.
 
 Admin history pages and sections must not query audit rows by default. Use the explicit
 `?load_history=true` query param for event, booking, and ticket history.

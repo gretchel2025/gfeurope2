@@ -15,6 +15,7 @@ test.describe('mutating booking canary', () => {
 		!shouldRunMutatingBooking(),
 		'Mutating booking canary is skipped for prod unless E2E_ALLOW_PROD_MUTATION=true.'
 	);
+	test.setTimeout(90_000);
 
 	test('can reserve one Standard ticket and cancel the unpaid reservation', async ({ page }) => {
 		const booking = makeBookingIdentity();

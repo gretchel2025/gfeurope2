@@ -13,15 +13,22 @@ test.describe('public deployment smoke', () => {
 		await page.goto('/');
 
 		await expect(page).toHaveURL(expectPath(eventPath()));
-		await expect(page.getByText(/Grand Feast EU and UK 2026/i).first()).toBeVisible();
+		await expect(page.getByText(/Grand Feast Europe 2026/i).first()).toBeVisible();
 	});
 
 	test('events index lists registered public events', async ({ page }) => {
 		await page.goto('/events');
 
-		await expect(page.getByRole('heading', { name: 'Grand Feast EU and UK Events' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Grand Feast Europe Events' })).toBeVisible();
 		await expect(page.locator(`a[href="${eventPath()}"]`)).toBeVisible();
-		await expect(page.locator('a[href="/events/gfeu2025"]')).toBeVisible();
+		await expect(page.locator('a[href="/events/gfeu2025"]')).toHaveCount(0);
+
+		const archivedEvent = page.locator('.events-index-entry-disabled').filter({
+			hasText: 'Called To More'
+		});
+		await expect(archivedEvent).toBeVisible();
+		await expect(archivedEvent.getByText('Archived')).toBeVisible();
+		await expect(archivedEvent.getByRole('button', { name: 'View event' })).toBeDisabled();
 	});
 
 	test('active public event page loads', async ({ page }) => {
@@ -29,7 +36,7 @@ test.describe('public deployment smoke', () => {
 
 		await expect(page).toHaveURL(expectPath(eventPath()));
 		await expect(page.getByText(/Dublin/i).first()).toBeVisible();
-		await expect(page.getByText(/Grand Feast EU and UK 2026/i).first()).toBeVisible();
+		await expect(page.getByText(/Grand Feast Europe 2026/i).first()).toBeVisible();
 	});
 
 	test('booking page loads ticket options', async ({ page }) => {

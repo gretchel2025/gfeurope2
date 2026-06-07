@@ -59,6 +59,7 @@ function makeService(ticket: Ticket = makeTicket(), booking: Booking = makeBooki
 		insert: vi.fn(async () => ticket.ticket_id),
 		findByTicketId: vi.fn(async () => ticket),
 		list: vi.fn(),
+		updateName: vi.fn(),
 		updateStatus: vi.fn(),
 		deleteByTicketId: vi.fn()
 	} satisfies TicketRepository;
@@ -143,6 +144,48 @@ describe('TicketService audit events', () => {
 				})
 			})
 		);
+	});
+
+	it('records ticket.name_updated after ticket holder name update succeeds', async () => {
+		const { service, ticketRepository, auditEventService } = makeService();
+
+		await service.updateName('TICKET123', '  Grace   Hopper  ', {
+			actor_type: AuditActorType.Admin,
+			actor_email: 'admin@example.test'
+		});
+
+		expect(ticketRepository.updateName).toHaveBeenCalledWith('TICKET123', 'Grace Hopper');
+		expect(auditEventService.record).toHaveBeenCalledWith(
+			expect.objectContaining({
+				event_id: 'gfeu2026',
+				action: AuditAction.TicketNameUpdated,
+				actor_type: AuditActorType.Admin,
+				entity_type: AuditEntityType.Ticket,
+				entity_id: 'TICKET123',
+				metadata: expect.objectContaining({
+					previous_ticket_guest_name: 'Ada Lovelace',
+					ticket_guest_name: 'Grace Hopper',
+					booking_reference_no: 'BREF001',
+					status: TicketStatus.CREATED
+				})
+			})
+		);
+	});
+
+	it('does not persist or audit when the ticket holder name is unchanged', async () => {
+		const { service, ticketRepository, auditEventService } = makeService();
+
+		await service.updateName('TICKET123', 'Ada Lovelace');
+
+		expect(ticketRepository.updateName).not.toHaveBeenCalled();
+		expect(auditEventService.record).not.toHaveBeenCalled();
+	});
+
+	it('rejects blank ticket holder names', async () => {
+		const { service, ticketRepository } = makeService();
+
+		await expect(service.updateName('TICKET123', '   ')).rejects.toThrow('ticket name is required');
+		expect(ticketRepository.updateName).not.toHaveBeenCalled();
 	});
 
 	it('records ticket.checked_out after status update succeeds', async () => {

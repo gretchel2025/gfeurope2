@@ -24,9 +24,9 @@ const publicEventPages: Record<PublicEventPageId, PublicEventPageConfig> = {
 		eventId: 'gfeu2026',
 		status: 'active',
 		component: 'gfeu2026',
-		headerTitle: 'Europe and UK 2026',
+		headerTitle: 'Europe 2026',
 		footerKicker: 'Together in Dublin',
-		footerTitle: 'Grand Feast EU and UK 2026',
+		footerTitle: 'Grand Feast Europe 2026',
 		footerCopyrightYear: 2026,
 		showBuyTickets: true
 	},
@@ -34,9 +34,9 @@ const publicEventPages: Record<PublicEventPageId, PublicEventPageConfig> = {
 		eventId: 'gfeu2025',
 		status: 'archived',
 		component: 'gfeu2025',
-		headerTitle: 'Europe and UK 2025',
+		headerTitle: 'Europe 2025',
 		footerKicker: 'Called To More in Oslo',
-		footerTitle: 'Grand Feast EU and UK 2025',
+		footerTitle: 'Grand Feast Europe 2025',
 		footerCopyrightYear: 2025,
 		showBuyTickets: false
 	}

@@ -318,6 +318,19 @@ body {
 	transform: translateY(-1px);
 }
 
+.events-index-entry-disabled {
+	background: rgba(248, 250, 252, 0.86);
+	box-shadow: none;
+	cursor: not-allowed;
+	opacity: 0.72;
+}
+
+.events-index-entry-disabled:hover {
+	border-color: rgba(148, 163, 184, 0.3);
+	background: rgba(248, 250, 252, 0.86);
+	transform: none;
+}
+
 .events-index-badge {
 	border-radius: 9999px;
 	padding: 0.25rem 0.75rem;
@@ -340,7 +353,15 @@ body {
 }
 
 .events-index-link-label {
+	border: 0;
+	background: transparent;
 	color: #334155;
+	font: inherit;
+}
+
+.events-index-link-label-disabled {
+	color: #94a3b8;
+	cursor: not-allowed;
 }
 
 .conference-kicker {

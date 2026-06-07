@@ -10,7 +10,7 @@
 	title="Terms and Conditions"
 	lastUpdated="May 31, 2025"
 	intro="Please read these Terms and Conditions carefully before using our service."
-	introSecondary="These terms explain the agreement between you and Grand Feast Europe and UK regarding access to and use of this website."
+	introSecondary="These terms explain the agreement between you and Grand Feast Europe regarding access to and use of this website."
 	companionHref={publicNav.privacy}
 	companionLabel="View Privacy Policy"
 >
@@ -52,7 +52,7 @@
 		</li>
 		<li>
 			<p>
-				<strong>Website</strong> refers to The Feast Europe and UK (referred to as either
+				<strong>Website</strong> refers to The Feast Europe (referred to as either
 				&quot;We&quot;, &quot;Us&quot;, &quot;Our&quot;, or &quot;Company&quot; in this Agreement),
 				accessible from
 				<a href="https://www.grandfeast.eu" rel="external nofollow noopener" target="_blank"

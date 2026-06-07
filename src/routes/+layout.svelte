@@ -60,9 +60,9 @@
 		$page.url.pathname === '/signin';
 	$: isEventsIndex = $page.url.pathname === '/events';
 	$: publicHomeHref = isEventsIndex ? '/events' : publicNav.home;
-	$: publicHeaderTitle = activePublicEventPage?.headerTitle ?? 'Grand Feast EU UK';
+	$: publicHeaderTitle = activePublicEventPage?.headerTitle ?? 'Grand Feast Europe';
 	$: publicFooterKicker = activePublicEventPage?.footerKicker ?? 'Events archive';
-	$: publicFooterTitle = activePublicEventPage?.footerTitle ?? 'Grand Feast Europe and UK';
+	$: publicFooterTitle = activePublicEventPage?.footerTitle ?? 'Grand Feast Europe';
 	$: publicFooterYear = activePublicEventPage?.footerCopyrightYear ?? new Date().getUTCFullYear();
 	$: organizerHref = $page.params.event_id
 		? adminRoutes($page.params.event_id).home
@@ -80,7 +80,7 @@
 			>
 				<div class="flex items-center justify-between">
 					<a href={publicNav.home} on:click={closeMenu}>
-						<h1 class="text-2xl font-bold tracking-wider text-slate-950">Grand Feast EU UK</h1>
+						<h1 class="text-2xl font-bold tracking-wider text-slate-950">Grand Feast Europe</h1>
 					</a>
 
 					<div class="flex items-center gap-3 md:hidden">
@@ -221,7 +221,7 @@
 						<p class="conference-kicker">{publicFooterKicker}</p>
 						<p class="mt-2 text-lg font-black text-white">{publicFooterTitle}</p>
 						<p class="mt-1 text-sm text-[#fff3df]/70">
-							© {publicFooterYear} Grand Feast Europe and UK.
+							© {publicFooterYear} Grand Feast Europe.
 						</p>
 					</div>
 					<div class="flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">

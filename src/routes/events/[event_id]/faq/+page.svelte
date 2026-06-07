@@ -9,7 +9,7 @@
 <LegalPage
 	title="Frequently Asked Questions"
 	lastUpdated="June 7, 2026"
-	intro="Find quick answers about tickets, entry, event logistics, and what to expect before attending Grand Feast Europe and UK."
+	intro="Find quick answers about tickets, entry, event logistics, and what to expect before attending Grand Feast Europe."
 	introSecondary="This page is provided as general attendee guidance for our event and ticket sales. Specific event updates shared on the website or in booking communications will take precedence if details change."
 	companionHref={publicNav.newBooking}
 	companionLabel="Buy Tickets"

@@ -14,6 +14,7 @@
 	export let data: ServerData;
 
 	$: routes = adminRoutes($page.params.event_id);
+	$: editNameHref = `${routes.ticket.details(data.aTicket.ticket_id)}?edit_name=true`;
 	$: loadHistoryHref = `${routes.ticket.details(data.aTicket.ticket_id)}?load_history=true#history`;
 </script>
 
@@ -35,7 +36,37 @@
 						{data.aTicket.booking_reference_no}
 					</a>
 				</DetailRow>
-				<DetailRow label="Name" value={data.aTicket.name} />
+				<DetailRow label="Name">
+					{#if data.nameEditMode}
+						<form action="?/updateName" method="POST" class="min-w-0 space-y-3">
+							<label for="ticket-name" class="sr-only">Ticket holder name</label>
+							<input
+								id="ticket-name"
+								name="name"
+								value={data.aTicket.name}
+								required
+								maxlength="160"
+								class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-950 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							/>
+							<div class="flex flex-wrap gap-2">
+								<AdminButton type="submit" variant="success" loadingText="Saving...">
+									Save name
+								</AdminButton>
+								<AdminButton
+									href={routes.ticket.details(data.aTicket.ticket_id)}
+									variant="secondary"
+								>
+									Cancel
+								</AdminButton>
+							</div>
+						</form>
+					{:else}
+						<div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+							<span class="min-w-0">{data.aTicket.name}</span>
+							<AdminButton href={editNameHref} variant="secondary">Change</AdminButton>
+						</div>
+					{/if}
+				</DetailRow>
 				<DetailRow label="Ticket Type" value={formatTicketTypeLabel(data.aTicket.ticket_type)} />
 				<DetailRow label="Status" value={data.aTicket.status} />
 			</dl>

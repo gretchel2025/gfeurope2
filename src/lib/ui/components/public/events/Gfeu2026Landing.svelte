@@ -10,7 +10,7 @@
 	$: publicNav = publicRoutes($page.params.event_id);
 
 	let ticketsSection: HTMLElement;
-	const eventDate = new Date('2026-10-03T12:30:00+01:00');
+	const eventDate = new Date('2026-10-03T12:00:00+01:00');
 	const now = new Date();
 	const standardTicket = ticketTypes.find((ticket) => ticket.ticket_type_id === 'STANDARD');
 	const grandFeastPlusTicket = ticketTypes.find(
@@ -21,12 +21,22 @@
 		? computeTicketPricing(grandFeastPlusTicket, 1, now)
 		: null;
 	let earlyBirdActive = Boolean(standardTicket && isEarlyBirdDiscountActive(standardTicket, now));
-	let countdown = '';
-	if (earlyBirdActive && standardTicket?.early_bird_discount_available_until) {
-		const diff = Date.parse(standardTicket.early_bird_discount_available_until) - now.getTime();
+	let grandFeastPlusEarlyBirdActive = Boolean(
+		grandFeastPlusTicket && isEarlyBirdDiscountActive(grandFeastPlusTicket, now)
+	);
+	let countdown = earlyBirdActive
+		? formatCountdown(standardTicket?.early_bird_discount_available_until)
+		: '';
+	let grandFeastPlusCountdown = grandFeastPlusEarlyBirdActive
+		? formatCountdown(grandFeastPlusTicket?.early_bird_discount_available_until)
+		: '';
+
+	function formatCountdown(value?: string) {
+		if (!value) return '';
+		const diff = Date.parse(value) - now.getTime();
 		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 		const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-		countdown = `${days}d ${hours}h left`;
+		return `${days}d ${hours}h left`;
 	}
 
 	function scrollToTickets() {
@@ -92,7 +102,7 @@
 		<div class="conference-gold-panel overflow-hidden p-0 shadow-2xl">
 			<img
 				src="/Poster2026v2.png"
-				alt="Grand Feast EU and UK 2026 Ireland venue poster"
+				alt="Grand Feast Europe 2026 Ireland venue poster"
 				class="block h-auto w-full"
 			/>
 		</div>
@@ -103,17 +113,17 @@
 	<div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
 		<div
 			class="conference-panel overflow-hidden bg-white p-0"
-			aria-label="Grand Feast EU and UK 2026 Together visual"
+			aria-label="Grand Feast Europe 2026 Together visual"
 		>
 			<img
 				src="/Poster2026.png"
-				alt="Grand Feast EU and UK 2026 Together poster"
+				alt="Grand Feast Europe 2026 Together poster"
 				class="block h-auto w-full"
 			/>
 		</div>
 
 		<div class="conference-panel p-6 sm:p-8">
-			<p class="conference-kicker">Message from Feast Dublin</p>
+			<p class="conference-kicker">Message from Feast Ireland</p>
 			<h3 class="conference-section-title mt-3 text-4xl sm:text-5xl">Together</h3>
 
 			<div class="conference-copy mt-6 space-y-4">
@@ -135,7 +145,7 @@
 					it is a home. And this year, we are calling everyone back to the hearth.
 				</p>
 
-				<p>Our focus for the Grand Feast 2026 is singular, profound, and urgent: Together.</p>
+				<p>Our focus for Grand Feast Europe 2026 is singular, profound, and urgent: Together.</p>
 
 				<p class="border-l-4 border-[#d99a32] pl-4 italic text-[#fff3df]">
 					“In him the whole building is joined together and rises to become a holy temple in the
@@ -157,6 +167,11 @@
 					seat at the table with your name on it.
 				</p>
 
+				<p>
+					Together with Bro Bo Sanchez, our main event speaker, we will gather for a day of
+					worship, renewal, and a shared reminder that we belong to God and to one another.
+				</p>
+
 				<p>Come to be refreshed by stepping into an environment of pure worship.</p>
 
 				<p>Come to be connected to a community that will stand by you.</p>
@@ -171,7 +186,7 @@
 				<div class="pt-6 text-sm text-[#fff3df]/70">
 					<p>With open arms,</p>
 					<p class="font-semibold text-white">Bro Lando Patolilic</p>
-					<p>Feast Dublin Builder</p>
+					<p>Feast Europe and UK District Builder</p>
 				</div>
 			</div>
 		</div>
@@ -187,7 +202,7 @@
 
 		<div class="conference-panel p-6 sm:p-8">
 			<h3 class="text-2xl md:text-3xl font-black text-center text-white mb-8">
-				2026 EU and UK Grand Feast in Dublin
+				Grand Feast Europe 2026 in Dublin
 			</h3>
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -196,8 +211,9 @@
 					<div>
 						<h4 class="text-lg font-black text-[#f3c15f]">Time</h4>
 						<p class="text-white">12:00 PM Registration</p>
-						<p class="text-white">12:30 PM Holy Mass</p>
-						<p class="text-white">1:30 PM Event Proper</p>
+						<p class="text-white">1:00 PM Holy Mass</p>
+						<p class="text-white">2:00 PM Event Proper</p>
+						<p class="text-white">4:30 PM End of Program</p>
 					</div>
 				</div>
 				<div class="conference-card p-5 flex items-start gap-4">
@@ -257,7 +273,9 @@
 
 				{#if earlyBirdActive && standardTicket && standardPricing}
 					<div class="conference-pill mb-2 px-2 py-1">
-						Early Bird <span class="ml-2 text-xs text-[#fff3df]/80">{countdown}</span>
+						Early Bird <span class="ml-2 text-xs text-[#fff3df]/80"
+							>{grandFeastPlusCountdown}</span
+						>
 					</div>
 					<p class="mb-3 text-sm text-[#fff3df]/70">
 						Until {formatDate(standardTicket.early_bird_discount_available_until ?? '')} only
@@ -307,12 +325,29 @@
 					{grandFeastPlusTicket?.label ?? 'GrandFeast Plus'}
 				</h3>
 
-				<div class="text-4xl font-black mb-2 text-[#f3c15f]">
-					{formatMoney(
-						grandFeastPlusPricing?.unitPrice ?? grandFeastPlusTicket?.base_price ?? 65,
-						grandFeastPlusTicket?.currency
-					)}
-				</div>
+				{#if grandFeastPlusEarlyBirdActive && grandFeastPlusTicket && grandFeastPlusPricing}
+					<div class="conference-pill mb-2 px-2 py-1">
+						Early Bird <span class="ml-2 text-xs text-[#fff3df]/80">{countdown}</span>
+					</div>
+					<p class="mb-3 text-sm text-[#fff3df]/70">
+						Until {formatDate(grandFeastPlusTicket.early_bird_discount_available_until ?? '')} only
+					</p>
+					<div class="mb-2">
+						<div class="text-2xl text-[#fff3df]/45 line-through">
+							{formatMoney(grandFeastPlusTicket.base_price, grandFeastPlusTicket.currency)}
+						</div>
+						<div class="text-4xl font-black text-[#f3c15f]">
+							{formatMoney(grandFeastPlusPricing.unitPrice, grandFeastPlusTicket.currency)}
+						</div>
+					</div>
+				{:else}
+					<div class="text-4xl font-black mb-2 text-[#f3c15f]">
+						{formatMoney(
+							grandFeastPlusPricing?.unitPrice ?? grandFeastPlusTicket?.base_price ?? 65,
+							grandFeastPlusTicket?.currency
+						)}
+					</div>
+				{/if}
 
 				<p class="text-[#f3c15f] text-sm mb-4">
 					Includes pilgrimage to Our Lady of Knock on Oct 4 plus sightseeing

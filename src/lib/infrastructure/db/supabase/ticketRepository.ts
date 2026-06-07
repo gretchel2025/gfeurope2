@@ -58,6 +58,16 @@ export class SupabaseTicketRepository implements TicketRepository {
 		if (error) throwSupabaseError('ticket status update failed', error);
 	}
 
+	async updateName(ticketId: string, name: string): Promise<void> {
+		const { error } = await this.schema
+			.from(tableName)
+			.update({ name })
+			.eq('event_id', this.eventId)
+			.eq('ticket_id', ticketId);
+
+		if (error) throwSupabaseError('ticket name update failed', error);
+	}
+
 	async deleteByTicketId(ticketId: string): Promise<void> {
 		const { error } = await this.schema
 			.from(tableName)
