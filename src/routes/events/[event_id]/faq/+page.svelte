@@ -8,7 +8,7 @@
 
 <LegalPage
 	title="Frequently Asked Questions"
-	lastUpdated="May 4, 2026"
+	lastUpdated="June 7, 2026"
 	intro="Find quick answers about tickets, entry, event logistics, and what to expect before attending Grand Feast Europe and UK."
 	introSecondary="This page is provided as general attendee guidance for our event and ticket sales. Specific event updates shared on the website or in booking communications will take precedence if details change."
 	companionHref={publicNav.newBooking}
@@ -30,7 +30,7 @@
 			<p>
 				We currently offer Standard and GrandFeast Plus tickets. Children 12 years old and below may
 				attend for free and do not need a separate booking ticket. The booking page shows current
-				prices, early bird promos, family discounts, and availability at the time of purchase.
+				prices, early bird promos, and availability at the time of purchase.
 			</p>
 		</li>
 		<li>

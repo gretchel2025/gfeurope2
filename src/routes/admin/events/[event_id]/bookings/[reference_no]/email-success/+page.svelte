@@ -20,11 +20,11 @@
 		></div>
 		<p class="text-xs font-black uppercase tracking-[0.22em] text-[#005b72]">Booking Email</p>
 		<h1 id="email-sent-title" class="mt-4 text-3xl font-black tracking-tight text-slate-950">
-			Booking Email Sent
+			Booking Email Accepted
 		</h1>
 		<p class="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600">
-			The email was sent successfully. You can return to this booking or continue managing
-			reservations.
+			The email provider accepted the request. Delivery can still fail later, so use provider
+			delivery status where it is available.
 		</p>
 
 		<div class="mt-8 grid gap-3 sm:grid-cols-3">

@@ -79,27 +79,9 @@ export const actions: Actions = {
 function getTicketNotes(ticketType: TicketTypeConfig): string[] {
 	const notes = [ticketType.description];
 
-	if (ticketType.early_bird_discount_available_until) {
-		notes.push('No extra group discount during Early Bird');
-	}
-	if (ticketType.bulk_purchase_discount_min_quantity) {
-		notes.push(
-			`${formatDiscount(ticketType)} group discount for ${ticketType.bulk_purchase_discount_min_quantity}+ tickets`
-		);
-	}
 	if (ticketType.ticket_type_id === 'GRAND_FEAST_PLUS') {
 		notes.push('Our Lady of Knock pilgrimage', 'Oct 4 sightseeing');
 	}
 
 	return notes.filter(Boolean);
-}
-
-function formatDiscount(ticketType: TicketTypeConfig): string {
-	if (ticketType.bulk_purchase_discount_rate !== undefined) {
-		return `${Math.round(ticketType.bulk_purchase_discount_rate * 100)}%`;
-	}
-	if (ticketType.bulk_purchase_discount_amount !== undefined) {
-		return `${ticketType.bulk_purchase_discount_amount} ${ticketType.currency}`;
-	}
-	return '';
 }

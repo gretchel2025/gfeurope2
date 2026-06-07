@@ -6,7 +6,12 @@ import {
 	normalizeTicketType,
 	type Ticket
 } from '$lib/domain/ticket';
-import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
+import {
+	BookingConfirmationEmailStatus,
+	BookingPaymentStatus,
+	TicketStatus,
+	TicketType
+} from '$lib/domain/shared/enums';
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
 	return {
@@ -22,6 +27,7 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 		guests: ['Ada'],
 		ticket_ids: ['TTEST001'],
 		tickets_sent_to_client: false,
+		booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN,
 		...overrides
 	};
 }

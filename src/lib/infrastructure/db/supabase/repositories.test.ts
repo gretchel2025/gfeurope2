@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { InfrastructureError } from '$lib/application/errors';
 import { AuditAction, AuditActorType, AuditEntityType } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
-import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
+import {
+	BookingConfirmationEmailStatus,
+	BookingPaymentStatus,
+	TicketStatus,
+	TicketType
+} from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 import { SupabaseAuditEventRepository } from '$lib/infrastructure/db/supabase/auditEventRepository';
 import { SupabaseBookingRepository } from '$lib/infrastructure/db/supabase/bookingRepository';
@@ -26,6 +31,7 @@ describe('Supabase repositories', () => {
 		guests: ['Ada Lovelace', 'Grace Hopper'],
 		ticket_ids: [],
 		tickets_sent_to_client: false,
+		booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN,
 		payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 	};
 	const ticket: Ticket = {
@@ -95,6 +101,7 @@ describe('Supabase repositories', () => {
 						guests: booking.guests,
 						ticket_ids: booking.ticket_ids,
 						tickets_sent_to_client: booking.tickets_sent_to_client,
+						booking_confirmation_email_status: booking.booking_confirmation_email_status,
 						payment_proof_url: booking.payment_proof_url
 					},
 					error: null
@@ -214,6 +221,77 @@ describe('Supabase repositories', () => {
 				{
 					p_event_id: 'event-test',
 					p_reference_no: 'B123'
+				}
+			]
+		]);
+	});
+
+	it('updates event-scoped booking confirmation email status', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			rpc: async (name: string, params: Record<string, unknown>) => {
+				calls.push([name, params]);
+				return { data: null, error: null };
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseBookingRepository(client, 'event-test');
+		await repository.updateBookingConfirmationEmailStatus(
+			'B123',
+			BookingConfirmationEmailStatus.FAILED,
+			'email bounced',
+			'email_123'
+		);
+
+		expect(calls).toEqual([
+			['schema', 'grandfeasteu'],
+			[
+				'update_booking_confirmation_email_status',
+				{
+					p_event_id: 'event-test',
+					p_reference_no: 'B123',
+					p_status: BookingConfirmationEmailStatus.FAILED,
+					p_error: 'email bounced',
+					p_provider_message_id: 'email_123'
+				}
+			]
+		]);
+	});
+
+	it('updates confirmation email delivery status by provider message id', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			rpc: async (name: string, params: Record<string, unknown>) => {
+				calls.push([name, params]);
+				return { data: null, error: null };
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseBookingRepository(client, 'event-test');
+		await repository.updateBookingConfirmationEmailDeliveryStatusByProviderMessageId(
+			'email_123',
+			BookingConfirmationEmailStatus.DELIVERED,
+			undefined,
+			'2026-06-07T09:30:00.000Z'
+		);
+
+		expect(calls).toEqual([
+			['schema', 'grandfeasteu'],
+			[
+				'update_booking_confirmation_email_delivery_status',
+				{
+					p_provider_message_id: 'email_123',
+					p_status: BookingConfirmationEmailStatus.DELIVERED,
+					p_error: null,
+					p_provider_event_at: '2026-06-07T09:30:00.000Z'
 				}
 			]
 		]);

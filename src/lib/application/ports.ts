@@ -13,7 +13,7 @@ import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
 import type { TicketTypeConfig } from '$lib/domain/ticketType';
 import type { AdminUser } from '$lib/domain/adminUser';
-import type { TicketStatus } from '$lib/domain/shared/enums';
+import type { BookingConfirmationEmailStatus, TicketStatus } from '$lib/domain/shared/enums';
 import type {
 	AuditEntityType,
 	AuditEvent,
@@ -28,6 +28,11 @@ export type EmailMessage = {
 	message: string;
 };
 
+export type EmailSendResult = {
+	status: 'SENT' | 'SKIPPED';
+	providerMessageId?: string;
+};
+
 /** Persistence contract for booking records. */
 export interface BookingRepository {
 	insertReservation(booking: Booking): Promise<Booking>;
@@ -37,6 +42,12 @@ export interface BookingRepository {
 	cancelReservation(referenceNo: string): Promise<void>;
 	appendTicketId(referenceNo: string, ticketId: string): Promise<void>;
 	markTicketsSentToClient(referenceNo: string): Promise<void>;
+	updateBookingConfirmationEmailStatus(
+		referenceNo: string,
+		status: BookingConfirmationEmailStatus,
+		errorMessage?: string,
+		providerMessageId?: string
+	): Promise<void>;
 }
 
 /** Persistence contract for append-only domain audit events. */
@@ -89,7 +100,7 @@ export interface AdminUserRepository {
 
 /** Outbound email delivery contract. */
 export interface EmailSender {
-	send(message: EmailMessage): Promise<void>;
+	send(message: EmailMessage): Promise<EmailSendResult>;
 }
 
 /** Image upload contract used for QR code assets. */

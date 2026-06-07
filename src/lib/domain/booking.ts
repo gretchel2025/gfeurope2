@@ -8,7 +8,11 @@
  * without pulling in framework or persistence concerns.
  */
 import type { QRCode, Ticket } from '$lib/domain/ticket';
-import { BookingPaymentStatus, TicketType } from '$lib/domain/shared/enums';
+import {
+	BookingConfirmationEmailStatus,
+	BookingPaymentStatus,
+	TicketType
+} from '$lib/domain/shared/enums';
 
 /** Canonical booking shape used by the application layer. */
 export type Booking = {
@@ -24,6 +28,11 @@ export type Booking = {
 	guests: string[];
 	ticket_ids: string[];
 	tickets_sent_to_client: boolean;
+	booking_confirmation_email_status: BookingConfirmationEmailStatus;
+	booking_confirmation_email_attempted_at?: string;
+	booking_confirmation_email_status_updated_at?: string;
+	booking_confirmation_email_provider_id?: string;
+	booking_confirmation_email_error?: string;
 	payment_proof_url?: string;
 };
 
@@ -55,6 +64,8 @@ export type CityStats = {
 	percentOfThisCitysBookingsOverAllBookings: number;
 };
 
+export type PaymentProofDisplayType = 'image' | 'pdf' | 'file';
+
 /** Whether an unpaid booking may still be cancelled. */
 export function canCancelBooking(booking: Booking): boolean {
 	return booking.payment_status === BookingPaymentStatus.UNPAID;
@@ -76,6 +87,29 @@ export function canGenerateTickets(booking: Booking): boolean {
 /** Sort helper used by admin screens to show newest bookings first. */
 export function sortBookingsByDateDescending(a: Booking, b: Booking): number {
 	return Date.parse(b.book_date) - Date.parse(a.book_date);
+}
+
+/** Detects how an uploaded payment proof can be previewed by admin screens. */
+export function getPaymentProofDisplayType(proofUrl: string | undefined): PaymentProofDisplayType {
+	if (!proofUrl) {
+		return 'file';
+	}
+
+	const normalizedUrl = proofUrl.split(/[?#]/)[0].toLowerCase();
+	if (normalizedUrl.startsWith('data:image/')) {
+		return 'image';
+	}
+	if (normalizedUrl.startsWith('data:application/pdf')) {
+		return 'pdf';
+	}
+	if (/\.(png|jpe?g|gif|webp|avif)$/.test(normalizedUrl)) {
+		return 'image';
+	}
+	if (/\.pdf$/.test(normalizedUrl) || normalizedUrl.includes('/raw/upload/')) {
+		return 'pdf';
+	}
+
+	return 'file';
 }
 
 /**

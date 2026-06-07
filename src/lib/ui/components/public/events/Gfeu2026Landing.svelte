@@ -89,25 +89,12 @@
 			</div>
 		</div>
 
-		<div class="conference-gold-panel conference-map-panel min-h-[30rem] p-8 shadow-2xl">
-			<div class="relative z-10 flex h-full flex-col justify-between gap-10">
-				<div>
-					<p class="text-sm font-black uppercase tracking-[0.22em] text-[#061922]/70">Ireland</p>
-					<p class="mt-10 text-6xl font-black uppercase leading-none text-white sm:text-7xl">
-						Dublin
-					</p>
-					<div class="mt-6 text-xl font-black leading-tight text-white">
-						<p>St. Helen's Hotel</p>
-						<p>Dublin A94 V6W3</p>
-					</div>
-				</div>
-				<div class="border-t border-white/45 pt-6">
-					<p class="text-4xl font-black text-white">Together 2026</p>
-					<p class="mt-2 text-sm font-black uppercase tracking-[0.18em] text-[#061922]/72">
-						Grand Feast EU and UK
-					</p>
-				</div>
-			</div>
+		<div class="conference-gold-panel overflow-hidden p-0 shadow-2xl">
+			<img
+				src="/Poster2026v2.png"
+				alt="Grand Feast EU and UK 2026 Ireland venue poster"
+				class="block h-auto w-full"
+			/>
 		</div>
 	</div>
 </section>
@@ -115,50 +102,14 @@
 <section id="speakers" class="px-4 py-20">
 	<div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
 		<div
-			class="conference-panel relative min-h-[28rem] overflow-hidden p-6 sm:min-h-[36rem] sm:p-8"
+			class="conference-panel overflow-hidden bg-white p-0"
 			aria-label="Grand Feast EU and UK 2026 Together visual"
 		>
-			<div class="absolute inset-0 bg-[#003847]"></div>
-			<div
-				class="absolute -left-24 top-20 h-14 w-[140%] rotate-[-18deg] bg-[#f3c15f]/18"
-				aria-hidden="true"
-			></div>
-			<div
-				class="absolute -right-32 bottom-28 h-16 w-[140%] rotate-[-18deg] bg-[#d64b55]/18"
-				aria-hidden="true"
-			></div>
-			<div
-				class="absolute inset-x-0 top-12 rotate-[-8deg] border-y border-[#f3c15f]/20 py-5 text-center text-6xl font-black uppercase leading-none text-white/5 sm:text-8xl"
-				aria-hidden="true"
-			>
-				Together
-			</div>
-			<div
-				class="absolute inset-x-0 bottom-16 rotate-[-8deg] border-y border-white/10 py-5 text-center text-6xl font-black uppercase leading-none text-white/5 sm:text-8xl"
-				aria-hidden="true"
-			>
-				Dublin
-			</div>
-
-			<div class="relative z-10 flex min-h-[25rem] flex-col justify-between sm:min-h-[32rem]">
-				<div>
-					<p class="conference-kicker">Grand Feast EU and UK</p>
-					<p class="mt-4 text-5xl font-black uppercase leading-none text-white sm:text-7xl">
-						Together
-					</p>
-					<p class="mt-2 text-5xl font-black uppercase leading-none text-[#f3c15f] sm:text-7xl">
-						2026
-					</p>
-				</div>
-
-				<div class="space-y-5 border-t border-white/15 pt-6">
-					<p class="text-xl font-black text-white">Dublin • October 3, 2026</p>
-					<p class="max-w-sm text-base leading-7 text-[#fff3df]/78">
-						One body, one voice, one table. A gathering for worship, community, and renewal.
-					</p>
-					<p class="font-black uppercase tracking-[0.2em] text-[#f3c15f]">Ephesians 2:21</p>
-				</div>
-			</div>
+			<img
+				src="/Poster2026.png"
+				alt="Grand Feast EU and UK 2026 Together poster"
+				class="block h-auto w-full"
+			/>
 		</div>
 
 		<div class="conference-panel p-6 sm:p-8">
@@ -335,9 +286,7 @@
 					</li>
 					<li class="flex items-center">
 						<span class="text-[#f3c15f] mr-2">✔</span>
-						{earlyBirdActive
-							? '10% group discount starts after Early Bird'
-							: '10% group discount for 5+ tickets'}
+						Children 12 and below do not need a ticket reservation
 					</li>
 				</ul>
 
@@ -379,10 +328,8 @@
 						<span class="text-[#f3c15f] mr-2">🗺</span>Oct 4 sightseeing
 					</li>
 					<li class="flex items-center">
-						<span class="text-[#f3c15f] mr-2">✔</span>
-						{grandFeastPlusTicket?.bulk_purchase_discount_rate
-							? `${Math.round(grandFeastPlusTicket.bulk_purchase_discount_rate * 100)}% family discount for ${grandFeastPlusTicket.bulk_purchase_discount_min_quantity}+ tickets`
-							: 'Family discount where eligible'}
+						<span class="text-[#f3c15f] mr-2">✔</span>For guests joining the full pilgrimage
+						experience
 					</li>
 				</ul>
 				<a

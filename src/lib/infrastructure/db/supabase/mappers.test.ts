@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { AuditAction, AuditActorType, AuditEntityType } from '$lib/domain/auditEvent';
-import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
+import {
+	BookingConfirmationEmailStatus,
+	BookingPaymentStatus,
+	TicketStatus,
+	TicketType
+} from '$lib/domain/shared/enums';
 import {
 	auditEventToRow,
 	mapAuditEvent,
@@ -27,6 +32,11 @@ describe('Supabase persistence mappers', () => {
 				guests: ['Ada'],
 				ticket_ids: ['T123'],
 				tickets_sent_to_client: true,
+				booking_confirmation_email_status: 'FAILED',
+				booking_confirmation_email_attempted_at: '2026-01-01T00:05:00.000Z',
+				booking_confirmation_email_status_updated_at: '2026-01-01T00:06:00.000Z',
+				booking_confirmation_email_provider_id: 'email_123',
+				booking_confirmation_email_error: 'email bounced',
 				payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 			})
 		).toEqual({
@@ -42,6 +52,11 @@ describe('Supabase persistence mappers', () => {
 			guests: ['Ada'],
 			ticket_ids: ['T123'],
 			tickets_sent_to_client: true,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.FAILED,
+			booking_confirmation_email_attempted_at: '2026-01-01T00:05:00.000Z',
+			booking_confirmation_email_status_updated_at: '2026-01-01T00:06:00.000Z',
+			booking_confirmation_email_provider_id: 'email_123',
+			booking_confirmation_email_error: 'email bounced',
 			payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 		});
 	});

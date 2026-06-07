@@ -25,7 +25,7 @@ import {
 } from '$lib/domain/booking';
 import type { Ticket } from '$lib/domain/ticket';
 import { normalizeTicketType } from '$lib/domain/ticket';
-import { BookingPaymentStatus } from '$lib/domain/shared/enums';
+import { BookingConfirmationEmailStatus, BookingPaymentStatus } from '$lib/domain/shared/enums';
 import type { TicketCounterService } from '$lib/application/services/ticketCounterService';
 import type { TicketService } from '$lib/application/services/ticketService';
 import type { NotificationService } from '$lib/application/services/notificationService';
@@ -95,10 +95,11 @@ export class BookingService {
 			guests: input.guests,
 			ticket_ids: [],
 			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.PENDING,
 			payment_proof_url: input.payment_proof_url
 		};
 
-		const createdBooking = await this.bookingRepository.insertReservation(booking);
+		let createdBooking = await this.bookingRepository.insertReservation(booking);
 		await this.auditEventService.record({
 			...actor,
 			event_id: createdBooking.event_id,
@@ -114,7 +115,42 @@ export class BookingService {
 				payment_status: createdBooking.payment_status
 			}
 		});
-		await this.notificationService.sendBookingConfirmation(createdBooking);
+		try {
+			const emailResult = await this.notificationService.sendBookingConfirmation(createdBooking);
+			await this.bookingRepository.updateBookingConfirmationEmailStatus(
+				createdBooking.reference_no,
+				emailResult.status === 'SENT'
+					? BookingConfirmationEmailStatus.SENT
+					: BookingConfirmationEmailStatus.SKIPPED,
+				undefined,
+				emailResult.providerMessageId
+			);
+			createdBooking = {
+				...createdBooking,
+				booking_confirmation_email_status:
+					emailResult.status === 'SENT'
+						? BookingConfirmationEmailStatus.SENT
+						: BookingConfirmationEmailStatus.SKIPPED,
+				booking_confirmation_email_provider_id: emailResult.providerMessageId
+			};
+		} catch (caught) {
+			const emailError = formatEmailSendError(caught);
+			await this.bookingRepository.updateBookingConfirmationEmailStatus(
+				createdBooking.reference_no,
+				BookingConfirmationEmailStatus.FAILED,
+				emailError
+			);
+			createdBooking = {
+				...createdBooking,
+				booking_confirmation_email_status: BookingConfirmationEmailStatus.FAILED,
+				booking_confirmation_email_error: emailError
+			};
+			this.eventLogger.log('BOOKING_CONFIRMATION_EMAIL_FAILED', createdBooking.email, {
+				booking_reference_no: createdBooking.reference_no,
+				email: createdBooking.email,
+				error: emailError
+			});
+		}
 
 		this.eventLogger.log('BOOKING_RESERVATION_CREATED', createdBooking.email, {
 			booking_reference_no: createdBooking.reference_no,
@@ -335,4 +371,11 @@ export class BookingService {
 		const part2 = this.randomIdGenerator(4);
 		return `B${part1}${part2}`;
 	}
+}
+
+function formatEmailSendError(caught: unknown): string {
+	if (caught instanceof Error && caught.message.trim()) {
+		return caught.message.slice(0, 500);
+	}
+	return 'email send failed';
 }

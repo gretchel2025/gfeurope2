@@ -3,10 +3,15 @@ import {
 	canCancelBooking,
 	canGenerateTickets,
 	canMarkBookingPaid,
+	getPaymentProofDisplayType,
 	getTopCitiesByCountOfTicketsBooked,
 	type Booking
 } from '$lib/domain/booking';
-import { BookingPaymentStatus, TicketType } from '$lib/domain/shared/enums';
+import {
+	BookingConfirmationEmailStatus,
+	BookingPaymentStatus,
+	TicketType
+} from '$lib/domain/shared/enums';
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
 	return {
@@ -22,6 +27,7 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 		guests: ['Ada'],
 		ticket_ids: [],
 		tickets_sent_to_client: false,
+		booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN,
 		...overrides
 	};
 }
@@ -53,6 +59,19 @@ describe('booking domain rules', () => {
 				})
 			)
 		).toBe(false);
+	});
+
+	it('detects image and PDF payment proof preview types', () => {
+		expect(getPaymentProofDisplayType('data:image/jpeg;base64,abc')).toBe('image');
+		expect(getPaymentProofDisplayType('data:application/pdf;base64,abc')).toBe('pdf');
+		expect(getPaymentProofDisplayType('https://res.cloudinary.com/demo/proof.jpg')).toBe('image');
+		expect(getPaymentProofDisplayType('https://res.cloudinary.com/demo/proof.pdf?download=1')).toBe(
+			'pdf'
+		);
+		expect(getPaymentProofDisplayType('https://res.cloudinary.com/demo/raw/upload/proof')).toBe(
+			'pdf'
+		);
+		expect(getPaymentProofDisplayType('https://res.cloudinary.com/demo/proof')).toBe('file');
 	});
 
 	it('normalizes city reporting aliases and counts tickets, not booking rows', () => {

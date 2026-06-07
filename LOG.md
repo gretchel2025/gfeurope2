@@ -3,6 +3,27 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-06-07
+
+- Removed 5+ group/family booking discounts from ticket type data and public ticket
+  purchase copy.
+- Centralized ticket-payment bank transfer details and added Bank of Ireland plus
+  BIC/SWIFT details to booking and reminder payment instructions.
+- Added explicit PDF handling for admin payment-proof previews and covered PDF receipt
+  uploads in local e2e.
+- Routed hosted PDF payment-proof uploads through Cloudinary raw-file delivery so admin
+  proof links do not hit image/PDF delivery restrictions.
+- Added an authenticated admin payment-proof route that signs Cloudinary PDF delivery
+  URLs at request time so restricted PDFs can still be previewed or opened by admins.
+- Replaced the custom Together visual panel on the GFEU 2026 landing page with the
+  provided 2026 poster image.
+- Replaced the GFEU 2026 landing page venue/map panel with the provided Ireland venue
+  poster image.
+- Added persisted booking confirmation email send status fields and surfaced the status
+  on admin booking details so failed confirmation sends are visible to operators.
+- Added Resend confirmation email delivery tracking so provider webhook events can mark
+  booking confirmations as delivered or failed, and clarified admin email success copy.
+
 ## 2026-06-06
 
 - Documented hosted deployment terminology aliases: `prod`/`production` refer to

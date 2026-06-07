@@ -1,5 +1,6 @@
 import type { BookingRepository } from '$lib/application/ports';
 import type { Booking } from '$lib/domain/booking';
+import { BookingConfirmationEmailStatus } from '$lib/domain/shared/enums';
 import { getSupabaseDataClient } from '$lib/infrastructure/db/supabase/client';
 import { throwSupabaseError } from '$lib/infrastructure/db/supabase/errors';
 import { mapBooking, type SupabaseBookingRow } from '$lib/infrastructure/db/supabase/mappers';
@@ -89,6 +90,40 @@ export class SupabaseBookingRepository implements BookingRepository {
 		});
 
 		if (error) throwSupabaseError('booking tickets sent update failed', error);
+	}
+
+	async updateBookingConfirmationEmailStatus(
+		referenceNo: string,
+		status: BookingConfirmationEmailStatus,
+		errorMessage?: string,
+		providerMessageId?: string
+	): Promise<void> {
+		const { error } = await this.schema.rpc('update_booking_confirmation_email_status', {
+			p_event_id: this.eventId,
+			p_reference_no: referenceNo,
+			p_status: status,
+			p_error: errorMessage ?? null,
+			p_provider_message_id: providerMessageId ?? null
+		});
+
+		if (error) throwSupabaseError('booking confirmation email status update failed', error);
+	}
+
+	async updateBookingConfirmationEmailDeliveryStatusByProviderMessageId(
+		providerMessageId: string,
+		status: BookingConfirmationEmailStatus.DELIVERED | BookingConfirmationEmailStatus.FAILED,
+		errorMessage?: string,
+		providerEventAt?: string
+	): Promise<void> {
+		const { error } = await this.schema.rpc('update_booking_confirmation_email_delivery_status', {
+			p_provider_message_id: providerMessageId,
+			p_status: status,
+			p_error: errorMessage ?? null,
+			p_provider_event_at: providerEventAt ?? null
+		});
+
+		if (error)
+			throwSupabaseError('booking confirmation email delivery status update failed', error);
 	}
 
 	private get client(): SupabaseClient {

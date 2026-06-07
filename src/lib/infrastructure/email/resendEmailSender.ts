@@ -8,7 +8,7 @@
  * without spreading provider-specific code through booking workflows.
  */
 import { AppError } from '$lib/application/errors';
-import type { EmailMessage, EmailSender } from '$lib/application/ports';
+import type { EmailMessage, EmailSender, EmailSendResult } from '$lib/application/ports';
 import { appConfig } from '$lib/infrastructure/config/env.server';
 import { logger } from '$lib/infrastructure/logging/logger';
 import { Resend, type CreateEmailOptions, type CreateEmailResponse } from 'resend';
@@ -30,14 +30,14 @@ export class ResendEmailSender implements EmailSender {
 	) {}
 
 	/** Sends one outbound email message or skips cleanly in local development. */
-	async send(message: EmailMessage): Promise<void> {
+	async send(message: EmailMessage): Promise<EmailSendResult> {
 		const { resendApiKey, emailFrom, emailReplyTo } = appConfig.integrations;
 
 		if (!resendApiKey) {
 			logger.warn(
 				`[WARN] email svc: RESEND_API_KEY is not configured, skipping email to ${message.to}`
 			);
-			return;
+			return { status: 'SKIPPED' };
 		}
 
 		if (!emailFrom) {
@@ -69,6 +69,7 @@ export class ResendEmailSender implements EmailSender {
 			{ email_id: response.data.id, to: message.to },
 			'email svc: email sent through Resend'
 		);
+		return { status: 'SENT', providerMessageId: response.data.id };
 	}
 }
 

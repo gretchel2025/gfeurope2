@@ -36,7 +36,9 @@ describe('ResendEmailSender', () => {
 	it('skips sending when Resend is not configured', async () => {
 		const createClient = vi.fn();
 
-		await new ResendEmailSender(createClient).send(message);
+		await expect(new ResendEmailSender(createClient).send(message)).resolves.toEqual({
+			status: 'SKIPPED'
+		});
 
 		expect(createClient).not.toHaveBeenCalled();
 		expect(logger.warn).toHaveBeenCalledWith(
@@ -56,7 +58,12 @@ describe('ResendEmailSender', () => {
 			headers: null
 		});
 
-		await new ResendEmailSender(() => ({ emails: { send } })).send(message);
+		await expect(
+			new ResendEmailSender(() => ({ emails: { send } })).send(message)
+		).resolves.toEqual({
+			status: 'SENT',
+			providerMessageId: 'email_123'
+		});
 
 		expect(send).toHaveBeenCalledWith({
 			from: 'Grand Feast EU and UK <help@grandfeast.eu>',

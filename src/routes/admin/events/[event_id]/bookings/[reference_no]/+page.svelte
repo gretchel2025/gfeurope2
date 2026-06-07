@@ -5,8 +5,17 @@
 	import AuditHistorySection from '$lib/ui/components/admin/AuditHistorySection.svelte';
 	import BackLinks from '$lib/ui/components/admin/BackLinks.svelte';
 	import DetailRow from '$lib/ui/components/admin/DetailRow.svelte';
-	import { canCancelBooking, canGenerateTickets, canMarkBookingPaid } from '$lib/domain/booking';
-	import { BookingPaymentStatus, formatTicketTypeLabel } from '$lib/domain/shared/enums';
+	import {
+		canCancelBooking,
+		canGenerateTickets,
+		canMarkBookingPaid,
+		getPaymentProofDisplayType
+	} from '$lib/domain/booking';
+	import {
+		BookingConfirmationEmailStatus,
+		BookingPaymentStatus,
+		formatTicketTypeLabel
+	} from '$lib/domain/shared/enums';
 	import { page } from '$app/stores';
 
 	import { adminRoutes } from '$lib/navigation/adminRoutes';
@@ -21,15 +30,45 @@
 	const isPaid = booking.payment_status === BookingPaymentStatus.PAID;
 	const allTicketsGenerated = booking.ticket_ids.length >= booking.guests.length;
 	const canViewSummary = isPaid && allTicketsGenerated;
-	const canSendTicketsEmail = canViewSummary;
-	const canSendPaymentReminderEmail = booking.payment_status === BookingPaymentStatus.UNPAID;
+	const bookingEmailDeliveryFailed =
+		booking.booking_confirmation_email_status === BookingConfirmationEmailStatus.FAILED;
+	const emailActionBlockedReason = bookingEmailDeliveryFailed
+		? `Email actions are blocked because the confirmation email failed${
+				booking.booking_confirmation_email_error
+					? `: ${booking.booking_confirmation_email_error}`
+					: '.'
+			}`
+		: '';
+	const canSendTicketsEmail = canViewSummary && !bookingEmailDeliveryFailed;
+	const canSendPaymentReminderEmail =
+		booking.payment_status === BookingPaymentStatus.UNPAID && !bookingEmailDeliveryFailed;
+	const confirmationEmailStatus = formatConfirmationEmailStatus(
+		booking.booking_confirmation_email_status
+	);
+	const confirmationEmailStatusDetail = formatConfirmationEmailStatusDetail(
+		booking.booking_confirmation_email_status,
+		booking.booking_confirmation_email_provider_id
+	);
+	const confirmationEmailAttemptedAt = booking.booking_confirmation_email_attempted_at
+		? new Intl.DateTimeFormat('en', {
+				dateStyle: 'medium',
+				timeStyle: 'short'
+			}).format(new Date(booking.booking_confirmation_email_attempted_at))
+		: '';
+	const confirmationEmailStatusUpdatedAt = booking.booking_confirmation_email_status_updated_at
+		? new Intl.DateTimeFormat('en', {
+				dateStyle: 'medium',
+				timeStyle: 'short'
+			}).format(new Date(booking.booking_confirmation_email_status_updated_at))
+		: '';
 	const bookDate = new Intl.DateTimeFormat('en', {
 		dateStyle: 'medium',
 		timeStyle: 'short'
 	}).format(new Date(booking.book_date));
 	const proofUrl = booking.payment_proof_url ?? '';
-	const proofUrlPath = proofUrl.split('?')[0].toLowerCase();
-	const isImageProof = /\.(png|jpe?g|gif|webp|avif)$/.test(proofUrlPath);
+	const proofDisplayType = getPaymentProofDisplayType(proofUrl);
+	const isImageProof = proofDisplayType === 'image';
+	const isPdfProof = proofDisplayType === 'pdf';
 
 	function bookingDetailsHref(options: {
 		loadHistory?: boolean;
@@ -61,6 +100,45 @@
 		showPaymentProofImage: true,
 		hash: '#payment-proof'
 	});
+	$: paymentProofHref = routes.booking.paymentProof(booking.reference_no);
+
+	function formatConfirmationEmailStatus(status: string) {
+		switch (status) {
+			case 'SENT':
+				return 'Accepted by email provider';
+			case 'DELIVERED':
+				return 'Delivered';
+			case 'FAILED':
+				return 'Failed';
+			case 'SKIPPED':
+				return 'Not sent';
+			case 'PENDING':
+				return 'Pending';
+			case 'UNKNOWN':
+				return 'Unknown';
+			default:
+				return status;
+		}
+	}
+
+	function formatConfirmationEmailStatusDetail(status: string, providerId: string | undefined) {
+		switch (status) {
+			case 'SENT':
+				return providerId
+					? 'Waiting for the provider delivery result.'
+					: 'Delivery result is unavailable for this email.';
+			case 'DELIVERED':
+				return 'The provider reported this email as delivered.';
+			case 'FAILED':
+				return 'The provider rejected delivery or reported a delivery failure.';
+			case 'SKIPPED':
+				return 'Email sending is not configured for this environment.';
+			case 'PENDING':
+				return 'Email sending has not completed yet.';
+			default:
+				return '';
+		}
+	}
 </script>
 
 <AdminPage
@@ -85,6 +163,27 @@
 						label="Tickets Email Sent"
 						value={booking.tickets_sent_to_client ? 'Yes' : 'No'}
 					/>
+					<DetailRow label="Confirmation Email">
+						<div class="space-y-1">
+							<p class="font-semibold">{confirmationEmailStatus}</p>
+							{#if confirmationEmailStatusDetail}
+								<p class="text-xs text-slate-500">{confirmationEmailStatusDetail}</p>
+							{/if}
+							{#if confirmationEmailAttemptedAt}
+								<p class="text-xs text-slate-500">Send attempted: {confirmationEmailAttemptedAt}</p>
+							{/if}
+							{#if confirmationEmailStatusUpdatedAt}
+								<p class="text-xs text-slate-500">
+									Status updated: {confirmationEmailStatusUpdatedAt}
+								</p>
+							{/if}
+							{#if booking.booking_confirmation_email_error}
+								<p class="text-xs font-semibold text-red-700">
+									{booking.booking_confirmation_email_error}
+								</p>
+							{/if}
+						</div>
+					</DetailRow>
 					<DetailRow label="Ticket IDs">
 						{#if booking.ticket_ids.length > 0}
 							<div class="flex flex-wrap gap-2">
@@ -108,6 +207,14 @@
 		<div class="min-w-0 [&>.admin-card]:h-full">
 			<AdminCard title="Actions" subtitle="Use these when the booking changes state.">
 				<div class="space-y-3">
+					{#if emailActionBlockedReason}
+						<p
+							class="rounded-md border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-800"
+						>
+							{emailActionBlockedReason}
+						</p>
+					{/if}
+
 					{#if canSendPaymentReminderEmail}
 						<form action="?/sendPaymentReminderEmail" method="POST">
 							<AdminButton type="submit" variant="warning" fullWidth
@@ -155,16 +262,28 @@
 							<div class="overflow-hidden rounded-md border border-slate-200 bg-white">
 								{#if isImageProof}
 									<img
-										src={booking.payment_proof_url}
+										src={paymentProofHref}
 										alt={`Payment proof for ${booking.reference_no}`}
 										class="max-h-[40rem] w-full object-contain"
 									/>
+								{:else if isPdfProof}
+									<object
+										data={paymentProofHref}
+										type="application/pdf"
+										aria-label={`Payment proof PDF for ${booking.reference_no}`}
+										data-testid="payment-proof-pdf-preview"
+										class="h-[32rem] w-full"
+									>
+										<div class="p-4 text-sm text-slate-600">
+											PDF preview is unavailable in this browser. Use the open link below to view
+											the uploaded proof.
+										</div>
+									</object>
 								{:else}
-									<iframe
-										src={booking.payment_proof_url}
-										title={`Payment proof for ${booking.reference_no}`}
-										class="h-[28rem] w-full"
-									/>
+									<div class="p-4 text-sm text-slate-600">
+										This uploaded proof type cannot be previewed inline. Use the open link below to
+										view it.
+									</div>
 								{/if}
 							</div>
 						{:else}
@@ -175,13 +294,13 @@
 								</p>
 								<div class="mt-4">
 									<AdminButton href={loadPaymentProofImageHref} variant="secondary">
-										Load image
+										Load proof preview
 									</AdminButton>
 								</div>
 							</div>
 						{/if}
 						<a
-							href={booking.payment_proof_url}
+							href={paymentProofHref}
 							target="_blank"
 							rel="noreferrer"
 							class="inline-flex min-w-0 break-words text-sm font-semibold text-blue-700 underline underline-offset-4 transition hover:text-blue-900"

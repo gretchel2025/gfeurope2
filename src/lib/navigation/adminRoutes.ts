@@ -50,6 +50,8 @@ export function adminRoutes(eventId: string) {
 			},
 			details: (referenceNo: string): string =>
 				`${adminBase}/bookings/${encodeSegment(referenceNo)}`,
+			paymentProof: (referenceNo: string): string =>
+				`${adminBase}/bookings/${encodeSegment(referenceNo)}/payment-proof`,
 			summary: (referenceNo: string): string =>
 				`${adminBase}/bookings/${encodeSegment(referenceNo)}/summary`,
 			cancel: (referenceNo: string): string =>

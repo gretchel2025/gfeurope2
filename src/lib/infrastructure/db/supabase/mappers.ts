@@ -1,6 +1,11 @@
 import type { Booking } from '$lib/domain/booking';
 import type { Event } from '$lib/domain/event';
-import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
+import {
+	BookingConfirmationEmailStatus,
+	BookingPaymentStatus,
+	TicketStatus,
+	TicketType
+} from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter } from '$lib/domain/ticketCounter';
 import type { TicketTypeConfig } from '$lib/domain/ticketType';
@@ -25,6 +30,11 @@ export type SupabaseBookingRow = {
 	guests: string[] | null;
 	ticket_ids: string[] | null;
 	tickets_sent_to_client?: boolean | null;
+	booking_confirmation_email_status?: string | null;
+	booking_confirmation_email_attempted_at?: string | null;
+	booking_confirmation_email_status_updated_at?: string | null;
+	booking_confirmation_email_provider_id?: string | null;
+	booking_confirmation_email_error?: string | null;
 	payment_proof_url?: string | null;
 };
 
@@ -107,6 +117,21 @@ export function mapBooking(row: SupabaseBookingRow): Booking {
 		guests: row.guests ?? [],
 		ticket_ids: row.ticket_ids ?? [],
 		tickets_sent_to_client: row.tickets_sent_to_client ?? false,
+		booking_confirmation_email_status:
+			(row.booking_confirmation_email_status as BookingConfirmationEmailStatus | null) ??
+			BookingConfirmationEmailStatus.UNKNOWN,
+		booking_confirmation_email_attempted_at:
+			row.booking_confirmation_email_attempted_at === null ||
+			row.booking_confirmation_email_attempted_at === undefined
+				? undefined
+				: new Date(row.booking_confirmation_email_attempted_at).toISOString(),
+		booking_confirmation_email_status_updated_at:
+			row.booking_confirmation_email_status_updated_at === null ||
+			row.booking_confirmation_email_status_updated_at === undefined
+				? undefined
+				: new Date(row.booking_confirmation_email_status_updated_at).toISOString(),
+		booking_confirmation_email_provider_id: row.booking_confirmation_email_provider_id ?? undefined,
+		booking_confirmation_email_error: row.booking_confirmation_email_error ?? undefined,
 		payment_proof_url: row.payment_proof_url ?? undefined
 	};
 }

@@ -1,13 +1,70 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { BookingRepository, EmailSender, TicketRepository } from '$lib/application/ports';
+import type {
+	BookingRepository,
+	EmailMessage,
+	EmailSender,
+	TicketRepository
+} from '$lib/application/ports';
 import type { AuditEventService } from '$lib/application/services/auditEventService';
 import { NotificationService } from '$lib/application/services/notificationService';
 import { AuditAction, AuditEntityType } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
-import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
+import {
+	BookingConfirmationEmailStatus,
+	BookingPaymentStatus,
+	TicketStatus,
+	TicketType
+} from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 
 describe('NotificationService audit events', () => {
+	it('includes complete bank transfer details in the booking confirmation email', async () => {
+		const booking: Booking = {
+			event_id: 'gfeu2026',
+			reference_no: 'BREF001',
+			name: 'Ada Lovelace',
+			email: 'ada@example.com',
+			city: 'Dublin',
+			ticket_type: TicketType.STANDARD,
+			book_date: '2026-01-01T00:00:00.000Z',
+			payment_status: BookingPaymentStatus.UNPAID,
+			amount_total: 35,
+			guests: ['Ada Lovelace'],
+			ticket_ids: [],
+			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN
+		};
+		const bookingRepository = {} as unknown as BookingRepository;
+		const ticketRepository = {} as unknown as TicketRepository;
+		const send = vi.fn(async (message: EmailMessage) => {
+			void message;
+			return { status: 'SENT' as const };
+		});
+		const emailSender = { send } satisfies EmailSender;
+		const auditEventService = {
+			record: vi.fn()
+		} as unknown as AuditEventService;
+		const service = new NotificationService(
+			bookingRepository,
+			ticketRepository,
+			emailSender,
+			auditEventService
+		);
+
+		await service.sendBookingConfirmation(booking);
+
+		const message = send.mock.calls[0][0].message;
+		expect(message).toContain('Account name');
+		expect(message).toContain('Light Of Jesus Family Ireland CLG');
+		expect(message).toContain('Bank name');
+		expect(message).toContain('Bank of Ireland');
+		expect(message).toContain('IBAN');
+		expect(message).toContain('IE12 BOFI 9000 1780 5681 80');
+		expect(message).toContain('BIC/SWIFT');
+		expect(message).toContain('BOFIIE2DXXX');
+		expect(message).toContain('ada@example.com');
+	});
+
 	it('records booking.tickets_email_sent after the ticket email sends', async () => {
 		const booking: Booking = {
 			event_id: 'gfeu2026',
@@ -21,7 +78,8 @@ describe('NotificationService audit events', () => {
 			amount_total: 35,
 			guests: ['Ada Lovelace'],
 			ticket_ids: ['TICKET001'],
-			tickets_sent_to_client: false
+			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN
 		};
 		const ticket: Ticket = {
 			ticket_id: 'TICKET001',
@@ -40,7 +98,11 @@ describe('NotificationService audit events', () => {
 		const ticketRepository = {
 			findByTicketId: vi.fn(async () => ticket)
 		} as unknown as TicketRepository;
-		const emailSender = { send: vi.fn() } satisfies EmailSender;
+		const send = vi.fn(async (message: EmailMessage) => {
+			void message;
+			return { status: 'SENT' as const };
+		});
+		const emailSender = { send } satisfies EmailSender;
 		const auditEventService = {
 			record: vi.fn()
 		} as unknown as AuditEventService;
@@ -109,7 +171,8 @@ describe('NotificationService audit events', () => {
 			amount_total: 35,
 			guests: ['Ada Lovelace'],
 			ticket_ids: ['TICKET001'],
-			tickets_sent_to_client: false
+			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN
 		};
 		const bookingRepository = {
 			findByReferenceNo: vi.fn(async () => booking),
@@ -118,7 +181,11 @@ describe('NotificationService audit events', () => {
 		const ticketRepository = {
 			findByTicketId: vi.fn(async () => null)
 		} as unknown as TicketRepository;
-		const emailSender = { send: vi.fn() } satisfies EmailSender;
+		const send = vi.fn(async (message: EmailMessage) => {
+			void message;
+			return { status: 'SENT' as const };
+		});
+		const emailSender = { send } satisfies EmailSender;
 		const auditEventService = {
 			record: vi.fn()
 		} as unknown as AuditEventService;
@@ -151,13 +218,18 @@ describe('NotificationService audit events', () => {
 			amount_total: 35,
 			guests: ['Ada Lovelace'],
 			ticket_ids: [],
-			tickets_sent_to_client: false
+			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN
 		};
 		const bookingRepository = {
 			findByReferenceNo: vi.fn(async () => booking)
 		} as unknown as BookingRepository;
 		const ticketRepository = {} as unknown as TicketRepository;
-		const emailSender = { send: vi.fn() } satisfies EmailSender;
+		const send = vi.fn(async (message: EmailMessage) => {
+			void message;
+			return { status: 'SENT' as const };
+		});
+		const emailSender = { send } satisfies EmailSender;
 		const auditEventService = {
 			record: vi.fn()
 		} as unknown as AuditEventService;
@@ -170,6 +242,16 @@ describe('NotificationService audit events', () => {
 
 		await service.sendPaymentReminder('BREF001');
 
+		const message = send.mock.calls[0][0].message;
+		expect(message).toContain('Account name');
+		expect(message).toContain('Light Of Jesus Family Ireland CLG');
+		expect(message).toContain('Bank name');
+		expect(message).toContain('Bank of Ireland');
+		expect(message).toContain('IBAN');
+		expect(message).toContain('IE12 BOFI 9000 1780 5681 80');
+		expect(message).toContain('BIC/SWIFT');
+		expect(message).toContain('BOFIIE2DXXX');
+		expect(message).toContain('ada@example.com');
 		expect(emailSender.send).toHaveBeenCalledOnce();
 		expect(auditEventService.record).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -181,5 +263,88 @@ describe('NotificationService audit events', () => {
 				})
 			})
 		);
+	});
+
+	it('does not record a payment reminder when email sending is skipped', async () => {
+		const booking: Booking = {
+			event_id: 'gfeu2026',
+			reference_no: 'BREF001',
+			name: 'Ada Lovelace',
+			email: 'ada@example.com',
+			city: 'Dublin',
+			ticket_type: TicketType.STANDARD,
+			book_date: '2026-01-01T00:00:00.000Z',
+			payment_status: BookingPaymentStatus.UNPAID,
+			amount_total: 35,
+			guests: ['Ada Lovelace'],
+			ticket_ids: [],
+			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN
+		};
+		const bookingRepository = {
+			findByReferenceNo: vi.fn(async () => booking)
+		} as unknown as BookingRepository;
+		const ticketRepository = {} as unknown as TicketRepository;
+		const emailSender = {
+			send: vi.fn(async () => ({ status: 'SKIPPED' as const }))
+		} satisfies EmailSender;
+		const auditEventService = {
+			record: vi.fn()
+		} as unknown as AuditEventService;
+		const service = new NotificationService(
+			bookingRepository,
+			ticketRepository,
+			emailSender,
+			auditEventService
+		);
+
+		await expect(service.sendPaymentReminder('BREF001')).rejects.toThrow(
+			'email sending is not configured'
+		);
+
+		expect(auditEventService.record).not.toHaveBeenCalled();
+	});
+
+	it('does not send a payment reminder when the confirmation email already failed delivery', async () => {
+		const booking: Booking = {
+			event_id: 'gfeu2026',
+			reference_no: 'BREF001',
+			name: 'Ada Lovelace',
+			email: 'typo@example.invalid',
+			city: 'Dublin',
+			ticket_type: TicketType.STANDARD,
+			book_date: '2026-01-01T00:00:00.000Z',
+			payment_status: BookingPaymentStatus.UNPAID,
+			amount_total: 35,
+			guests: ['Ada Lovelace'],
+			ticket_ids: [],
+			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.FAILED,
+			booking_confirmation_email_error:
+				'Email bounced: hard: invalid_mailbox: mailbox does not exist'
+		};
+		const bookingRepository = {
+			findByReferenceNo: vi.fn(async () => booking)
+		} as unknown as BookingRepository;
+		const ticketRepository = {} as unknown as TicketRepository;
+		const emailSender = {
+			send: vi.fn(async () => ({ status: 'SENT' as const }))
+		} satisfies EmailSender;
+		const auditEventService = {
+			record: vi.fn()
+		} as unknown as AuditEventService;
+		const service = new NotificationService(
+			bookingRepository,
+			ticketRepository,
+			emailSender,
+			auditEventService
+		);
+
+		await expect(service.sendPaymentReminder('BREF001')).rejects.toThrow(
+			'email delivery already failed for this booking. Reason: Email bounced: hard: invalid_mailbox: mailbox does not exist'
+		);
+
+		expect(emailSender.send).not.toHaveBeenCalled();
+		expect(auditEventService.record).not.toHaveBeenCalled();
 	});
 });

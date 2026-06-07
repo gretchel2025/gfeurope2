@@ -8,7 +8,12 @@
  * allowing the actual sending mechanism to be swapped out cleanly.
  */
 import { ConflictError, NotFoundError } from '$lib/application/errors';
-import type { BookingRepository, EmailSender, TicketRepository } from '$lib/application/ports';
+import type {
+	BookingRepository,
+	EmailSender,
+	EmailSendResult,
+	TicketRepository
+} from '$lib/application/ports';
 import type { AuditEventService } from '$lib/application/services/auditEventService';
 import {
 	AuditAction,
@@ -17,11 +22,10 @@ import {
 	type AuditActor
 } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
-import { formatTicketTypeLabel } from '$lib/domain/shared/enums';
+import { grandFeastPaymentDetails } from '$lib/domain/paymentDetails';
+import { BookingConfirmationEmailStatus, formatTicketTypeLabel } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 
-const bankAccountName = 'LIGHT OF JESUS FAMILY IRELAND';
-const bankIban = 'IE12 BOFI 9000 1780 5681 80';
 const supportEmail = 'help@grandfeast.eu';
 
 const eventDetails = {
@@ -43,8 +47,8 @@ export class NotificationService {
 	) {}
 
 	/** Sends the initial reservation email after payment proof has been submitted. */
-	async sendBookingConfirmation(booking: Booking): Promise<void> {
-		await this.emailSender.send({
+	async sendBookingConfirmation(booking: Booking): Promise<EmailSendResult> {
+		return await this.emailSender.send({
 			to: booking.email,
 			subject: `We received your Grand Feast booking ${booking.reference_no}`,
 			message: buildReservationEmail(booking)
@@ -55,19 +59,21 @@ export class NotificationService {
 	async sendTicketsEmail(
 		bookingReferenceNo: string,
 		actor: AuditActor = systemAuditActor
-	): Promise<void> {
+	): Promise<EmailSendResult> {
 		const booking = await this.bookingRepository.findByReferenceNo(bookingReferenceNo);
 		if (!booking) {
 			throw new NotFoundError('booking not found');
 		}
 
+		requireDeliverableBookingEmail(booking);
 		const tickets = await this.loadTickets(booking);
 
-		await this.emailSender.send({
+		const emailResult = await this.emailSender.send({
 			to: booking.email,
 			subject: `Your Grand Feast eTickets ${booking.reference_no}`,
 			message: buildTicketsEmail(booking, tickets)
 		});
+		requireAcceptedEmail(emailResult);
 		await this.auditEventService.record({
 			...actor,
 			event_id: booking.event_id,
@@ -101,23 +107,26 @@ export class NotificationService {
 				tickets_sent_to_client: true
 			}
 		});
+		return emailResult;
 	}
 
 	/** Sends a reminder for a booking that is still awaiting payment. */
 	async sendPaymentReminder(
 		bookingReferenceNo: string,
 		actor: AuditActor = systemAuditActor
-	): Promise<void> {
+	): Promise<EmailSendResult> {
 		const booking = await this.bookingRepository.findByReferenceNo(bookingReferenceNo);
 		if (!booking) {
 			throw new NotFoundError('booking not found');
 		}
 
-		await this.emailSender.send({
+		requireDeliverableBookingEmail(booking);
+		const emailResult = await this.emailSender.send({
 			to: booking.email,
 			subject: `Payment reminder for your Grand Feast booking ${booking.reference_no}`,
 			message: buildPaymentReminderEmail(booking)
 		});
+		requireAcceptedEmail(emailResult);
 		await this.auditEventService.record({
 			...actor,
 			event_id: booking.event_id,
@@ -133,6 +142,7 @@ export class NotificationService {
 				payment_status: booking.payment_status
 			}
 		});
+		return emailResult;
 	}
 
 	/** Loads all concrete ticket records for the given booking. */
@@ -153,6 +163,23 @@ export class NotificationService {
 			throw new ConflictError('booking ticket records are incomplete');
 		}
 		return loadedTickets;
+	}
+}
+
+function requireDeliverableBookingEmail(booking: Booking): void {
+	if (booking.booking_confirmation_email_status !== BookingConfirmationEmailStatus.FAILED) {
+		return;
+	}
+
+	const reason = booking.booking_confirmation_email_error
+		? ` Reason: ${booking.booking_confirmation_email_error}`
+		: '';
+	throw new ConflictError(`email delivery already failed for this booking.${reason}`);
+}
+
+function requireAcceptedEmail(result: EmailSendResult): void {
+	if (result.status === 'SKIPPED') {
+		throw new ConflictError('email sending is not configured');
 	}
 }
 
@@ -179,6 +206,8 @@ function buildReservationEmail(booking: Booking): string {
 				['Quantity', String(booking.guests.length)],
 				['Total amount', formatAmount(booking.amount_total)]
 			])}
+			${sectionTitle('Bank Transfer Details')}
+			${paymentDetailsTable(booking.email)}
 			${guestList(booking.guests)}
 			${eventDetailsBlock()}
 			${paragraph(
@@ -243,17 +272,23 @@ function buildPaymentReminderEmail(booking: Booking): string {
 				['Status', booking.payment_status]
 			])}
 			${sectionTitle('Bank Transfer Details')}
-			${detailTable([
-				['Account name', bankAccountName],
-				['IBAN', bankIban],
-				['Transfer reference', booking.email]
-			])}
+			${paymentDetailsTable(booking.email)}
 			${paragraph(
 				`If you need help with your booking, please contact us at <a href="mailto:${supportEmail}" style="color:#005b72;font-weight:700;">${supportEmail}</a>.`
 			)}
 			${paragraph('Best regards,<br><strong>Grand Feast EU and UK Team</strong>')}
 		`
 	});
+}
+
+function paymentDetailsTable(transferReference: string): string {
+	return detailTable([
+		['Account name', grandFeastPaymentDetails.accountName],
+		['Bank name', grandFeastPaymentDetails.bankName],
+		['IBAN', grandFeastPaymentDetails.iban],
+		['BIC/SWIFT', grandFeastPaymentDetails.bicSwift],
+		['Transfer reference', transferReference]
+	]);
 }
 
 function buildEmailShell(input: {

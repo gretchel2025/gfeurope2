@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { AppError } from '$lib/application/errors';
 import { BookingService } from '$lib/application/services/bookingService';
 import type { NotificationService } from '$lib/application/services/notificationService';
 import type { TicketCounterService } from '$lib/application/services/ticketCounterService';
@@ -9,7 +10,12 @@ import type { BookingRepository, EventLogger, EventRepository } from '$lib/appli
 import { AuditAction, AuditEntityType } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
 import type { Event } from '$lib/domain/event';
-import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
+import {
+	BookingConfirmationEmailStatus,
+	BookingPaymentStatus,
+	TicketStatus,
+	TicketType
+} from '$lib/domain/shared/enums';
 import type { CreateTicketInput, Ticket } from '$lib/domain/ticket';
 import { computeTicketPricing, type TicketTypeConfig } from '$lib/domain/ticketType';
 
@@ -27,6 +33,7 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 		guests: ['Ada Lovelace'],
 		ticket_ids: [],
 		tickets_sent_to_client: false,
+		booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN,
 		...overrides
 	};
 }
@@ -92,7 +99,8 @@ function makeService(
 		markPaid: vi.fn(),
 		cancelReservation: vi.fn(),
 		appendTicketId: vi.fn(),
-		markTicketsSentToClient: vi.fn()
+		markTicketsSentToClient: vi.fn(),
+		updateBookingConfirmationEmailStatus: vi.fn()
 	} satisfies BookingRepository;
 
 	const eventRepository = {
@@ -137,7 +145,10 @@ function makeService(
 		)
 	} as unknown as TicketTypeService;
 	const notificationService = {
-		sendBookingConfirmation: vi.fn()
+		sendBookingConfirmation: vi.fn(async () => ({
+			status: 'SENT' as const,
+			providerMessageId: 'email_123'
+		}))
 	} as unknown as NotificationService;
 	const auditEventService = {
 		record: vi.fn()
@@ -165,6 +176,9 @@ function makeService(
 		ticketService: ticketService as TicketService & {
 			createNew: ReturnType<typeof vi.fn>;
 			getById: ReturnType<typeof vi.fn>;
+		},
+		notificationService: notificationService as NotificationService & {
+			sendBookingConfirmation: ReturnType<typeof vi.fn>;
 		},
 		auditEventService: auditEventService as AuditEventService & {
 			record: ReturnType<typeof vi.fn>;
@@ -249,6 +263,12 @@ describe('BookingService.createNew', () => {
 				payment_proof_url: 'https://res.cloudinary.com/demo/proof.pdf'
 			})
 		);
+		expect(bookingRepository.updateBookingConfirmationEmailStatus).toHaveBeenCalledWith(
+			booking.reference_no,
+			BookingConfirmationEmailStatus.SENT,
+			undefined,
+			'email_123'
+		);
 		expect(auditEventService.record).toHaveBeenCalledWith(
 			expect.objectContaining({
 				event_id: 'gfeu2026',
@@ -259,6 +279,32 @@ describe('BookingService.createNew', () => {
 					payment_proof_url: expect.anything()
 				})
 			})
+		);
+	});
+
+	it('records a failed confirmation email without losing the booking', async () => {
+		const { service, bookingRepository, notificationService } = makeService([]);
+		notificationService.sendBookingConfirmation.mockRejectedValueOnce(
+			new AppError('email svc: failed to send email:invalid recipient', 422, 'EMAIL_ERROR')
+		);
+
+		const booking = await service.createNew({
+			event_id: 'gfeu2026',
+			name: 'Ada Lovelace',
+			email: 'typo@example.invalid',
+			city: 'Dublin',
+			ticket_type: TicketType.STANDARD,
+			quantity: 1,
+			guests: ['Ada Lovelace']
+		});
+
+		expect(booking.booking_confirmation_email_status).toBe(BookingConfirmationEmailStatus.FAILED);
+		expect(booking.booking_confirmation_email_error).toContain('invalid recipient');
+		expect(bookingRepository.insertReservation).toHaveBeenCalled();
+		expect(bookingRepository.updateBookingConfirmationEmailStatus).toHaveBeenCalledWith(
+			booking.reference_no,
+			BookingConfirmationEmailStatus.FAILED,
+			'email svc: failed to send email:invalid recipient'
 		);
 	});
 

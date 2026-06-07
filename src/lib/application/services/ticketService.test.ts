@@ -10,7 +10,12 @@ import type { AuditEventService } from '$lib/application/services/auditEventServ
 import { TicketService } from '$lib/application/services/ticketService';
 import { AuditAction, AuditActorType, AuditEntityType } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
-import { BookingPaymentStatus, TicketStatus, TicketType } from '$lib/domain/shared/enums';
+import {
+	BookingConfirmationEmailStatus,
+	BookingPaymentStatus,
+	TicketStatus,
+	TicketType
+} from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
@@ -27,6 +32,7 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 		guests: ['Ada Lovelace'],
 		ticket_ids: ['TICKET123'],
 		tickets_sent_to_client: false,
+		booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN,
 		...overrides
 	};
 }

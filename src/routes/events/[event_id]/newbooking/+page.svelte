@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { grandFeastPaymentDetails } from '$lib/domain/paymentDetails';
 	import { computeTicketPricing, isEarlyBirdDiscountActive } from '$lib/domain/ticketType';
 	import { publicRoutes } from '$lib/navigation/adminRoutes';
 	import type { BookingTicketOption, ServerData } from './+page.server';
@@ -223,16 +224,6 @@
 		return pricing.earlyBirdDiscountActive
 			? `${formatMoney(pricing.unitPrice, option.currency)} Early Bird`
 			: formatMoney(option.base_price, option.currency);
-	}
-
-	function formatDiscountLabel(option: BookingTicketOption) {
-		if (option.bulk_purchase_discount_rate !== undefined) {
-			return `${Math.round(option.bulk_purchase_discount_rate * 100)}%`;
-		}
-		if (option.bulk_purchase_discount_amount !== undefined) {
-			return formatMoney(option.bulk_purchase_discount_amount, option.currency);
-		}
-		return 'Group';
 	}
 
 	function formatDate(value: string) {
@@ -487,7 +478,7 @@
 								<div>
 									<h4 class="text-xl font-black text-white">How many tickets?</h4>
 									<p class="mt-1 text-sm text-[#fff3df]/70">
-										Group discounts are applied automatically where eligible.
+										Choose the number of seats you want to reserve.
 									</p>
 								</div>
 								<div class="flex items-center gap-3">
@@ -694,11 +685,27 @@
 								<p class="mt-2 text-[#fff3df]/75">
 									Please transfer the total amount before submitting your reservation.
 								</p>
-								<div class="mt-4 space-y-2 border-l-4 border-[#f3c15f] pl-4 text-[#fff3df]">
-									<p class="font-black">LIGHT OF JESUS FAMILY IRELAND</p>
-									<p class="font-mono text-lg font-black tracking-wide text-[#f3c15f]">
-										IE12 BOFI 9000 1780 5681 80
-									</p>
+								<div class="mt-4 grid gap-3 border-l-4 border-[#f3c15f] pl-4 text-[#fff3df]">
+									<div>
+										<p class="conference-kicker text-[#fff3df]/60">Account name</p>
+										<p class="mt-1 font-black">{grandFeastPaymentDetails.accountName}</p>
+									</div>
+									<div>
+										<p class="conference-kicker text-[#fff3df]/60">Bank name</p>
+										<p class="mt-1 font-black">{grandFeastPaymentDetails.bankName}</p>
+									</div>
+									<div>
+										<p class="conference-kicker text-[#fff3df]/60">IBAN</p>
+										<p class="mt-1 font-mono text-lg font-black tracking-wide text-[#f3c15f]">
+											{grandFeastPaymentDetails.iban}
+										</p>
+									</div>
+									<div>
+										<p class="conference-kicker text-[#fff3df]/60">BIC/SWIFT</p>
+										<p class="mt-1 font-mono text-lg font-black tracking-wide text-[#f3c15f]">
+											{grandFeastPaymentDetails.bicSwift}
+										</p>
+									</div>
 									<p class="text-sm text-[#fff3df]/70">
 										Use your attendee email as the transfer reference.
 									</p>
@@ -834,9 +841,7 @@
 							<span
 								>{selectedPricing?.earlyBirdDiscountActive
 									? 'Early Bird discount'
-									: selectedTicketOption
-										? `${formatDiscountLabel(selectedTicketOption)} group discount`
-										: 'Discount'}</span
+									: 'Discount'}</span
 							>
 							<span class="font-bold"
 								>-{formatMoney(discountAmount, selectedTicketOption?.currency ?? 'EUR')}</span

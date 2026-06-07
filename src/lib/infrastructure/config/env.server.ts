@@ -30,6 +30,7 @@ export type AppConfig = {
 	};
 	integrations: {
 		resendApiKey: string;
+		resendWebhookSecret: string;
 		emailFrom: string;
 		emailReplyTo: string;
 		cloudinaryCloudName: string;
@@ -61,6 +62,7 @@ export const appConfig: AppConfig = {
 	},
 	integrations: {
 		resendApiKey: readEnv('RESEND_API_KEY') || '',
+		resendWebhookSecret: readEnv('RESEND_WEBHOOK_SECRET') || '',
 		emailFrom: readEnv('EMAIL_FROM') || '',
 		emailReplyTo: readEnv('EMAIL_REPLY_TO') || '',
 		cloudinaryCloudName: readEnv('CLOUDINARY_CLOUD_NAME') || cloudinaryUrlConfig.cloudName || '',

@@ -14,6 +14,16 @@ export enum BookingPaymentStatus {
 	BOOKING_RESERVATION_CANCELLED = 'BOOKING_RESERVATION_CANCELLED'
 }
 
+/** The states of the first booking confirmation email send attempt. */
+export enum BookingConfirmationEmailStatus {
+	PENDING = 'PENDING',
+	SENT = 'SENT',
+	DELIVERED = 'DELIVERED',
+	FAILED = 'FAILED',
+	SKIPPED = 'SKIPPED',
+	UNKNOWN = 'UNKNOWN'
+}
+
 /** The states a ticket can move through during event operations. */
 export enum TicketStatus {
 	CREATED = 'CREATED',
