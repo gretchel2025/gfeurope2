@@ -17,7 +17,7 @@
 <div class="gfeu2025-archive">
 	<section class="archive-hero px-4 py-12 sm:py-16">
 		<div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-			<div class="space-y-7">
+			<div class="min-w-0 space-y-7">
 				<div
 					class="inline-flex border border-white/20 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-[0.2em] text-white"
 				>
@@ -26,11 +26,13 @@
 				<div class="space-y-4">
 					<p class="text-sm font-black uppercase tracking-[0.22em] text-[#f3d6a0]">Oslo, Norway</p>
 					<h1
-						class="max-w-4xl text-6xl font-black uppercase leading-none text-white sm:text-7xl md:text-8xl"
+						class="max-w-full text-5xl font-black uppercase leading-none text-white sm:max-w-4xl sm:text-7xl md:text-8xl"
 					>
 						Called To More
 					</h1>
-					<p class="text-2xl font-black uppercase leading-tight text-[#fff5e5] sm:text-4xl">
+					<p
+						class="max-w-full text-2xl font-black uppercase leading-tight text-[#fff5e5] sm:text-4xl"
+					>
 						Grand Feast Europe 2025
 					</p>
 					<p class="max-w-2xl text-xl font-bold text-[#f3d6a0]">September 20, 2025</p>

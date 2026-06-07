@@ -41,6 +41,7 @@ export interface BookingRepository {
 	markPaid(referenceNo: string): Promise<void>;
 	cancelReservation(referenceNo: string): Promise<void>;
 	appendTicketId(referenceNo: string, ticketId: string): Promise<void>;
+	updateGuestDetails(referenceNo: string, guests: string[], contactName?: string): Promise<void>;
 	markTicketsSentToClient(referenceNo: string): Promise<void>;
 	updateBookingConfirmationEmailStatus(
 		referenceNo: string,

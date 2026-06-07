@@ -144,10 +144,14 @@
 			<div
 				class="mx-auto flex max-w-6xl flex-col gap-4 rounded-xl border border-white/10 bg-[#021821]/80 px-4 py-4 shadow-xl backdrop-blur md:flex-row md:items-center md:justify-between md:px-5"
 			>
-				<div class="flex items-center justify-between">
-					<a href={publicHomeHref} on:click={closeMenu} class="group">
+				<div class="flex min-w-0 items-center justify-between gap-3">
+					<a href={publicHomeHref} on:click={closeMenu} class="group min-w-0 pr-2">
 						<p class="conference-kicker">Grand Feast</p>
-						<h1 class="text-2xl font-black tracking-normal text-white">{publicHeaderTitle}</h1>
+						<h1
+							class="max-w-52 text-2xl font-black leading-tight tracking-normal text-white sm:max-w-none"
+						>
+							{publicHeaderTitle}
+						</h1>
 					</a>
 
 					<button

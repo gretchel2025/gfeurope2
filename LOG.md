@@ -31,7 +31,9 @@ test sends, site availability checks, or command-only housekeeping.
   disabled View event controls.
 - Added Bro Bo Sanchez as the main event speaker in the GFEU 2026 public landing message.
 - Added an admin-only ticket holder name edit action with a `ticket.name_updated` audit
-  event for customer-requested corrections.
+  event for customer-requested corrections, including booking guest-list sync.
+- Improved mobile responsiveness for public event headers, hero headings, booking flow
+  headings, and bank-transfer review details so narrow webviews do not crop text.
 
 ## 2026-06-06
 

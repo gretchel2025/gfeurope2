@@ -70,14 +70,18 @@
 
 <section class="relative px-4 pb-20 pt-12 sm:pt-16">
 	<div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-		<div class="space-y-8">
-			<div class="space-y-4">
+		<div class="min-w-0 space-y-8">
+			<div class="min-w-0 space-y-4">
 				<p class="conference-kicker">Dublin, Ireland</p>
-				<h1 class="conference-title text-6xl uppercase sm:text-7xl md:text-8xl">TOGETHER 2026</h1>
-				<p class="max-w-3xl text-2xl font-black uppercase leading-tight text-white sm:text-4xl">
+				<h1 class="conference-title max-w-full text-5xl uppercase sm:text-7xl md:text-8xl">
+					TOGETHER 2026
+				</h1>
+				<p
+					class="max-w-full text-2xl font-black uppercase leading-tight text-white sm:max-w-3xl sm:text-4xl"
+				>
 					October 3, 2026
 				</p>
-				<p class="max-w-2xl text-lg italic leading-8 text-[#fff3df]/80 sm:text-xl">
+				<p class="max-w-full text-lg italic leading-8 text-[#fff3df]/80 sm:max-w-2xl sm:text-xl">
 					“In him the whole building is joined together and rises to become a holy temple in the
 					Lord.” — <span class="font-bold text-[#f3c15f]">Ephesians 2:21</span>
 				</p>
@@ -91,11 +95,13 @@
 				<button
 					type="button"
 					on:click={scrollToTickets}
-					class="conference-button px-8 py-4 text-sm"
+					class="conference-button w-full px-8 py-4 text-sm sm:w-auto"
 				>
 					Buy Ticket
 				</button>
-				<a href="#details" class="conference-button-secondary px-8 py-4 text-sm"> Event Details </a>
+				<a href="#details" class="conference-button-secondary w-full px-8 py-4 text-sm sm:w-auto">
+					Event Details
+				</a>
 			</div>
 		</div>
 
@@ -168,8 +174,8 @@
 				</p>
 
 				<p>
-					Together with Bro Bo Sanchez, our main event speaker, we will gather for a day of
-					worship, renewal, and a shared reminder that we belong to God and to one another.
+					Together with Bro Bo Sanchez, our main event speaker, we will gather for a day of worship,
+					renewal, and a shared reminder that we belong to God and to one another.
 				</p>
 
 				<p>Come to be refreshed by stepping into an environment of pure worship.</p>
@@ -273,9 +279,7 @@
 
 				{#if earlyBirdActive && standardTicket && standardPricing}
 					<div class="conference-pill mb-2 px-2 py-1">
-						Early Bird <span class="ml-2 text-xs text-[#fff3df]/80"
-							>{grandFeastPlusCountdown}</span
-						>
+						Early Bird <span class="ml-2 text-xs text-[#fff3df]/80">{grandFeastPlusCountdown}</span>
 					</div>
 					<p class="mb-3 text-sm text-[#fff3df]/70">
 						Until {formatDate(standardTicket.early_bird_discount_available_until ?? '')} only

@@ -198,6 +198,42 @@ describe('Supabase repositories', () => {
 		]);
 	});
 
+	it('updates event-scoped booking guest details', async () => {
+		const calls: Array<[string, unknown]> = [];
+		const query = {
+			update: (value: Record<string, unknown>) => {
+				calls.push(['update', value]);
+				return query;
+			},
+			eq: (column: string, value: unknown) => {
+				calls.push(['eq', [column, value]]);
+				return query;
+			},
+			then: (resolve: (value: { data: null; error: null }) => void) => {
+				resolve({ data: null, error: null });
+			}
+		};
+		const client = {
+			schema: (schema: string) => {
+				calls.push(['schema', schema]);
+				return client;
+			},
+			from: (table: string) => {
+				calls.push(['from', table]);
+				return query;
+			}
+		} as unknown as SupabaseClient;
+
+		const repository = new SupabaseBookingRepository(client, 'event-test');
+		await repository.updateGuestDetails('B123', ['Grace Hopper'], 'Grace Hopper');
+
+		expect(calls).toContainEqual(['schema', 'grandfeasteu']);
+		expect(calls).toContainEqual(['from', 'bookings']);
+		expect(calls).toContainEqual(['update', { guests: ['Grace Hopper'], name: 'Grace Hopper' }]);
+		expect(calls).toContainEqual(['eq', ['event_id', 'event-test']]);
+		expect(calls).toContainEqual(['eq', ['reference_no', 'B123']]);
+	});
+
 	it('marks event-scoped booking tickets as sent to the client', async () => {
 		const calls: Array<[string, unknown]> = [];
 		const client = {

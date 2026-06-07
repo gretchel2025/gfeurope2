@@ -99,6 +99,7 @@ function makeService(
 		markPaid: vi.fn(),
 		cancelReservation: vi.fn(),
 		appendTicketId: vi.fn(),
+		updateGuestDetails: vi.fn(),
 		markTicketsSentToClient: vi.fn(),
 		updateBookingConfirmationEmailStatus: vi.fn()
 	} satisfies BookingRepository;

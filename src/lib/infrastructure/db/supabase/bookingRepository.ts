@@ -83,6 +83,25 @@ export class SupabaseBookingRepository implements BookingRepository {
 		if (error) throwSupabaseError('booking ticket append failed', error);
 	}
 
+	async updateGuestDetails(
+		referenceNo: string,
+		guests: string[],
+		contactName?: string
+	): Promise<void> {
+		const values: { guests: string[]; name?: string } = { guests };
+		if (contactName !== undefined) {
+			values.name = contactName;
+		}
+
+		const { error } = await this.schema
+			.from(tableName)
+			.update(values)
+			.eq('event_id', this.eventId)
+			.eq('reference_no', referenceNo);
+
+		if (error) throwSupabaseError('booking guest details update failed', error);
+	}
+
 	async markTicketsSentToClient(referenceNo: string): Promise<void> {
 		const { error } = await this.schema.rpc('mark_booking_tickets_sent_to_client', {
 			p_event_id: this.eventId,

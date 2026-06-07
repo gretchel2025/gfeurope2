@@ -348,7 +348,9 @@
 			<p class="conference-kicker">Ticket Reservation</p>
 			<h1 class="conference-section-title text-4xl sm:text-5xl">Reserve Your Seat</h1>
 
-			<h2 class="text-xl font-black tracking-normal text-[#f3c15f] sm:text-2xl">
+			<h2
+				class="mx-auto max-w-xl text-xl font-black leading-tight tracking-normal text-[#f3c15f] sm:text-2xl"
+			>
 				Grand Feast Europe 2026 • Dublin • October 3, 2026
 			</h2>
 		</hgroup>
@@ -430,7 +432,7 @@
 													<p class="text-lg font-black text-[#fff3df]/55 line-through">
 														{formatMoney(option.base_price, option.currency)}
 													</p>
-													<p class="text-3xl font-black text-[#f3c15f]">
+													<p class="text-2xl font-black text-[#f3c15f] sm:text-3xl">
 														{formatSingleTicketDescription(option)}
 													</p>
 													<p class="text-sm font-bold text-[#fff3df]/70">
@@ -438,7 +440,7 @@
 													</p>
 												</div>
 											{:else}
-												<p class="mt-2 text-3xl font-black text-[#f3c15f]">
+												<p class="mt-2 text-2xl font-black text-[#f3c15f] sm:text-3xl">
 													{formatSingleTicketDescription(option)}
 												</p>
 											{/if}
@@ -696,13 +698,17 @@
 									</div>
 									<div>
 										<p class="conference-kicker text-[#fff3df]/60">IBAN</p>
-										<p class="mt-1 font-mono text-lg font-black tracking-wide text-[#f3c15f]">
+										<p
+											class="overflow-wrap-anywhere mt-1 font-mono text-base font-black text-[#f3c15f] sm:text-lg sm:tracking-wide"
+										>
 											{grandFeastPaymentDetails.iban}
 										</p>
 									</div>
 									<div>
 										<p class="conference-kicker text-[#fff3df]/60">BIC/SWIFT</p>
-										<p class="mt-1 font-mono text-lg font-black tracking-wide text-[#f3c15f]">
+										<p
+											class="overflow-wrap-anywhere mt-1 font-mono text-base font-black text-[#f3c15f] sm:text-lg sm:tracking-wide"
+										>
 											{grandFeastPaymentDetails.bicSwift}
 										</p>
 									</div>

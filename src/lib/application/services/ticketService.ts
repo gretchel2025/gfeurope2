@@ -109,12 +109,47 @@ export class TicketService {
 	): Promise<void> {
 		const newName = this.normalizeTicketName(name);
 		const ticket = await this.getRequiredById(ticketId);
+		const booking = await this.getRequiredBooking(ticket.booking_reference_no);
 		const previousName = ticket.name;
-		if (previousName === newName) {
+		const ticketIndex = booking.ticket_ids.findIndex(
+			(bookingTicketId) => bookingTicketId === ticketId
+		);
+		if (ticketIndex === -1) {
+			throw new ValidationError('ticket is not linked to booking');
+		}
+		if (ticketIndex >= booking.guests.length) {
+			throw new ValidationError('ticket guest is not linked to booking guest list');
+		}
+
+		const previousBookingGuestName = booking.guests[ticketIndex];
+		const shouldUpdateBookingContactName =
+			ticketIndex === 0 &&
+			(booking.name === previousName || booking.name === previousBookingGuestName);
+		const shouldUpdateTicketName = previousName !== newName;
+		const shouldUpdateBookingGuestName = previousBookingGuestName !== newName;
+		const shouldPersistBookingContactName =
+			shouldUpdateBookingContactName && booking.name !== newName;
+
+		if (
+			!shouldUpdateTicketName &&
+			!shouldUpdateBookingGuestName &&
+			!shouldPersistBookingContactName
+		) {
 			return;
 		}
 
-		await this.ticketRepository.updateName(ticketId, newName);
+		if (shouldUpdateBookingGuestName || shouldPersistBookingContactName) {
+			const updatedGuests = [...booking.guests];
+			updatedGuests[ticketIndex] = newName;
+			await this.bookingRepository.updateGuestDetails(
+				booking.reference_no,
+				updatedGuests,
+				shouldPersistBookingContactName ? newName : undefined
+			);
+		}
+		if (shouldUpdateTicketName) {
+			await this.ticketRepository.updateName(ticketId, newName);
+		}
 		await this.auditEventService.record({
 			...actor,
 			event_id: this.eventId,
@@ -127,6 +162,11 @@ export class TicketService {
 				ticket_guest_name: newName,
 				ticket_type: ticket.ticket_type,
 				booking_reference_no: ticket.booking_reference_no,
+				booking_guest_index: ticketIndex,
+				previous_booking_guest_name: previousBookingGuestName,
+				booking_guest_name: newName,
+				booking_guest_name_updated: shouldUpdateBookingGuestName,
+				booking_contact_name_updated: shouldPersistBookingContactName,
 				status: ticket.status
 			}
 		});
@@ -134,6 +174,9 @@ export class TicketService {
 			ticket_id: ticket.ticket_id,
 			previous_ticket_guest_name: previousName,
 			ticket_guest_name: newName,
+			booking_guest_index: ticketIndex,
+			booking_guest_name_updated: shouldUpdateBookingGuestName,
+			booking_contact_name_updated: shouldPersistBookingContactName,
 			related_booking_reference_no: ticket.booking_reference_no
 		});
 	}
@@ -220,11 +263,16 @@ export class TicketService {
 	/** Loads the ticket together with its parent booking for state validation. */
 	private async getTicketAndBooking(ticketId: string) {
 		const ticket = await this.getRequiredById(ticketId);
-		const booking = await this.bookingRepository.findByReferenceNo(ticket.booking_reference_no);
+		const booking = await this.getRequiredBooking(ticket.booking_reference_no);
+		return { ticket, booking };
+	}
+
+	private async getRequiredBooking(referenceNo: string) {
+		const booking = await this.bookingRepository.findByReferenceNo(referenceNo);
 		if (!booking) {
 			throw new NotFoundError('booking not found');
 		}
-		return { ticket, booking };
+		return booking;
 	}
 
 	/** Generates the user-visible ticket id format. */
