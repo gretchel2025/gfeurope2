@@ -22,6 +22,8 @@ describe('event route builders', () => {
 		expect(routes.home).toBe(`/admin/events/${eventId}`);
 		expect(routes.audit).toBe(`/admin/events/${eventId}/audit`);
 		expect(routes.merchandise).toBe(`/admin/events/${eventId}/merchandise`);
+		expect(routes.merchandiseNew).toBe(`/admin/events/${eventId}/merchandise/new`);
+		expect(routes.merchandiseProduct('MP-123')).toBe(`/admin/events/${eventId}/merchandise/MP-123`);
 		expect(routes.booking.list).toBe(`/admin/events/${eventId}/bookings`);
 		expect(routes.booking.details('B123')).toBe(`/admin/events/${eventId}/bookings/B123`);
 		expect(routes.ticket.details('T123')).toBe(`/admin/events/${eventId}/tickets/T123`);

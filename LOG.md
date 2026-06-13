@@ -11,6 +11,8 @@ test sends, site availability checks, or command-only housekeeping.
 - Restricted merchandise categories to T-Shirts, Books, Cards, Bags, and Sweatshirt,
   moved product IDs to database generation, and added a merch image carousel below the
   public ticket cards when product images are available.
+- Split admin merchandise management into a product list, dedicated create form, and
+  dedicated update form, with local e2e coverage for create, update, and delete.
 
 ## 2026-06-07
 

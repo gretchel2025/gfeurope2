@@ -47,6 +47,9 @@ export function adminRoutes(eventId: string) {
 		home: adminBase,
 		audit: `${adminBase}/audit`,
 		merchandise: `${adminBase}/merchandise`,
+		merchandiseNew: `${adminBase}/merchandise/new`,
+		merchandiseProduct: (productId: string): string =>
+			`${adminBase}/merchandise/${encodeSegment(productId)}`,
 		reports: `${adminBase}/reports`,
 		system: `${adminBase}/system`,
 		booking: {
