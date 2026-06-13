@@ -3,6 +3,15 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-06-13
+
+- Added event-scoped merchandise management, public shop reservations, merch reservation
+  persistence, stock decrementing, audit events, image storage hooks, and customer
+  reservation confirmation emails.
+- Restricted merchandise categories to T-Shirts, Books, Cards, Bags, and Sweatshirt,
+  moved product IDs to database generation, and added a merch image carousel below the
+  public ticket cards when product images are available.
+
 ## 2026-06-07
 
 - Removed 5+ group/family booking discounts from ticket type data and public ticket

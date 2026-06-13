@@ -1,13 +1,27 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import CountdownTimer from '$lib/ui/components/public/CountdownTimer.svelte';
+	import type { MerchProduct } from '$lib/domain/merchandise';
 	import { computeTicketPricing, isEarlyBirdDiscountActive } from '$lib/domain/ticketType';
 	import type { TicketTypeConfig } from '$lib/domain/ticketType';
 	import { publicRoutes } from '$lib/navigation/adminRoutes';
 
 	export let ticketTypes: TicketTypeConfig[];
+	export let merchProducts: MerchProduct[] = [];
 
 	$: publicNav = publicRoutes($page.params.event_id);
+	$: merchCarouselItems = merchProducts
+		.flatMap((product) =>
+			product.image_urls.slice(0, 5).map((imageUrl) => ({
+				product_id: product.product_id,
+				name: product.name,
+				category: product.category,
+				unit_price: product.unit_price,
+				currency: product.currency,
+				imageUrl
+			}))
+		)
+		.slice(0, 5);
 
 	let ticketsSection: HTMLElement;
 	const eventDate = new Date('2026-10-03T12:00:00+01:00');
@@ -101,6 +115,12 @@
 				</button>
 				<a href="#details" class="conference-button-secondary w-full px-8 py-4 text-sm sm:w-auto">
 					Event Details
+				</a>
+				<a
+					href={publicNav.shop}
+					class="conference-button-secondary w-full px-8 py-4 text-sm sm:w-auto"
+				>
+					Shop Merch
 				</a>
 			</div>
 		</div>
@@ -398,3 +418,129 @@
 		</div>
 	</div>
 </section>
+
+{#if merchCarouselItems.length > 0}
+	<section class="px-4 pb-24">
+		<div class="mx-auto max-w-6xl">
+			<div class="text-center">
+				<p class="conference-kicker">Event Merchandise</p>
+				<h2 class="conference-section-title mt-3 text-4xl md:text-5xl">Shop Preview</h2>
+			</div>
+
+			<div class={`merch-carousel-stage merch-carousel-count-${merchCarouselItems.length}`}>
+				{#each merchCarouselItems as item, index (`${item.product_id}-${item.imageUrl}`)}
+					<a
+						href={publicNav.shop}
+						data-merch-slide={index}
+						class="merch-carousel-slide group overflow-hidden border border-white/12 bg-white/8 shadow-xl transition hover:-translate-y-1 hover:border-[#f3c15f]/70"
+						style={`animation-delay: ${index * 5}s`}
+					>
+						<img
+							src={item.imageUrl}
+							alt={item.name}
+							class="h-72 w-full object-cover transition duration-300 group-hover:scale-105"
+							loading="lazy"
+						/>
+						<div class="space-y-2 p-5">
+							<p class="text-xs font-black uppercase tracking-[0.18em] text-[#f3c15f]">
+								{item.category} · {formatMoney(item.unit_price, item.currency)}
+							</p>
+							<h3 class="text-2xl font-black text-white">{item.name}</h3>
+						</div>
+					</a>
+				{/each}
+			</div>
+		</div>
+	</section>
+{/if}
+
+<style>
+	.merch-carousel-stage {
+		position: relative;
+		margin: 2rem auto 0;
+		min-height: 26rem;
+		width: min(100%, 22rem);
+	}
+
+	.merch-carousel-slide {
+		inset: 0;
+		opacity: 0;
+		position: absolute;
+		transform: translateX(0.75rem) scale(0.98);
+	}
+
+	.merch-carousel-count-1 .merch-carousel-slide {
+		animation: none;
+		opacity: 1;
+		position: relative;
+		transform: none;
+	}
+
+	.merch-carousel-count-2 .merch-carousel-slide {
+		animation: merch-fade-2 10s infinite;
+	}
+
+	.merch-carousel-count-3 .merch-carousel-slide {
+		animation: merch-fade-3 15s infinite;
+	}
+
+	.merch-carousel-count-4 .merch-carousel-slide {
+		animation: merch-fade-4 20s infinite;
+	}
+
+	.merch-carousel-count-5 .merch-carousel-slide {
+		animation: merch-fade-5 25s infinite;
+	}
+
+	@keyframes merch-fade-2 {
+		0%,
+		45% {
+			opacity: 1;
+			transform: translateX(0) scale(1);
+		}
+		50%,
+		100% {
+			opacity: 0;
+			transform: translateX(-0.75rem) scale(0.98);
+		}
+	}
+
+	@keyframes merch-fade-3 {
+		0%,
+		30% {
+			opacity: 1;
+			transform: translateX(0) scale(1);
+		}
+		33.33%,
+		100% {
+			opacity: 0;
+			transform: translateX(-0.75rem) scale(0.98);
+		}
+	}
+
+	@keyframes merch-fade-4 {
+		0%,
+		22.5% {
+			opacity: 1;
+			transform: translateX(0) scale(1);
+		}
+		25%,
+		100% {
+			opacity: 0;
+			transform: translateX(-0.75rem) scale(0.98);
+		}
+	}
+
+	@keyframes merch-fade-5 {
+		0%,
+		18% {
+			opacity: 1;
+			transform: translateX(0) scale(1);
+		}
+		20%,
+		100% {
+			opacity: 0;
+			transform: translateX(-0.75rem) scale(0.98);
+		}
+	}
+</style>

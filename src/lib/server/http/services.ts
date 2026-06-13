@@ -9,6 +9,7 @@
 import { AdminUserService } from '$lib/application/services/adminUserService';
 import { AuditEventService } from '$lib/application/services/auditEventService';
 import { BookingService } from '$lib/application/services/bookingService';
+import { MerchandiseService } from '$lib/application/services/merchandiseService';
 import { NotificationService } from '$lib/application/services/notificationService';
 import { ReportingService } from '$lib/application/services/reportingService';
 import { SystemService } from '$lib/application/services/systemService';
@@ -19,12 +20,15 @@ import {
 	SupabaseAuditEventRepository,
 	SupabaseBookingRepository,
 	SupabaseEventRepository,
+	SupabaseMerchProductRepository,
+	SupabaseMerchReservationRepository,
 	SupabaseTicketCounterRepository,
 	SupabaseTicketRepository,
 	SupabaseTicketTypeRepository
 } from '$lib/infrastructure/db/supabase/repositories';
 import { ResendEmailSender } from '$lib/infrastructure/email/resendEmailSender';
 import { CloudinaryImageStorage } from '$lib/infrastructure/media/cloudinaryImageStorage';
+import { CloudinaryMerchProductImageStorage } from '$lib/infrastructure/media/cloudinaryMerchProductImageStorage';
 import { CloudinaryPaymentProofStorage } from '$lib/infrastructure/media/cloudinaryPaymentProofStorage';
 import { DefaultQrCodeGenerator } from '$lib/infrastructure/media/qrCodeGenerator';
 import { PinoEventLogger } from '$lib/infrastructure/logging/eventLogger';
@@ -40,11 +44,14 @@ const randomIdGenerator = customAlphabet('23456789ABCDEFGHJKLMNPRSTUVWXYZ', 10);
 const eventRepository = new SupabaseEventRepository();
 const ticketTypeRepository = new SupabaseTicketTypeRepository();
 const auditEventRepository = new SupabaseAuditEventRepository();
+const merchProductRepository = new SupabaseMerchProductRepository();
+const merchReservationRepository = new SupabaseMerchReservationRepository();
 const adminUserRepository = new SupabaseAdminUserRepository();
 
 /** Infrastructure adapters used by the service layer. */
 const emailSender = new ResendEmailSender();
 const imageStorage = new CloudinaryImageStorage();
+const merchProductImageStorage = new CloudinaryMerchProductImageStorage();
 const paymentProofStorage = new CloudinaryPaymentProofStorage();
 const qrCodeGenerator = new DefaultQrCodeGenerator();
 const eventLogger = new PinoEventLogger();
@@ -54,7 +61,7 @@ export const ticketTypeService = new TicketTypeService(ticketTypeRepository);
 export const adminUserService = new AdminUserService(adminUserRepository);
 export const reportingService = new ReportingService();
 export const systemService = new SystemService(systemSettingsStore);
-export { paymentProofStorage };
+export { merchProductImageStorage, paymentProofStorage };
 
 export type EventServices = ReturnType<typeof createEventServices>;
 
@@ -107,6 +114,15 @@ export function createEventServices(eventId: string) {
 		auditEventService,
 		(size) => randomIdGenerator(size)
 	);
+	const merchandiseService = new MerchandiseService(
+		merchProductRepository,
+		merchReservationRepository,
+		eventRepository,
+		notificationService,
+		eventLogger,
+		auditEventService,
+		(size) => randomIdGenerator(size)
+	);
 
 	return {
 		bookingRepository,
@@ -118,6 +134,7 @@ export function createEventServices(eventId: string) {
 		notificationService,
 		ticketService,
 		bookingService,
+		merchandiseService,
 		ticketTypeService
 	};
 }
@@ -126,5 +143,7 @@ export function createEventServices(eventId: string) {
 export const repositories = {
 	eventRepository,
 	ticketTypeRepository,
-	auditEventRepository
+	auditEventRepository,
+	merchProductRepository,
+	merchReservationRepository
 };

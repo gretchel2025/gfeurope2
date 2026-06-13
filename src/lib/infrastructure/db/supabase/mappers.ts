@@ -1,11 +1,13 @@
 import type { Booking } from '$lib/domain/booking';
 import type { Event } from '$lib/domain/event';
+import type { MerchProduct, MerchReservation, MerchReservationItem } from '$lib/domain/merchandise';
 import {
 	BookingConfirmationEmailStatus,
 	BookingPaymentStatus,
 	TicketStatus,
 	TicketType
 } from '$lib/domain/shared/enums';
+import { MerchReservationEmailStatus, MerchReservationStatus } from '$lib/domain/merchandise';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter } from '$lib/domain/ticketCounter';
 import type { TicketTypeConfig } from '$lib/domain/ticketType';
@@ -87,6 +89,56 @@ export type SupabaseTicketTypeRow = {
 	bulk_purchase_discount_amount: number | string | null;
 	sort_order: number;
 	is_active: boolean;
+};
+
+export type SupabaseMerchProductRow = {
+	event_id: string;
+	product_id: string;
+	name: string;
+	description: string | null;
+	category: string;
+	unit_price: number | string;
+	currency: string;
+	stock_count: number;
+	sizes: string[] | null;
+	colors: string[] | null;
+	image_urls: string[] | null;
+	is_active: boolean;
+	deleted_at: string | null;
+	created_at?: string | null;
+	updated_at?: string | null;
+};
+
+export type SupabaseMerchReservationRow = {
+	event_id: string;
+	reservation_id: string;
+	customer_name: string;
+	email: string;
+	mobile: string;
+	reserved_at: string;
+	status: string;
+	amount_total: number | string;
+	currency: string;
+	confirmation_email_status: string;
+	confirmation_email_attempted_at: string | null;
+	confirmation_email_provider_id: string | null;
+	confirmation_email_error: string | null;
+	created_at?: string | null;
+	updated_at?: string | null;
+};
+
+export type SupabaseMerchReservationItemRow = {
+	item_id: string;
+	event_id: string;
+	reservation_id: string;
+	product_id: string;
+	product_name: string;
+	quantity: number;
+	unit_price: number | string;
+	currency: string;
+	selected_size: string | null;
+	selected_color: string | null;
+	created_at?: string | null;
 };
 
 export type SupabaseAuditEventRow = {
@@ -200,6 +252,99 @@ export function mapTicketType(row: SupabaseTicketTypeRow): TicketTypeConfig {
 				: Number(row.bulk_purchase_discount_amount),
 		sort_order: Number(row.sort_order),
 		is_active: row.is_active
+	};
+}
+
+export function mapMerchProduct(row: SupabaseMerchProductRow): MerchProduct {
+	return {
+		event_id: row.event_id,
+		product_id: row.product_id,
+		name: row.name,
+		description: row.description ?? '',
+		category: row.category,
+		unit_price: Number(row.unit_price),
+		currency: row.currency,
+		stock_count: Number(row.stock_count),
+		sizes: row.sizes ?? [],
+		colors: row.colors ?? [],
+		image_urls: row.image_urls ?? [],
+		is_active: row.is_active,
+		deleted_at: row.deleted_at ? new Date(row.deleted_at).toISOString() : undefined,
+		created_at: row.created_at ? new Date(row.created_at).toISOString() : undefined,
+		updated_at: row.updated_at ? new Date(row.updated_at).toISOString() : undefined
+	};
+}
+
+export function mapMerchReservationItem(
+	row: SupabaseMerchReservationItemRow
+): MerchReservationItem {
+	return {
+		item_id: row.item_id,
+		event_id: row.event_id,
+		reservation_id: row.reservation_id,
+		product_id: row.product_id,
+		product_name: row.product_name,
+		quantity: Number(row.quantity),
+		unit_price: Number(row.unit_price),
+		currency: row.currency,
+		selected_size: row.selected_size ?? undefined,
+		selected_color: row.selected_color ?? undefined
+	};
+}
+
+export function mapMerchReservation(
+	row: SupabaseMerchReservationRow,
+	items: MerchReservationItem[] = []
+): MerchReservation {
+	return {
+		event_id: row.event_id,
+		reservation_id: row.reservation_id,
+		customer_name: row.customer_name,
+		email: row.email,
+		mobile: row.mobile,
+		reserved_at: new Date(row.reserved_at).toISOString(),
+		status: row.status as MerchReservationStatus,
+		amount_total: Number(row.amount_total),
+		currency: row.currency,
+		confirmation_email_status: row.confirmation_email_status as MerchReservationEmailStatus,
+		confirmation_email_attempted_at: row.confirmation_email_attempted_at
+			? new Date(row.confirmation_email_attempted_at).toISOString()
+			: undefined,
+		confirmation_email_provider_id: row.confirmation_email_provider_id ?? undefined,
+		confirmation_email_error: row.confirmation_email_error ?? undefined,
+		items,
+		created_at: row.created_at ? new Date(row.created_at).toISOString() : undefined,
+		updated_at: row.updated_at ? new Date(row.updated_at).toISOString() : undefined
+	};
+}
+
+export function merchProductToRow(input: {
+	event_id: string;
+	product_id?: string;
+	name: string;
+	description: string;
+	category: string;
+	unit_price: number;
+	currency?: string;
+	stock_count: number;
+	sizes?: string[];
+	colors?: string[];
+	image_urls?: string[];
+	is_active?: boolean;
+}) {
+	return {
+		event_id: input.event_id,
+		...(input.product_id ? { product_id: input.product_id } : {}),
+		name: input.name,
+		description: input.description,
+		category: input.category,
+		unit_price: input.unit_price,
+		currency: input.currency ?? 'EUR',
+		stock_count: input.stock_count,
+		sizes: input.sizes ?? [],
+		colors: input.colors ?? [],
+		image_urls: input.image_urls ?? [],
+		is_active: input.is_active ?? true
 	};
 }
 

@@ -9,6 +9,13 @@
  */
 import type { Booking } from '$lib/domain/booking';
 import type { Event } from '$lib/domain/event';
+import type {
+	CreateMerchProductInput,
+	CreateMerchReservationInput,
+	MerchProduct,
+	MerchReservation,
+	UpdateMerchProductInput
+} from '$lib/domain/merchandise';
 import type { Ticket } from '$lib/domain/ticket';
 import type { TicketCounter, TicketCounterDelta } from '$lib/domain/ticketCounter';
 import type { TicketTypeConfig } from '$lib/domain/ticketType';
@@ -95,6 +102,33 @@ export interface TicketTypeRepository {
 	listActive(eventId: string): Promise<TicketTypeConfig[]>;
 }
 
+/** Persistence contract for event merchandise products. */
+export interface MerchProductRepository {
+	insert(input: CreateMerchProductInput): Promise<MerchProduct>;
+	update(eventId: string, input: UpdateMerchProductInput): Promise<MerchProduct>;
+	softDelete(eventId: string, productId: string): Promise<void>;
+	findById(eventId: string, productId: string): Promise<MerchProduct | null>;
+	list(eventId: string): Promise<MerchProduct[]>;
+	listAvailable(eventId: string): Promise<MerchProduct[]>;
+}
+
+/** Persistence contract for public merchandise reservations. */
+export interface MerchReservationRepository {
+	insertReservation(
+		input: CreateMerchReservationInput,
+		reservationId: string
+	): Promise<MerchReservation>;
+	findById(eventId: string, reservationId: string): Promise<MerchReservation | null>;
+	list(eventId: string): Promise<MerchReservation[]>;
+	updateConfirmationEmailStatus(
+		eventId: string,
+		reservationId: string,
+		status: MerchReservation['confirmation_email_status'],
+		errorMessage?: string,
+		providerMessageId?: string
+	): Promise<void>;
+}
+
 /** Server-only contract for Supabase Auth admin user visibility. */
 export interface AdminUserRepository {
 	list(): Promise<AdminUser[]>;
@@ -113,6 +147,11 @@ export interface ImageStorage {
 /** Upload contract for visitor payment proof files. */
 export interface PaymentProofStorage {
 	uploadProof(file: File): Promise<string>;
+}
+
+/** Upload contract for admin-managed merchandise product images. */
+export interface MerchProductImageStorage {
+	uploadProductImages(eventId: string, productId: string, files: File[]): Promise<string[]>;
 }
 
 /** QR code generation contract. */

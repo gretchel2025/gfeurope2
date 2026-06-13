@@ -191,6 +191,13 @@
 									on:click={closeMenu}>Details</a
 								>
 							</li>
+							<li>
+								<a
+									href={publicNav.shop}
+									class="font-semibold text-[#fff3df]/80 transition hover:text-white"
+									on:click={closeMenu}>Shop</a
+								>
+							</li>
 							{#if activePublicEventPage.showBuyTickets}
 								<li>
 									<a

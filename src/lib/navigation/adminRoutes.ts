@@ -29,6 +29,12 @@ export function publicRoutes(eventId: string) {
 		newBooking: `${eventBase}/newbooking`,
 		newBookingSoldOut: `${eventBase}/newbooking/soldout`,
 		newBookingSuccess: `${eventBase}/newbooking/success`,
+		shop: `${eventBase}/shop`,
+		shopSuccess: (reservationId?: string): string => {
+			const base = `${eventBase}/shop/success`;
+			if (!reservationId) return base;
+			return `${base}?reservation_id=${encodeURIComponent(reservationId)}`;
+		},
 		conditions: `${eventBase}/conditions`,
 		privacy: `${eventBase}/privacy`,
 		faq: `${eventBase}/faq`
@@ -40,6 +46,7 @@ export function adminRoutes(eventId: string) {
 	return {
 		home: adminBase,
 		audit: `${adminBase}/audit`,
+		merchandise: `${adminBase}/merchandise`,
 		reports: `${adminBase}/reports`,
 		system: `${adminBase}/system`,
 		booking: {

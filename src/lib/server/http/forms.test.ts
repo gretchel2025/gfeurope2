@@ -1,56 +1,99 @@
 import { describe, expect, it } from 'vitest';
+
 import { ValidationError } from '$lib/application/errors';
-import { parseCreateBookingForm } from '$lib/server/http/forms';
-import { TicketType } from '$lib/domain/shared/enums';
+import {
+	parseCreateMerchProductForm,
+	parseCreateMerchReservationForm,
+	parseMerchProductImageFiles
+} from '$lib/server/http/forms';
 
-function bookingForm(overrides: Record<string, string> = {}) {
-	const formData = new FormData();
-	const values = {
-		name: 'Ada Lovelace',
-		email: 'ada@example.com',
-		country: 'Ireland',
-		city: 'Dublin, Ireland',
-		ticket_type: TicketType.STANDARD,
-		quantity: '2',
-		guest_1: 'Ada Lovelace',
-		guest_2: 'Grace Hopper',
-		...overrides
-	};
-
-	Object.entries(values).forEach(([key, value]) => formData.set(key, value));
-	formData.set('payment_proof', new File(['proof'], 'proof.pdf', { type: 'application/pdf' }));
-	return formData;
+function imageFile(name: string, type = 'image/png'): File {
+	return new File([new Uint8Array([1])], name, { type });
 }
 
-describe('parseCreateBookingForm', () => {
-	it('parses separated country and city booking fields into existing booking input', async () => {
-		await expect(parseCreateBookingForm(bookingForm())).resolves.toEqual({
-			name: 'Ada Lovelace',
-			email: 'ada@example.com',
-			city: 'Dublin, Ireland',
-			ticket_type: TicketType.STANDARD,
-			quantity: 2,
-			guests: ['Ada Lovelace', 'Grace Hopper']
+describe('merchandise form parsing', () => {
+	it('parses product creation without a custom product id', () => {
+		const formData = productFormData();
+
+		expect(parseCreateMerchProductForm(formData)).toMatchObject({
+			name: 'Grand Feast T-Shirt',
+			category: 'T-Shirts',
+			unit_price: 20,
+			stock_count: 10
+		});
+		expect(parseCreateMerchProductForm(formData)).not.toHaveProperty('product_id');
+	});
+
+	it('rejects unsupported product categories', () => {
+		const formData = productFormData();
+		formData.set('category', 'Drinkware');
+
+		expect(() => parseCreateMerchProductForm(formData)).toThrow(ValidationError);
+	});
+
+	it('accepts up to five product images', () => {
+		const formData = new FormData();
+		for (let index = 0; index < 5; index += 1) {
+			formData.append('images', imageFile(`product-${index}.png`));
+		}
+
+		expect(parseMerchProductImageFiles(formData)).toHaveLength(5);
+	});
+
+	it('rejects more than five product images', () => {
+		const formData = new FormData();
+		for (let index = 0; index < 6; index += 1) {
+			formData.append('images', imageFile(`product-${index}.png`));
+		}
+
+		expect(() => parseMerchProductImageFiles(formData)).toThrow(ValidationError);
+	});
+
+	it('rejects unsupported product image types', () => {
+		const formData = new FormData();
+		formData.append('images', imageFile('product.gif', 'image/gif'));
+
+		expect(() => parseMerchProductImageFiles(formData)).toThrow(ValidationError);
+	});
+
+	it('parses reservation items with selected size and color', () => {
+		const formData = new FormData();
+		formData.append('customer_name', 'Codex Test Customer');
+		formData.append('email', 'codex-merch-test@example.test');
+		formData.append('mobile', '+353 000 000 000');
+		formData.append('product_id', 'mug');
+		formData.append('quantity_mug', '2');
+		formData.append('size_mug', 'One Size');
+		formData.append('color_mug', 'Gold');
+		formData.append('product_id', 'shirt');
+		formData.append('quantity_shirt', '0');
+
+		expect(parseCreateMerchReservationForm(formData)).toEqual({
+			customer_name: 'Codex Test Customer',
+			email: 'codex-merch-test@example.test',
+			mobile: '+353 000 000 000',
+			items: [
+				{
+					product_id: 'mug',
+					quantity: 2,
+					selected_size: 'One Size',
+					selected_color: 'Gold'
+				}
+			]
 		});
 	});
-
-	it('requires country before accepting the booking form', async () => {
-		await expect(parseCreateBookingForm(bookingForm({ country: '' }))).rejects.toBeInstanceOf(
-			ValidationError
-		);
-	});
-
-	it('requires payment proof before accepting the booking form', async () => {
-		const formData = bookingForm();
-		formData.delete('payment_proof');
-
-		await expect(parseCreateBookingForm(formData)).rejects.toBeInstanceOf(ValidationError);
-	});
-
-	it('rejects unsupported payment proof file types', async () => {
-		const formData = bookingForm();
-		formData.set('payment_proof', new File(['proof'], 'proof.txt', { type: 'text/plain' }));
-
-		await expect(parseCreateBookingForm(formData)).rejects.toBeInstanceOf(ValidationError);
-	});
 });
+
+function productFormData(): FormData {
+	const formData = new FormData();
+	formData.append('name', 'Grand Feast T-Shirt');
+	formData.append('description', 'Official event shirt.');
+	formData.append('category', 'T-Shirts');
+	formData.append('unit_price', '20');
+	formData.append('currency', 'EUR');
+	formData.append('stock_count', '10');
+	formData.append('sizes', 'S, M, L');
+	formData.append('colors', 'Navy, White');
+	formData.append('is_active', 'on');
+	return formData;
+}

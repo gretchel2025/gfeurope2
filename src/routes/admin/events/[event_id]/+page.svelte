@@ -42,6 +42,10 @@
 		<AdminCard title="Reports" subtitle="Review sales and booking breakdowns.">
 			<AdminButton href={routes.reports}>All reports</AdminButton>
 		</AdminCard>
+
+		<AdminCard title="Merchandise" subtitle="Create products and watch merch inventory.">
+			<AdminButton href={routes.merchandise}>Manage merch</AdminButton>
+		</AdminCard>
 	</div>
 
 	<AdminCard title="Ticket Counters" subtitle="Current inventory by ticket type.">

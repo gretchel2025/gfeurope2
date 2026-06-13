@@ -7,7 +7,7 @@
 </script>
 
 {#if data.publicEventPage.component === 'gfeu2026'}
-	<Gfeu2026Landing ticketTypes={data.ticketTypes} />
+	<Gfeu2026Landing ticketTypes={data.ticketTypes} merchProducts={data.merchProducts} />
 {:else if data.publicEventPage.component === 'gfeu2025'}
 	<Gfeu2025ArchiveLanding ticketTypes={data.ticketTypes} />
 {/if}

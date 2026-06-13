@@ -10,7 +10,11 @@ export const AuditAction = {
 	TicketNameUpdated: 'ticket.name_updated',
 	TicketCheckedIn: 'ticket.checked_in',
 	TicketCheckedOut: 'ticket.checked_out',
-	TicketCounterAvailableAdded: 'ticket_counter.available_added'
+	TicketCounterAvailableAdded: 'ticket_counter.available_added',
+	MerchProductCreated: 'merch_product.created',
+	MerchProductUpdated: 'merch_product.updated',
+	MerchProductDeleted: 'merch_product.deleted',
+	MerchReservationCreated: 'merch_reservation.created'
 } as const;
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];
@@ -26,7 +30,9 @@ export type AuditActorType = (typeof AuditActorType)[keyof typeof AuditActorType
 export const AuditEntityType = {
 	Booking: 'booking',
 	Ticket: 'ticket',
-	TicketCounter: 'ticket_counter'
+	TicketCounter: 'ticket_counter',
+	MerchProduct: 'merch_product',
+	MerchReservation: 'merch_reservation'
 } as const;
 
 export type AuditEntityType = (typeof AuditEntityType)[keyof typeof AuditEntityType];

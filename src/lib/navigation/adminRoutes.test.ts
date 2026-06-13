@@ -7,6 +7,10 @@ describe('event route builders', () => {
 
 		expect(routes.home).toBe(`/events/${eventId}`);
 		expect(routes.newBooking).toBe(`/events/${eventId}/newbooking`);
+		expect(routes.shop).toBe(`/events/${eventId}/shop`);
+		expect(routes.shopSuccess('MR-123')).toBe(
+			`/events/${eventId}/shop/success?reservation_id=MR-123`
+		);
 		expect(routes.privacy).toBe(`/events/${eventId}/privacy`);
 		expect(routes.conditions).toBe(`/events/${eventId}/conditions`);
 		expect(routes.faq).toBe(`/events/${eventId}/faq`);
@@ -17,6 +21,7 @@ describe('event route builders', () => {
 
 		expect(routes.home).toBe(`/admin/events/${eventId}`);
 		expect(routes.audit).toBe(`/admin/events/${eventId}/audit`);
+		expect(routes.merchandise).toBe(`/admin/events/${eventId}/merchandise`);
 		expect(routes.booking.list).toBe(`/admin/events/${eventId}/bookings`);
 		expect(routes.booking.details('B123')).toBe(`/admin/events/${eventId}/bookings/B123`);
 		expect(routes.ticket.details('T123')).toBe(`/admin/events/${eventId}/tickets/T123`);

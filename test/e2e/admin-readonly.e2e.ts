@@ -12,6 +12,7 @@ test.describe('authenticated admin read-only smoke', () => {
 		[adminEventPath(), 'Dashboard'],
 		[adminEventPath('/bookings'), 'Bookings'],
 		[adminEventPath('/tickets'), 'Tickets'],
+		[adminEventPath('/merchandise'), 'Merchandise'],
 		[adminEventPath('/reports'), 'Reports'],
 		[adminEventPath('/audit'), 'Audit']
 	] as Array<readonly [string, string]>;

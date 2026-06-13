@@ -46,6 +46,12 @@ test.describe('public deployment smoke', () => {
 		await expect(page.getByTestId('ticket-option-STANDARD')).toBeVisible();
 	});
 
+	test('shop page loads merchandise surface', async ({ page }) => {
+		await page.goto(eventPath('/shop'));
+
+		await expect(page.getByRole('heading', { name: 'Event Merchandise' })).toBeVisible();
+	});
+
 	for (const [pathname, heading] of [
 		['/privacy', 'Privacy Policy'],
 		['/conditions', 'Terms and Conditions'],

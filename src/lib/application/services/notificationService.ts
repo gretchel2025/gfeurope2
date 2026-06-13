@@ -22,6 +22,7 @@ import {
 	type AuditActor
 } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
+import type { MerchReservation } from '$lib/domain/merchandise';
 import { grandFeastPaymentDetails } from '$lib/domain/paymentDetails';
 import { BookingConfirmationEmailStatus, formatTicketTypeLabel } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
@@ -57,6 +58,15 @@ export class NotificationService {
 			to: booking.email,
 			subject: `We received your Grand Feast booking ${booking.reference_no}`,
 			message: buildReservationEmail(booking)
+		});
+	}
+
+	/** Sends the public merchandise reservation confirmation email. */
+	async sendMerchReservationConfirmation(reservation: MerchReservation): Promise<EmailSendResult> {
+		return await this.emailSender.send({
+			to: reservation.email,
+			subject: `Your Grand Feast merchandise reservation ${reservation.reservation_id}`,
+			message: buildMerchReservationEmail(reservation)
 		});
 	}
 
@@ -284,6 +294,59 @@ function buildPaymentReminderEmail(booking: Booking): string {
 			${paragraph('Best regards,<br><strong>Grand Feast Europe Team</strong>')}
 		`
 	});
+}
+
+function buildMerchReservationEmail(reservation: MerchReservation): string {
+	return buildEmailShell({
+		preheader: `Your merchandise reservation ${reservation.reservation_id} was received.`,
+		eyebrow: 'Merchandise Reserved',
+		title: 'Your merch reservation is confirmed',
+		body: `
+			${paragraph(`Dear ${escapeHtml(reservation.customer_name)},`)}
+			${paragraph(
+				`We received your merchandise reservation for ${eventDetails.name}. Your reserved items will be paid for and collected on the day of the event.`
+			)}
+			${callout(`
+				<strong>Please pay and collect your reserved merchandise at the event merch desk.</strong><br>
+				Bring this email and your reservation reference so the team can find your items quickly.
+			`)}
+			${sectionTitle('Reservation Details')}
+			${detailTable([
+				['Reservation reference', reservation.reservation_id],
+				['Customer name', reservation.customer_name],
+				['Email', reservation.email],
+				['Mobile', reservation.mobile],
+				['Total due at event', formatAmount(reservation.amount_total)]
+			])}
+			${sectionTitle('Reserved Items')}
+			${merchItemsTable(reservation)}
+			${eventDetailsBlock()}
+			${paragraph(
+				`If you need help with your reservation, please contact us at <a href="mailto:${supportEmail}" style="color:#005b72;font-weight:700;">${supportEmail}</a>.`
+			)}
+			${paragraph('Best regards,<br><strong>Grand Feast Europe Team</strong>')}
+		`
+	});
+}
+
+function merchItemsTable(reservation: MerchReservation): string {
+	const rows = reservation.items.map((item) => {
+		const variant = [item.selected_size, item.selected_color].filter(Boolean).join(' / ');
+		const amount = item.unit_price * item.quantity;
+		return [
+			item.product_name,
+			[
+				`Qty ${item.quantity}`,
+				variant ? `Variant: ${variant}` : '',
+				`Unit: ${formatAmount(item.unit_price)}`,
+				`Subtotal: ${formatAmount(amount)}`
+			]
+				.filter(Boolean)
+				.join('<br>')
+		] as [string, string];
+	});
+
+	return detailTable(rows);
 }
 
 function paymentDetailsTable(transferReference: string): string {
