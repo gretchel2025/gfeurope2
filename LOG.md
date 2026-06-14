@@ -3,6 +3,16 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-06-14
+
+- Improved public merchandise image presentation to avoid cropping uploaded product
+  photos, added quantity-aware size/color validation on the public shop form, and made
+  admin merchandise product IDs link to product detail pages.
+- Added explicit customer-name and email browser prompts to the public merchandise
+  reservation form.
+- Replaced the fixed admin ticket-counter +10 action with a selectable 1-100 ticket
+  increment.
+
 ## 2026-06-13
 
 - Added event-scoped merchandise management, public shop reservations, merch reservation

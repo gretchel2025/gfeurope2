@@ -435,12 +435,14 @@
 						class="merch-carousel-slide group overflow-hidden border border-white/12 bg-white/8 shadow-xl transition hover:-translate-y-1 hover:border-[#f3c15f]/70"
 						style={`animation-delay: ${index * 5}s`}
 					>
-						<img
-							src={item.imageUrl}
-							alt={item.name}
-							class="h-72 w-full object-cover transition duration-300 group-hover:scale-105"
-							loading="lazy"
-						/>
+						<div class="flex h-72 w-full items-center justify-center bg-[#f4fbff] p-4">
+							<img
+								src={item.imageUrl}
+								alt={item.name}
+								class="h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+								loading="lazy"
+							/>
+						</div>
 						<div class="space-y-2 p-5">
 							<p class="text-xs font-black uppercase tracking-[0.18em] text-[#f3c15f]">
 								{item.category} · {formatMoney(item.unit_price, item.currency)}

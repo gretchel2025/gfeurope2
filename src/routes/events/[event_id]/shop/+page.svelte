@@ -1,13 +1,126 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;
+
+	const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+	let customerNameInput: HTMLInputElement | undefined;
+	let emailInput: HTMLInputElement | undefined;
+
+	onMount(() => {
+		syncInitialReservationDetailPrompts();
+	});
 
 	function formatMoney(value: number, currency = 'EUR') {
 		return new Intl.NumberFormat('en-IE', {
 			style: 'currency',
 			currency
 		}).format(value);
+	}
+
+	function syncProductOptionRequirements(event: Event) {
+		const quantityInput = event.currentTarget as HTMLInputElement;
+		syncOptionRequirementsForQuantity(quantityInput);
+	}
+
+	function syncReservationFormRequirements(event: Event) {
+		const form = reservationFormFromEvent(event);
+		if (!form) return;
+
+		syncProductOptionRequirementsForForm(form);
+		syncReservationDetailPrompts(form);
+	}
+
+	function reservationFormFromEvent(event: Event): HTMLFormElement | null {
+		if (event.currentTarget instanceof HTMLFormElement) return event.currentTarget;
+		if (event.currentTarget instanceof HTMLButtonElement) return event.currentTarget.form;
+		return null;
+	}
+
+	function syncProductOptionRequirementsForForm(form: HTMLFormElement) {
+		for (const quantityInput of form.querySelectorAll<HTMLInputElement>('input[data-product-id]')) {
+			syncOptionRequirementsForQuantity(quantityInput);
+		}
+	}
+
+	function syncOptionRequirementsForQuantity(quantityInput: HTMLInputElement) {
+		const form = quantityInput.form;
+		const productId = quantityInput.dataset.productId;
+		if (!form || !productId) return;
+
+		const quantity = Number(quantityInput.value);
+		const isRequired = Number.isFinite(quantity) && quantity > 0;
+
+		for (const optionSelect of form.querySelectorAll<HTMLSelectElement>(
+			'select[data-option-product-id]'
+		)) {
+			if (optionSelect.dataset.optionProductId !== productId) continue;
+
+			optionSelect.required = isRequired;
+			syncOptionPrompt(optionSelect);
+		}
+	}
+
+	function clearOptionPrompt(event: Event) {
+		syncOptionPrompt(event.currentTarget as HTMLSelectElement);
+	}
+
+	function syncOptionPrompt(optionSelect: HTMLSelectElement) {
+		if (optionSelect.required && !optionSelect.value) {
+			optionSelect.setCustomValidity(
+				`Please select a ${optionSelect.dataset.optionLabel ?? 'selection'} for ${
+					optionSelect.dataset.productName ?? 'this product'
+				}.`
+			);
+			return;
+		}
+
+		optionSelect.setCustomValidity('');
+	}
+
+	function syncReservationDetailPrompts(form: HTMLFormElement) {
+		const customerNameInput = form.querySelector<HTMLInputElement>('input[name="customer_name"]');
+		const emailInput = form.querySelector<HTMLInputElement>('input[name="email"]');
+
+		if (customerNameInput) syncCustomerNameInputPrompt(customerNameInput);
+		if (emailInput) syncEmailInputPrompt(emailInput);
+	}
+
+	function syncInitialReservationDetailPrompts() {
+		if (customerNameInput) syncCustomerNameInputPrompt(customerNameInput);
+		if (emailInput) syncEmailInputPrompt(emailInput);
+	}
+
+	function syncEmailPrompt(event: Event) {
+		syncEmailInputPrompt(event.currentTarget as HTMLInputElement);
+	}
+
+	function syncEmailInputPrompt(emailInput: HTMLInputElement) {
+		const email = emailInput.value.trim();
+
+		if (!email) {
+			emailInput.setCustomValidity('Email is required.');
+			return;
+		}
+
+		if (!emailPattern.test(email)) {
+			emailInput.setCustomValidity('Please enter a valid email address.');
+			return;
+		}
+
+		emailInput.setCustomValidity('');
+	}
+
+	function syncCustomerNamePrompt(event: Event) {
+		syncCustomerNameInputPrompt(event.currentTarget as HTMLInputElement);
+	}
+
+	function syncCustomerNameInputPrompt(customerNameInput: HTMLInputElement) {
+		customerNameInput.setCustomValidity(
+			customerNameInput.value.trim() ? '' : 'Customer name is required.'
+		);
 	}
 </script>
 
@@ -24,7 +137,12 @@
 </section>
 
 {#if data.categories.length > 0}
-	<form method="POST" action="?/reserve" class="px-4 pb-24">
+	<form
+		method="POST"
+		action="?/reserve"
+		class="px-4 pb-24"
+		on:submit={syncReservationFormRequirements}
+	>
 		<div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
 			<div class="space-y-12">
 				{#each data.categories as category}
@@ -42,14 +160,18 @@
 									class="overflow-hidden rounded-lg border border-white/12 bg-white/8 shadow-xl backdrop-blur"
 								>
 									{#if product.image_urls[0]}
-										<img
-											src={product.image_urls[0]}
-											alt={product.name}
-											class="h-64 w-full object-cover"
-										/>
+										<div
+											class="flex aspect-[4/3] w-full items-center justify-center bg-[#f4fbff] p-4"
+										>
+											<img
+												src={product.image_urls[0]}
+												alt={product.name}
+												class="h-full w-full object-contain"
+											/>
+										</div>
 									{:else}
 										<div
-											class="flex h-64 items-center justify-center bg-[#052a3a] text-sm font-bold uppercase tracking-[0.18em] text-[#fff3df]/55"
+											class="flex aspect-[4/3] items-center justify-center bg-[#052a3a] text-sm font-bold uppercase tracking-[0.18em] text-[#fff3df]/55"
 										>
 											Grand Feast
 										</div>
@@ -72,10 +194,13 @@
 												Qty
 												<input
 													name={`quantity_${product.product_id}`}
+													data-product-id={product.product_id}
 													type="number"
 													min="0"
 													max={product.stock_count}
 													value="0"
+													on:input={syncProductOptionRequirements}
+													on:change={syncProductOptionRequirements}
 													class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
 												/>
 											</label>
@@ -85,6 +210,10 @@
 													Size
 													<select
 														name={`size_${product.product_id}`}
+														data-option-product-id={product.product_id}
+														data-option-label="size"
+														data-product-name={product.name}
+														on:change={clearOptionPrompt}
 														class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
 													>
 														<option value="">Select</option>
@@ -100,6 +229,10 @@
 													Color
 													<select
 														name={`color_${product.product_id}`}
+														data-option-product-id={product.product_id}
+														data-option-label="color"
+														data-product-name={product.name}
+														on:change={clearOptionPrompt}
 														class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
 													>
 														<option value="">Select</option>
@@ -130,17 +263,27 @@
 					<label class="block text-sm font-semibold text-[#fff3df]/82">
 						Customer Name
 						<input
+							bind:this={customerNameInput}
 							name="customer_name"
 							required
+							autocomplete="name"
+							on:input={syncCustomerNamePrompt}
+							on:change={syncCustomerNamePrompt}
+							on:invalid={syncCustomerNamePrompt}
 							class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
 						/>
 					</label>
 					<label class="block text-sm font-semibold text-[#fff3df]/82">
 						Email
 						<input
+							bind:this={emailInput}
 							name="email"
 							type="email"
 							required
+							autocomplete="email"
+							on:input={syncEmailPrompt}
+							on:change={syncEmailPrompt}
+							on:invalid={syncEmailPrompt}
 							class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
 						/>
 					</label>
@@ -153,7 +296,11 @@
 							class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
 						/>
 					</label>
-					<button type="submit" class="conference-button w-full px-5 py-3 text-sm">
+					<button
+						type="submit"
+						class="conference-button w-full px-5 py-3 text-sm"
+						on:click={syncReservationFormRequirements}
+					>
 						Reserve Merchandise
 					</button>
 				</div>

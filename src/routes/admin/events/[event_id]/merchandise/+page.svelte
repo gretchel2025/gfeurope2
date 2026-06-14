@@ -49,7 +49,13 @@
 					{#each products as product}
 						<tr>
 							<td class="px-3 py-3 font-mono text-xs font-semibold text-slate-950">
-								{product.product_id}
+								<a
+									href={routes.merchandiseProduct(product.product_id)}
+									aria-label={`View product info for ${product.name}`}
+									class="inline-flex rounded text-teal-800 underline decoration-teal-800/30 underline-offset-2 hover:text-teal-950 hover:decoration-teal-950 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:ring-offset-2"
+								>
+									{product.product_id}
+								</a>
 							</td>
 							<td class="px-3 py-3 font-semibold text-slate-950">{product.name}</td>
 							<td class="px-3 py-3 text-slate-700">{product.category}</td>

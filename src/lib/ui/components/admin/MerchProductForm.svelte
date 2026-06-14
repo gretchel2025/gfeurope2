@@ -136,7 +136,7 @@
 						<img
 							src={imageUrl}
 							alt={`${product.name} image ${index + 1}`}
-							class="h-24 w-full rounded object-cover"
+							class="h-24 w-full rounded bg-white object-contain"
 						/>
 						<span class="mt-2 flex items-center gap-2 font-semibold text-slate-700">
 							<input
