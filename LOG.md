@@ -12,6 +12,9 @@ test sends, site availability checks, or command-only housekeeping.
   lists from the event Reports page.
 - Added admin merchandise reservation XLSX export and checkbox-based bulk reservation
   deletion from the merchandise page.
+- Added inline validation for public merchandise reservations so missing customer details,
+  item quantities, or required size/color selections stay on the shop form instead of
+  showing an error page.
 
 ## 2026-06-14
 

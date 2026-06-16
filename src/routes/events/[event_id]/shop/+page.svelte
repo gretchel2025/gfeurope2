@@ -1,17 +1,16 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import type { ServerData } from './+page.server';
+	import type {
+		MerchReservationActionData,
+		MerchReservationFormErrors,
+		ServerData
+	} from './+page.server';
 
 	export let data: ServerData;
+	export let form: MerchReservationActionData | undefined;
 
-	const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	let validationErrors: MerchReservationFormErrors = {};
 
-	let customerNameInput: HTMLInputElement | undefined;
-	let emailInput: HTMLInputElement | undefined;
-
-	onMount(() => {
-		syncInitialReservationDetailPrompts();
-	});
+	$: validationErrors = { ...(form?.errors ?? {}) };
 
 	function formatMoney(value: number, currency = 'EUR') {
 		return new Intl.NumberFormat('en-IE', {
@@ -20,109 +19,256 @@
 		}).format(value);
 	}
 
-	function syncProductOptionRequirements(event: Event) {
-		const quantityInput = event.currentTarget as HTMLInputElement;
-		syncOptionRequirementsForQuantity(quantityInput);
+	function fieldError(field: string): string {
+		return validationErrors[field] ?? '';
 	}
 
-	function syncReservationFormRequirements(event: Event) {
-		const form = reservationFormFromEvent(event);
-		if (!form) return;
-
-		syncProductOptionRequirementsForForm(form);
-		syncReservationDetailPrompts(form);
+	function inputClass(field: string): string {
+		return [
+			'mt-1 w-full rounded-md border bg-white px-3 py-2 text-slate-950',
+			fieldError(field) ? 'border-[#ff9c9c] ring-2 ring-[#ff9c9c]/45' : 'border-white/15'
+		].join(' ');
 	}
 
-	function reservationFormFromEvent(event: Event): HTMLFormElement | null {
-		if (event.currentTarget instanceof HTMLFormElement) return event.currentTarget;
-		if (event.currentTarget instanceof HTMLButtonElement) return event.currentTarget.form;
-		return null;
+	function quantityField(productId: string): string {
+		return `quantity_${productId}`;
 	}
 
-	function syncProductOptionRequirementsForForm(form: HTMLFormElement) {
-		for (const quantityInput of form.querySelectorAll<HTMLInputElement>('input[data-product-id]')) {
-			syncOptionRequirementsForQuantity(quantityInput);
-		}
+	function sizeField(productId: string): string {
+		return `size_${productId}`;
 	}
 
-	function syncOptionRequirementsForQuantity(quantityInput: HTMLInputElement) {
-		const form = quantityInput.form;
-		const productId = quantityInput.dataset.productId;
-		if (!form || !productId) return;
-
-		const quantity = Number(quantityInput.value);
-		const isRequired = Number.isFinite(quantity) && quantity > 0;
-
-		for (const optionSelect of form.querySelectorAll<HTMLSelectElement>(
-			'select[data-option-product-id]'
-		)) {
-			if (optionSelect.dataset.optionProductId !== productId) continue;
-
-			optionSelect.required = isRequired;
-			syncOptionPrompt(optionSelect);
-		}
+	function colorField(productId: string): string {
+		return `color_${productId}`;
 	}
 
-	function clearOptionPrompt(event: Event) {
-		syncOptionPrompt(event.currentTarget as HTMLSelectElement);
+	function quantityValue(productId: string): string {
+		return form?.values.quantities[productId] ?? '0';
 	}
 
-	function syncOptionPrompt(optionSelect: HTMLSelectElement) {
-		if (optionSelect.required && !optionSelect.value) {
-			optionSelect.setCustomValidity(
-				`Please select a ${optionSelect.dataset.optionLabel ?? 'selection'} for ${
-					optionSelect.dataset.productName ?? 'this product'
-				}.`
-			);
-			return;
-		}
-
-		optionSelect.setCustomValidity('');
+	function selectedSize(productId: string): string {
+		return form?.values.sizes[productId] ?? '';
 	}
 
-	function syncReservationDetailPrompts(form: HTMLFormElement) {
-		const customerNameInput = form.querySelector<HTMLInputElement>('input[name="customer_name"]');
-		const emailInput = form.querySelector<HTMLInputElement>('input[name="email"]');
-
-		if (customerNameInput) syncCustomerNameInputPrompt(customerNameInput);
-		if (emailInput) syncEmailInputPrompt(emailInput);
+	function selectedColor(productId: string): string {
+		return form?.values.colors[productId] ?? '';
 	}
 
-	function syncInitialReservationDetailPrompts() {
-		if (customerNameInput) syncCustomerNameInputPrompt(customerNameInput);
-		if (emailInput) syncEmailInputPrompt(emailInput);
-	}
-
-	function syncEmailPrompt(event: Event) {
-		syncEmailInputPrompt(event.currentTarget as HTMLInputElement);
-	}
-
-	function syncEmailInputPrompt(emailInput: HTMLInputElement) {
-		const email = emailInput.value.trim();
-
-		if (!email) {
-			emailInput.setCustomValidity('Email is required.');
-			return;
-		}
-
-		if (!emailPattern.test(email)) {
-			emailInput.setCustomValidity('Please enter a valid email address.');
-			return;
-		}
-
-		emailInput.setCustomValidity('');
-	}
-
-	function syncCustomerNamePrompt(event: Event) {
-		syncCustomerNameInputPrompt(event.currentTarget as HTMLInputElement);
-	}
-
-	function syncCustomerNameInputPrompt(customerNameInput: HTMLInputElement) {
-		customerNameInput.setCustomValidity(
-			customerNameInput.value.trim() ? '' : 'Customer name is required.'
-		);
+	function textValue(field: 'customer_name' | 'email' | 'mobile'): string {
+		return form?.values[field] ?? '';
 	}
 </script>
+
+<svelte:head>
+	<script>
+		(function () {
+			var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			var invalidClasses = ['border-[#ff9c9c]', 'ring-2', 'ring-[#ff9c9c]/45'];
+			var validClasses = ['border-white/15'];
+
+			document.documentElement.dataset.merchValidationReady = 'true';
+
+			function readString(form, name) {
+				var value = new FormData(form).get(name);
+				return typeof value === 'string' ? value.trim() : '';
+			}
+
+			function validate(form) {
+				var errors = {};
+				var customerName = readString(form, 'customer_name');
+				var email = readString(form, 'email');
+				var mobile = readString(form, 'mobile');
+				var quantityInputs = Array.from(form.querySelectorAll('[data-merch-quantity]'));
+				var hasSelectedItem = false;
+				var hasQuantityError = false;
+
+				if (!customerName) errors.customer_name = 'Customer name is required.';
+				if (!email) errors.email = 'Email is required.';
+				else if (!emailPattern.test(email)) errors.email = 'Enter a valid email address.';
+				if (!mobile) errors.mobile = 'Mobile number is required.';
+
+				for (var input of quantityInputs) {
+					var value = input.value.trim();
+					if (!value) continue;
+
+					if (!/^\d+$/.test(value)) {
+						errors[input.name] = 'Enter a whole number quantity.';
+						hasQuantityError = true;
+						continue;
+					}
+
+					var quantity = Number(value);
+					var maxQuantity = Number(input.max || '99');
+					if (quantity > maxQuantity) {
+						errors[input.name] = 'Only ' + maxQuantity + ' available.';
+						hasQuantityError = true;
+						continue;
+					}
+
+					if (quantity > 0) {
+						hasSelectedItem = true;
+						validateProductOptions(form, input, errors);
+					}
+				}
+
+				if (!hasSelectedItem && !hasQuantityError && quantityInputs[0]) {
+					errors[quantityInputs[0].name] = 'Select qty.';
+				}
+
+				return errors;
+			}
+
+			function validateProductOptions(form, quantityInput, errors) {
+				var productId = quantityInput.dataset.merchProductId;
+				if (!productId) return;
+
+				var sizeSelect = form.elements.namedItem('size_' + productId);
+				var colorSelect = form.elements.namedItem('color_' + productId);
+
+				if (sizeSelect instanceof HTMLSelectElement && sizeSelect.options.length > 1) {
+					if (!sizeSelect.value) errors[sizeSelect.name] = 'Select size.';
+				}
+
+				if (colorSelect instanceof HTMLSelectElement && colorSelect.options.length > 1) {
+					if (!colorSelect.value) errors[colorSelect.name] = 'Select color.';
+				}
+			}
+
+			function hasErrors(errors) {
+				return Object.keys(errors).some(function (key) {
+					return Boolean(errors[key]);
+				});
+			}
+
+			function errorIdFor(field) {
+				return field.replace(/[^a-zA-Z0-9_-]/g, '-') + '-error';
+			}
+
+			function findOrCreateError(control, field) {
+				var describedBy = control.getAttribute('aria-describedby');
+				var existing = describedBy ? document.getElementById(describedBy.split(/\s+/)[0]) : null;
+				if (existing) return existing;
+
+				var error = document.getElementById(errorIdFor(field));
+				if (!error) {
+					error = document.createElement('p');
+					error.id = errorIdFor(field);
+					error.className = 'mt-2 text-xs font-bold text-[#ffd6d6]';
+					control.insertAdjacentElement('afterend', error);
+				}
+				control.setAttribute('aria-describedby', error.id);
+				return error;
+			}
+
+			function setFieldError(form, field, message) {
+				var control = form.elements.namedItem(field);
+				if (!(control instanceof HTMLElement)) return;
+
+				var error = findOrCreateError(control, field);
+				error.textContent = message || '';
+				error.hidden = !message;
+				control.setAttribute('aria-invalid', message ? 'true' : 'false');
+
+				for (var invalidClass of invalidClasses)
+					control.classList.toggle(invalidClass, Boolean(message));
+				for (var validClass of validClasses) control.classList.toggle(validClass, !message);
+			}
+
+			function renderErrors(form, errors) {
+				var fields = ['customer_name', 'email', 'mobile'].concat(
+					Array.from(form.querySelectorAll('[data-merch-validation-field]')).map(function (field) {
+						return field.name;
+					})
+				);
+
+				for (var field of fields) setFieldError(form, field, errors[field] || '');
+			}
+
+			function firstInvalidField(form, errors) {
+				var fields = ['customer_name', 'email', 'mobile'].concat(
+					Array.from(form.querySelectorAll('[data-merch-validation-field]')).map(function (field) {
+						return field.name;
+					})
+				);
+				return fields.find(function (field) {
+					return Boolean(errors[field]);
+				});
+			}
+
+			function validateBeforeSubmit(form, event) {
+				var errors = validate(form);
+				form.dataset.validationStarted = 'true';
+				renderErrors(form, errors);
+				if (!hasErrors(errors)) return true;
+
+				event.preventDefault();
+				event.stopPropagation();
+				var field = firstInvalidField(form, errors);
+				var control = field ? form.elements.namedItem(field) : null;
+				if (control instanceof HTMLElement) control.focus();
+				return false;
+			}
+
+			document.addEventListener(
+				'click',
+				function (event) {
+					var submitter =
+						event.target instanceof HTMLElement
+							? event.target.closest('[data-merch-submit]')
+							: null;
+					if (!(submitter instanceof HTMLElement)) return;
+
+					var form = submitter.closest('[data-merch-reservation-form]');
+					if (!(form instanceof HTMLFormElement)) return;
+
+					if (!validateBeforeSubmit(form, event)) return;
+
+					event.preventDefault();
+					HTMLFormElement.prototype.submit.call(form);
+				},
+				true
+			);
+
+			document.addEventListener(
+				'submit',
+				function (event) {
+					var form = event.target;
+					if (
+						!(form instanceof HTMLFormElement) ||
+						!form.matches('[data-merch-reservation-form]')
+					) {
+						return;
+					}
+
+					validateBeforeSubmit(form, event);
+				},
+				true
+			);
+
+			window.validateMerchReservationForm = function (form, event) {
+				return validateBeforeSubmit(form, event);
+			};
+
+			document.addEventListener('input', function (event) {
+				var control = event.target;
+				if (!(control instanceof HTMLElement)) return;
+				var form = control.closest('[data-merch-reservation-form]');
+				if (!(form instanceof HTMLFormElement) || form.dataset.validationStarted !== 'true') return;
+
+				renderErrors(form, validate(form));
+			});
+
+			document.addEventListener('change', function (event) {
+				var control = event.target;
+				if (!(control instanceof HTMLElement)) return;
+				var form = control.closest('[data-merch-reservation-form]');
+				if (!(form instanceof HTMLFormElement) || form.dataset.validationStarted !== 'true') return;
+
+				renderErrors(form, validate(form));
+			});
+		})();
+	</script>
+</svelte:head>
 
 <section class="px-4 pb-16 pt-10">
 	<div class="mx-auto max-w-6xl">
@@ -137,12 +283,7 @@
 </section>
 
 {#if data.categories.length > 0}
-	<form
-		method="POST"
-		action="?/reserve"
-		class="px-4 pb-24"
-		on:submit={syncReservationFormRequirements}
-	>
+	<form method="POST" action="?/reserve" class="px-4 pb-24" novalidate data-merch-reservation-form>
 		<div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
 			<div class="space-y-12">
 				{#each data.categories as category}
@@ -194,15 +335,28 @@
 												Qty
 												<input
 													name={`quantity_${product.product_id}`}
-													data-product-id={product.product_id}
 													type="number"
 													min="0"
-													max={product.stock_count}
-													value="0"
-													on:input={syncProductOptionRequirements}
-													on:change={syncProductOptionRequirements}
-													class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
+													max={Math.min(product.stock_count, 99)}
+													data-merch-quantity
+													data-merch-validation-field
+													data-merch-product-id={product.product_id}
+													data-merch-product-name={product.name}
+													value={quantityValue(product.product_id)}
+													aria-invalid={Boolean(fieldError(quantityField(product.product_id)))}
+													aria-describedby={fieldError(quantityField(product.product_id))
+														? `quantity-${product.product_id}-error`
+														: undefined}
+													class={inputClass(quantityField(product.product_id))}
 												/>
+												{#if fieldError(quantityField(product.product_id))}
+													<p
+														id={`quantity-${product.product_id}-error`}
+														class="mt-2 text-xs font-bold text-[#ffd6d6]"
+													>
+														{fieldError(quantityField(product.product_id))}
+													</p>
+												{/if}
 											</label>
 
 											{#if product.sizes.length > 0}
@@ -210,17 +364,29 @@
 													Size
 													<select
 														name={`size_${product.product_id}`}
-														data-option-product-id={product.product_id}
-														data-option-label="size"
-														data-product-name={product.name}
-														on:change={clearOptionPrompt}
-														class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
+														data-merch-validation-field
+														aria-invalid={Boolean(fieldError(sizeField(product.product_id)))}
+														aria-describedby={fieldError(sizeField(product.product_id))
+															? `size-${product.product_id}-error`
+															: undefined}
+														class={inputClass(sizeField(product.product_id))}
 													>
 														<option value="">Select</option>
 														{#each product.sizes as size}
-															<option value={size}>{size}</option>
+															<option
+																value={size}
+																selected={selectedSize(product.product_id) === size}>{size}</option
+															>
 														{/each}
 													</select>
+													{#if fieldError(sizeField(product.product_id))}
+														<p
+															id={`size-${product.product_id}-error`}
+															class="mt-2 text-xs font-bold text-[#ffd6d6]"
+														>
+															{fieldError(sizeField(product.product_id))}
+														</p>
+													{/if}
 												</label>
 											{/if}
 
@@ -229,17 +395,30 @@
 													Color
 													<select
 														name={`color_${product.product_id}`}
-														data-option-product-id={product.product_id}
-														data-option-label="color"
-														data-product-name={product.name}
-														on:change={clearOptionPrompt}
-														class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
+														data-merch-validation-field
+														aria-invalid={Boolean(fieldError(colorField(product.product_id)))}
+														aria-describedby={fieldError(colorField(product.product_id))
+															? `color-${product.product_id}-error`
+															: undefined}
+														class={inputClass(colorField(product.product_id))}
 													>
 														<option value="">Select</option>
 														{#each product.colors as color}
-															<option value={color}>{color}</option>
+															<option
+																value={color}
+																selected={selectedColor(product.product_id) === color}
+																>{color}</option
+															>
 														{/each}
 													</select>
+													{#if fieldError(colorField(product.product_id))}
+														<p
+															id={`color-${product.product_id}-error`}
+															class="mt-2 text-xs font-bold text-[#ffd6d6]"
+														>
+															{fieldError(colorField(product.product_id))}
+														</p>
+													{/if}
 												</label>
 											{/if}
 										</div>
@@ -263,29 +442,37 @@
 					<label class="block text-sm font-semibold text-[#fff3df]/82">
 						Customer Name
 						<input
-							bind:this={customerNameInput}
 							name="customer_name"
 							required
 							autocomplete="name"
-							on:input={syncCustomerNamePrompt}
-							on:change={syncCustomerNamePrompt}
-							on:invalid={syncCustomerNamePrompt}
-							class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
+							value={textValue('customer_name')}
+							aria-invalid={Boolean(fieldError('customer_name'))}
+							aria-describedby={fieldError('customer_name') ? 'customer-name-error' : undefined}
+							class={inputClass('customer_name')}
 						/>
+						{#if fieldError('customer_name')}
+							<p id="customer-name-error" class="mt-2 text-xs font-bold text-[#ffd6d6]">
+								{fieldError('customer_name')}
+							</p>
+						{/if}
 					</label>
 					<label class="block text-sm font-semibold text-[#fff3df]/82">
 						Email
 						<input
-							bind:this={emailInput}
 							name="email"
 							type="email"
 							required
 							autocomplete="email"
-							on:input={syncEmailPrompt}
-							on:change={syncEmailPrompt}
-							on:invalid={syncEmailPrompt}
-							class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
+							value={textValue('email')}
+							aria-invalid={Boolean(fieldError('email'))}
+							aria-describedby={fieldError('email') ? 'email-error' : undefined}
+							class={inputClass('email')}
 						/>
+						{#if fieldError('email')}
+							<p id="email-error" class="mt-2 text-xs font-bold text-[#ffd6d6]">
+								{fieldError('email')}
+							</p>
+						{/if}
 					</label>
 					<label class="block text-sm font-semibold text-[#fff3df]/82">
 						Mobile
@@ -293,13 +480,28 @@
 							name="mobile"
 							type="tel"
 							required
-							class="mt-1 w-full rounded-md border border-white/15 bg-white px-3 py-2 text-slate-950"
+							value={textValue('mobile')}
+							aria-invalid={Boolean(fieldError('mobile'))}
+							aria-describedby={fieldError('mobile') ? 'mobile-error' : undefined}
+							class={inputClass('mobile')}
 						/>
+						{#if fieldError('mobile')}
+							<p id="mobile-error" class="mt-2 text-xs font-bold text-[#ffd6d6]">
+								{fieldError('mobile')}
+							</p>
+						{/if}
 					</label>
+					{#if fieldError('items')}
+						<p
+							class="rounded-md border border-[#ff9c9c]/45 bg-[#ff9c9c]/10 p-3 text-sm font-bold text-[#ffd6d6]"
+						>
+							{fieldError('items')}
+						</p>
+					{/if}
 					<button
-						type="submit"
+						type="button"
+						data-merch-submit
 						class="conference-button w-full px-5 py-3 text-sm"
-						on:click={syncReservationFormRequirements}
 					>
 						Reserve Merchandise
 					</button>
