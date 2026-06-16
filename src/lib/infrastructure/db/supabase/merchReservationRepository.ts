@@ -72,6 +72,16 @@ export class SupabaseMerchReservationRepository implements MerchReservationRepos
 		return reservations;
 	}
 
+	async delete(eventId: string, reservationId: string): Promise<void> {
+		const { error } = await this.schema
+			.from(reservationsTableName)
+			.delete()
+			.eq('event_id', eventId)
+			.eq('reservation_id', reservationId);
+
+		if (error) throwSupabaseError('merch reservation delete failed', error);
+	}
+
 	async updateConfirmationEmailStatus(
 		eventId: string,
 		reservationId: string,

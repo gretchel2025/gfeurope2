@@ -10,6 +10,8 @@ test sends, site availability checks, or command-only housekeeping.
   production smoke suite passed.
 - Added admin XLSX exports for city ticket-sales totals and generated ticket registration
   lists from the event Reports page.
+- Added admin merchandise reservation XLSX export and checkbox-based bulk reservation
+  deletion from the merchandise page.
 
 ## 2026-06-14
 

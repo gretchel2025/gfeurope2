@@ -3,6 +3,7 @@ import type {
 	CityTicketSalesExportRow,
 	GeneratedTicketReportRow
 } from '$lib/application/services/reportingService';
+import type { MerchReservation } from '$lib/domain/merchandise';
 
 export const xlsxContentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -99,6 +100,54 @@ export async function createGeneratedTicketsWorkbookBuffer(
 	return await workbook.xlsx.writeBuffer();
 }
 
+export async function createMerchReservationsWorkbookBuffer(
+	reservations: MerchReservation[]
+): Promise<BodyInit> {
+	const workbook = createWorkbook();
+	const worksheet = workbook.addWorksheet('Merch Reservations', {
+		views: [{ state: 'frozen', ySplit: 1 }],
+		pageSetup: {
+			paperSize: 9,
+			orientation: 'landscape',
+			fitToPage: true,
+			fitToWidth: 1,
+			fitToHeight: 0
+		}
+	});
+
+	const columns: WorksheetColumn[] = [
+		{ header: '#', key: 'rowNumber', width: 8 },
+		{ header: 'Reference', key: 'reservationId', width: 18 },
+		{ header: 'Customer', key: 'customerName', width: 24 },
+		{ header: 'Email', key: 'email', width: 32 },
+		{ header: 'Mobile', key: 'mobile', width: 18 },
+		{ header: 'Status', key: 'status', width: 14 },
+		{ header: 'Items', key: 'items', width: 42 },
+		{ header: 'Total', key: 'amountTotal', width: 14, numFmt: '"€"#,##0.00' },
+		{ header: 'Currency', key: 'currency', width: 12 },
+		{ header: 'Reserved At', key: 'reservedAt', width: 22, numFmt: 'mmm d, yyyy h:mm' }
+	];
+
+	configureWorksheet(worksheet, columns);
+	reservations.forEach((reservation, index) => {
+		const row = worksheet.addRow({
+			rowNumber: index + 1,
+			reservationId: reservation.reservation_id,
+			customerName: reservation.customer_name,
+			email: reservation.email,
+			mobile: reservation.mobile,
+			status: reservation.status,
+			items: formatMerchReservationItems(reservation),
+			amountTotal: reservation.amount_total,
+			currency: reservation.currency,
+			reservedAt: new Date(reservation.reserved_at)
+		});
+		row.alignment = { vertical: 'top', wrapText: true };
+	});
+
+	return await workbook.xlsx.writeBuffer();
+}
+
 export function xlsxAttachmentResponse(body: BodyInit, filename: string): Response {
 	return new Response(body, {
 		headers: {
@@ -151,6 +200,15 @@ function styleGrandTotalRow(worksheet: ExcelJS.Worksheet, rows: CityTicketSalesE
 	const worksheetRow = worksheet.getRow(totalRowIndex + 2);
 	worksheetRow.font = { bold: true, color: { argb: 'FF0F172A' } };
 	worksheetRow.fill = totalFill;
+}
+
+function formatMerchReservationItems(reservation: MerchReservation): string {
+	return reservation.items
+		.map((item) => {
+			const optionText = [item.selected_size, item.selected_color].filter(Boolean).join(' / ');
+			return `${item.quantity}x ${item.product_name}${optionText ? ` (${optionText})` : ''}`;
+		})
+		.join('\n');
 }
 
 function columnLetter(columnNumber: number): string {

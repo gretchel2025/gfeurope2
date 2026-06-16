@@ -14,7 +14,8 @@ export const AuditAction = {
 	MerchProductCreated: 'merch_product.created',
 	MerchProductUpdated: 'merch_product.updated',
 	MerchProductDeleted: 'merch_product.deleted',
-	MerchReservationCreated: 'merch_reservation.created'
+	MerchReservationCreated: 'merch_reservation.created',
+	MerchReservationDeleted: 'merch_reservation.deleted'
 } as const;
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];

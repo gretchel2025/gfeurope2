@@ -207,6 +207,30 @@ export class MerchandiseService {
 		return await this.merchReservationRepository.findById(eventId, reservationId);
 	}
 
+	async deleteReservation(
+		eventId: string,
+		reservationId: string,
+		actor: AuditActor = systemAuditActor
+	): Promise<void> {
+		const reservation = await this.requireReservation(eventId, reservationId);
+		await this.merchReservationRepository.delete(eventId, reservationId);
+		await this.auditEventService.record({
+			...actor,
+			event_id: eventId,
+			action: AuditAction.MerchReservationDeleted,
+			entity_type: AuditEntityType.MerchReservation,
+			entity_id: reservationId,
+			metadata: reservationAuditMetadata(reservation)
+		});
+		this.eventLogger.log('MERCH_RESERVATION_DELETED', actor.actor_email ?? 'admin', {
+			event_id: eventId,
+			reservation_id: reservationId,
+			customer_name: reservation.customer_name,
+			email: reservation.email,
+			amount_total: reservation.amount_total
+		});
+	}
+
 	async listReservations(eventId: string): Promise<MerchReservation[]> {
 		await this.requireEvent(eventId);
 		return await this.merchReservationRepository.list(eventId);
@@ -225,6 +249,17 @@ export class MerchandiseService {
 			throw new NotFoundError('merch product not found');
 		}
 		return product;
+	}
+
+	private async requireReservation(
+		eventId: string,
+		reservationId: string
+	): Promise<MerchReservation> {
+		const reservation = await this.merchReservationRepository.findById(eventId, reservationId);
+		if (!reservation) {
+			throw new NotFoundError('merch reservation not found');
+		}
+		return reservation;
 	}
 
 	private generateReservationId(): string {
@@ -331,6 +366,26 @@ function productAuditMetadata(product: MerchProduct) {
 		colors: product.colors,
 		image_count: product.image_urls.length,
 		is_active: product.is_active
+	};
+}
+
+function reservationAuditMetadata(reservation: MerchReservation) {
+	return {
+		reservation_id: reservation.reservation_id,
+		customer_name: reservation.customer_name,
+		email: reservation.email,
+		mobile: reservation.mobile,
+		status: reservation.status,
+		amount_total: reservation.amount_total,
+		currency: reservation.currency,
+		item_count: reservation.items.length,
+		items: reservation.items.map((item) => ({
+			product_id: item.product_id,
+			product_name: item.product_name,
+			quantity: item.quantity,
+			selected_size: item.selected_size,
+			selected_color: item.selected_color
+		}))
 	};
 }
 

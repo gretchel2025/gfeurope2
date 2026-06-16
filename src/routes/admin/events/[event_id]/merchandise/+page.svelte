@@ -3,6 +3,7 @@
 	import AdminButton from '$lib/ui/components/admin/AdminButton.svelte';
 	import AdminCard from '$lib/ui/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/ui/components/admin/AdminPage.svelte';
+	import { Download } from 'lucide-svelte';
 	import type { ServerData } from './+page.server';
 
 	export let data: ServerData;
@@ -10,6 +11,12 @@
 	$: products = data.products ?? [];
 	$: reservations = data.reservations ?? [];
 	$: routes = adminRoutes(data.eventId);
+	let selectedReservationIds: string[] = [];
+
+	$: selectedReservationCount = selectedReservationIds.length;
+	$: hasSelectedReservations = selectedReservationCount > 0;
+	$: allReservationsSelected =
+		reservations.length > 0 && selectedReservationCount === reservations.length;
 
 	function formatMoney(value: number, currency = 'EUR') {
 		return new Intl.NumberFormat('en-IE', {
@@ -26,12 +33,41 @@
 			minute: '2-digit'
 		}).format(new Date(value));
 	}
+
+	function toggleAllReservations(event: Event) {
+		const checkbox = event.currentTarget as HTMLInputElement;
+		selectedReservationIds = checkbox.checked
+			? reservations.map((reservation) => reservation.reservation_id)
+			: [];
+	}
+
+	function confirmSelectedReservationDelete(event: SubmitEvent) {
+		if (!hasSelectedReservations) {
+			event.preventDefault();
+			return;
+		}
+
+		const label =
+			selectedReservationCount === 1
+				? '1 merch reservation'
+				: `${selectedReservationCount} merch reservations`;
+		if (!window.confirm(`Delete ${label}? This cannot be undone.`)) {
+			event.preventDefault();
+		}
+	}
 </script>
 
 <AdminPage
 	title="Merchandise"
 	subtitle={`${products.length} products | ${reservations.length} reservations`}
 >
+	<svelte:fragment slot="actions">
+		<AdminButton href={`${routes.merchandise}/export/reservations.xlsx`} variant="secondary">
+			<Download size={16} strokeWidth={2.2} aria-hidden="true" />
+			Download Reservations
+		</AdminButton>
+	</svelte:fragment>
+
 	<AdminCard title="Products" subtitle="Existing merchandise products.">
 		<AdminButton slot="actions" href={routes.merchandiseNew}>Create Product</AdminButton>
 
@@ -85,10 +121,39 @@
 	</AdminCard>
 
 	<AdminCard title="Reservations" subtitle={`Count: ${reservations.length}`}>
+		<form
+			slot="actions"
+			method="POST"
+			action="?/deleteReservations"
+			on:submit={confirmSelectedReservationDelete}
+		>
+			{#each selectedReservationIds as reservationId}
+				<input type="hidden" name="reservation_id" value={reservationId} />
+			{/each}
+			<AdminButton
+				type="submit"
+				variant="danger"
+				disabled={!hasSelectedReservations}
+				submitLoading={false}
+			>
+				Delete Selected
+			</AdminButton>
+		</form>
+
 		<div class="overflow-x-auto">
 			<table class="min-w-full divide-y divide-slate-200 text-left text-sm">
 				<thead class="text-xs uppercase tracking-wide text-slate-500">
 					<tr>
+						<th class="w-12 px-3 py-2">
+							<input
+								type="checkbox"
+								checked={allReservationsSelected}
+								disabled={reservations.length === 0}
+								aria-label="Select all merch reservations"
+								class="h-4 w-4 rounded border-slate-300 text-red-700 focus:ring-red-700"
+								on:change={toggleAllReservations}
+							/>
+						</th>
 						<th class="px-3 py-2">Reference</th>
 						<th class="px-3 py-2">Customer</th>
 						<th class="px-3 py-2">Items</th>
@@ -99,6 +164,15 @@
 				<tbody class="divide-y divide-slate-100">
 					{#each reservations as reservation}
 						<tr>
+							<td class="px-3 py-3">
+								<input
+									type="checkbox"
+									bind:group={selectedReservationIds}
+									value={reservation.reservation_id}
+									aria-label={`Select merch reservation ${reservation.reservation_id}`}
+									class="h-4 w-4 rounded border-slate-300 text-red-700 focus:ring-red-700"
+								/>
+							</td>
 							<td class="px-3 py-3 font-semibold text-slate-950">{reservation.reservation_id}</td>
 							<td class="px-3 py-3">
 								<p class="font-semibold text-slate-950">{reservation.customer_name}</p>
@@ -123,7 +197,7 @@
 						</tr>
 					{:else}
 						<tr>
-							<td colspan="5" class="px-3 py-4 text-slate-600">No merch reservations found.</td>
+							<td colspan="6" class="px-3 py-4 text-slate-600">No merch reservations found.</td>
 						</tr>
 					{/each}
 				</tbody>

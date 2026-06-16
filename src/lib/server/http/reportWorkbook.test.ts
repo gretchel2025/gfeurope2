@@ -3,10 +3,12 @@ import ExcelJS from 'exceljs';
 import {
 	createCitySalesWorkbookBuffer,
 	createGeneratedTicketsWorkbookBuffer,
+	createMerchReservationsWorkbookBuffer,
 	datedXlsxFilename,
 	xlsxAttachmentResponse,
 	xlsxContentType
 } from '$lib/server/http/reportWorkbook';
+import { MerchReservationEmailStatus, MerchReservationStatus } from '$lib/domain/merchandise';
 
 describe('reportWorkbook', () => {
 	it('builds XLSX attachment responses with download headers', async () => {
@@ -72,6 +74,43 @@ describe('reportWorkbook', () => {
 		expect(worksheet?.getCell('C1').value).toBe('Guest Name');
 		expect(worksheet?.getCell('C2').value).toBe('Ada Lovelace');
 		expect(worksheet?.getCell('H2').value).toBe('Berlin');
+	});
+
+	it('builds a valid merchandise reservations workbook', async () => {
+		const buffer = await createMerchReservationsWorkbookBuffer([
+			{
+				event_id: 'gfeu2026',
+				reservation_id: 'MR-TEST123',
+				customer_name: 'Codex Test Customer',
+				email: 'codex@example.test',
+				mobile: '+3530000000',
+				reserved_at: '2026-06-16T09:30:00.000Z',
+				status: MerchReservationStatus.Reserved,
+				amount_total: 27.5,
+				currency: 'EUR',
+				confirmation_email_status: MerchReservationEmailStatus.Sent,
+				items: [
+					{
+						event_id: 'gfeu2026',
+						reservation_id: 'MR-TEST123',
+						product_id: 'MP-TEST',
+						product_name: 'Codex Test Mug',
+						quantity: 2,
+						unit_price: 13.75,
+						currency: 'EUR',
+						selected_size: 'One Size',
+						selected_color: 'Gold'
+					}
+				]
+			}
+		]);
+		const workbook = await loadWorkbook(buffer);
+		const worksheet = workbook.getWorksheet('Merch Reservations');
+
+		expect(worksheet?.getCell('B1').value).toBe('Reference');
+		expect(worksheet?.getCell('B2').value).toBe('MR-TEST123');
+		expect(worksheet?.getCell('C2').value).toBe('Codex Test Customer');
+		expect(worksheet?.getCell('G2').value).toBe('2x Codex Test Mug (One Size / Gold)');
 	});
 });
 

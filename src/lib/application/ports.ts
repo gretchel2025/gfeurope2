@@ -120,6 +120,7 @@ export interface MerchReservationRepository {
 	): Promise<MerchReservation>;
 	findById(eventId: string, reservationId: string): Promise<MerchReservation | null>;
 	list(eventId: string): Promise<MerchReservation[]>;
+	delete(eventId: string, reservationId: string): Promise<void>;
 	updateConfirmationEmailStatus(
 		eventId: string,
 		reservationId: string,

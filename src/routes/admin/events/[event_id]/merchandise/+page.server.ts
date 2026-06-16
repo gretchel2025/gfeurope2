@@ -38,5 +38,28 @@ export const actions: Actions = {
 		await merchandiseService.deleteProduct(eventId, productId, await adminRequestAuditActor(event));
 
 		throw redirect(303, adminRoutes(eventId).merchandise);
+	}),
+	deleteReservations: adminAction(async (event) => {
+		const {
+			eventId,
+			services: { merchandiseService }
+		} = await getEventServiceContext(event);
+		const formData = await event.request.formData();
+		const reservationIds = Array.from(
+			new Set(
+				formData
+					.getAll('reservation_id')
+					.filter((reservationId): reservationId is string => typeof reservationId === 'string')
+					.map((reservationId) => reservationId.trim())
+					.filter(Boolean)
+			)
+		);
+		const actor = await adminRequestAuditActor(event);
+
+		for (const reservationId of reservationIds) {
+			await merchandiseService.deleteReservation(eventId, reservationId, actor);
+		}
+
+		throw redirect(303, adminRoutes(eventId).merchandise);
 	})
 };
