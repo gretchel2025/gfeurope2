@@ -3,6 +3,14 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-06-16
+
+- Updated Netlify production `EMAIL_FROM` and `EMAIL_REPLY_TO` from the admin mailbox to
+  `Grand Feast Europe <help@grandfeast.eu>`, redeployed production, and verified the
+  production smoke suite passed.
+- Added admin XLSX exports for city ticket-sales totals and generated ticket registration
+  lists from the event Reports page.
+
 ## 2026-06-14
 
 - Improved public merchandise image presentation to avoid cropping uploaded product

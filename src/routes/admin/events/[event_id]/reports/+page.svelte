@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Download } from 'lucide-svelte';
+	import AdminButton from '$lib/ui/components/admin/AdminButton.svelte';
 	import AdminCard from '$lib/ui/components/admin/AdminCard.svelte';
 	import AdminPage from '$lib/ui/components/admin/AdminPage.svelte';
 	import { page } from '$app/stores';
@@ -21,6 +23,17 @@
 	title="Reports"
 	subtitle="City-level ticket sales and payment follow-up reports for the active event."
 >
+	<svelte:fragment slot="actions">
+		<AdminButton href={`${routes.reports}/export/city-sales.xlsx`} variant="secondary">
+			<Download size={16} strokeWidth={2.2} aria-hidden="true" />
+			Download City Sales
+		</AdminButton>
+		<AdminButton href={`${routes.reports}/export/generated-tickets.xlsx`} variant="secondary">
+			<Download size={16} strokeWidth={2.2} aria-hidden="true" />
+			Download Ticket List
+		</AdminButton>
+	</svelte:fragment>
+
 	<AdminCard title="Top Ticket Sales by City" subtitle="Ranked by paid tickets sold.">
 		<div class="space-y-3">
 			{#each topTicketSalesByCity as cityStat, index}

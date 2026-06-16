@@ -66,8 +66,8 @@
 					<li>Grand Feast Europe 2026 in Dublin</li>
 					<li>Date: October 3, 2026</li>
 					<li>
-						Time: 12:00 PM Registration, 1:00 PM Holy Mass, 2:00 PM Event Proper, 4:30 PM
-						End of Program
+						Time: 12:00 PM Registration, 1:00 PM Holy Mass, 2:00 PM Event Proper, 4:30 PM End of
+						Program
 					</li>
 					<li>Venue: St. Helen's Hotel</li>
 					<li>Address: Stillorgan Road, Blackrock, Ireland, Dublin A94 V6W3</li>
