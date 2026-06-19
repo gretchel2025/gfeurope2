@@ -65,6 +65,10 @@
 	let email = '';
 	let countrySearch = '';
 	let citySearch = '';
+	let selectedCountry = '';
+	let selectedCity = '';
+	let countryFieldTouched = false;
+	let cityFieldTouched = false;
 	let paymentProofFileName = '';
 	let paymentProofError = '';
 	let paymentProofSelected = false;
@@ -87,17 +91,27 @@
 	$: discountAmount = selectedPricing?.discountAmount ?? 0;
 	$: totalAmount = selectedPricing?.totalAmount ?? 0;
 	$: isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-	$: countryName = countrySearch.trim();
-	$: selectedCityName = citySearch.trim();
+	$: countryName = selectedCountry;
+	$: selectedCityName = selectedCity;
 	$: primaryGuestName = guests[0]?.trim() ?? '';
 	$: bookingLocation =
 		selectedCityName && countryName ? `${selectedCityName}, ${countryName}` : selectedCityName;
 	$: filteredCountries = filterCountryOptions(countrySearch, countries);
 	$: filteredCities = filterCityOptions(citySearch, countryName);
 	$: emailValidationMessage = getEmailValidationMessage(email, detailsStepSubmitted);
+	$: countryValidationMessage = getCountryValidationMessage(
+		countrySearch,
+		selectedCountry,
+		detailsStepSubmitted || countryFieldTouched
+	);
+	$: cityValidationMessage = getCityValidationMessage(
+		citySearch,
+		selectedCity,
+		detailsStepSubmitted || cityFieldTouched
+	);
 	$: canContinueTicket =
 		Boolean(selectedTicketOption) && quantity > 0 && quantity <= availableTickets;
-	$: canContinueDetails = isValidEmail && countryName.length > 0 && selectedCityName.length > 0;
+	$: canContinueDetails = isValidEmail && selectedCountry.length > 0 && selectedCity.length > 0;
 	$: canContinueGuests =
 		guests.length === quantity && guests.every((guest) => guest.trim().length > 0);
 	$: canReserve =
@@ -178,34 +192,72 @@
 
 	function handleCountryInput(event: Event) {
 		countrySearch = (event.currentTarget as HTMLInputElement).value;
-		citySearch = '';
+		if (normalizeTypeaheadValue(countrySearch) !== normalizeTypeaheadValue(selectedCountry)) {
+			selectedCountry = '';
+			selectedCity = '';
+			citySearch = '';
+		}
 		showCountryOptions = true;
 		showCityOptions = false;
 	}
 
 	function handleCityInput(event: Event) {
 		citySearch = (event.currentTarget as HTMLInputElement).value;
+		if (normalizeTypeaheadValue(citySearch) !== normalizeTypeaheadValue(selectedCity)) {
+			selectedCity = '';
+		}
 		showCityOptions = true;
 	}
 
 	function selectCountry(name: string) {
-		if (normalizeTypeaheadValue(countrySearch) !== normalizeTypeaheadValue(name)) {
+		if (normalizeTypeaheadValue(selectedCountry) !== normalizeTypeaheadValue(name)) {
 			citySearch = '';
+			selectedCity = '';
 		}
 		countrySearch = name;
+		selectedCountry = name;
+		countryFieldTouched = true;
 		showCountryOptions = false;
 		showCityOptions = false;
 	}
 
 	function selectCity(name: string) {
 		citySearch = name;
+		selectedCity = name;
+		cityFieldTouched = true;
 		showCityOptions = false;
+	}
+
+	function closeCountryOptions() {
+		countryFieldTouched = true;
+		setTimeout(() => (showCountryOptions = false), 120);
+	}
+
+	function closeCityOptions() {
+		cityFieldTouched = true;
+		setTimeout(() => (showCityOptions = false), 120);
 	}
 
 	function getEmailValidationMessage(value: string, submitted: boolean) {
 		if (!submitted && !value) return '';
 		if (!value.trim()) return 'Email address is required.';
 		if (!isValidEmail) return 'Please enter a valid email address.';
+		return '';
+	}
+
+	function getCountryValidationMessage(
+		value: string,
+		selectedValue: string,
+		shouldValidate: boolean
+	) {
+		if (!shouldValidate) return '';
+		if (!value.trim() || !selectedValue) return 'Select a valid country.';
+		return '';
+	}
+
+	function getCityValidationMessage(value: string, selectedValue: string, shouldValidate: boolean) {
+		if (!shouldValidate) return '';
+		if (!value.trim() || !selectedValue) return 'Select a valid city.';
 		return '';
 	}
 
@@ -575,10 +627,14 @@
 										aria-autocomplete="list"
 										aria-controls="country-options"
 										aria-expanded={showCountryOptions}
-										class="w-full px-4 py-3"
+										aria-invalid={Boolean(countryValidationMessage)}
+										aria-describedby={countryValidationMessage ? 'country-error' : undefined}
+										class={`w-full px-4 py-3 ${
+											countryValidationMessage ? 'border-red-200 bg-red-50 text-red-950' : ''
+										}`}
 										on:focus={() => (showCountryOptions = true)}
 										on:input={handleCountryInput}
-										on:blur={() => setTimeout(() => (showCountryOptions = false), 120)}
+										on:blur={closeCountryOptions}
 									/>
 									{#if showCountryOptions && filteredCountries.length > 0}
 										<div
@@ -601,6 +657,14 @@
 										</div>
 									{/if}
 								</div>
+								{#if countryValidationMessage}
+									<p
+										id="country-error"
+										class="border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800"
+									>
+										{countryValidationMessage}
+									</p>
+								{/if}
 							</div>
 
 							<div class="grid gap-2">
@@ -616,10 +680,17 @@
 										aria-autocomplete="list"
 										aria-controls="city-options"
 										aria-expanded={showCityOptions}
-										class="w-full px-4 py-3"
-										on:focus={() => (showCityOptions = true)}
+										aria-invalid={Boolean(cityValidationMessage)}
+										aria-describedby={cityValidationMessage ? 'city-error' : undefined}
+										disabled={!countryName}
+										class={`w-full px-4 py-3 disabled:cursor-not-allowed disabled:opacity-60 ${
+											cityValidationMessage ? 'border-red-200 bg-red-50 text-red-950' : ''
+										}`}
+										on:focus={() => {
+											if (countryName) showCityOptions = true;
+										}}
 										on:input={handleCityInput}
-										on:blur={() => setTimeout(() => (showCityOptions = false), 120)}
+										on:blur={closeCityOptions}
 									/>
 									{#if showCityOptions && filteredCities.length > 0}
 										<div
@@ -642,6 +713,14 @@
 										</div>
 									{/if}
 								</div>
+								{#if cityValidationMessage}
+									<p
+										id="city-error"
+										class="border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800"
+									>
+										{cityValidationMessage}
+									</p>
+								{/if}
 							</div>
 						</div>
 					</section>

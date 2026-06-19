@@ -3,6 +3,11 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-06-19
+
+- Tightened the public booking country/city selectors so typed values must be chosen from
+  the dropdown list before the details step can continue.
+
 ## 2026-06-16
 
 - Updated Netlify production `EMAIL_FROM` and `EMAIL_REPLY_TO` from the admin mailbox to
