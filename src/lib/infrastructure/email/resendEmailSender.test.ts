@@ -79,6 +79,39 @@ describe('ResendEmailSender', () => {
 		);
 	});
 
+	it('uses a per-message sender identity when provided', async () => {
+		Object.assign(appConfig.integrations, {
+			resendApiKey: 're_test',
+			emailFrom: 'Grand Feast Europe <help@grandfeast.eu>',
+			emailReplyTo: 'Grand Feast Europe <help@grandfeast.eu>'
+		});
+		const send = vi.fn().mockResolvedValue({
+			data: { id: 'email_456' },
+			error: null,
+			headers: null
+		});
+
+		await expect(
+			new ResendEmailSender(() => ({ emails: { send } })).send({
+				...message,
+				from: 'Jewels Europe <jewelseuropesupport@grandfeast.eu>',
+				replyTo: 'Jewels Europe <jewelseuropesupport@grandfeast.eu>'
+			})
+		).resolves.toEqual({
+			status: 'SENT',
+			providerMessageId: 'email_456'
+		});
+
+		expect(send).toHaveBeenCalledWith({
+			from: 'Jewels Europe <jewelseuropesupport@grandfeast.eu>',
+			to: 'ada@example.com',
+			replyTo: 'Jewels Europe <jewelseuropesupport@grandfeast.eu>',
+			subject: 'Hello',
+			html: '<p>Welcome</p>',
+			tags: [{ name: 'category', value: 'transactional' }]
+		});
+	});
+
 	it('requires EMAIL_FROM when an API key is configured', async () => {
 		Object.assign(appConfig.integrations, {
 			resendApiKey: 're_test',

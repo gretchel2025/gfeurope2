@@ -5,6 +5,36 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-06-19
 
+- Added the Jewels 2026 public event registry, landing-page implementation, static
+  Becoming artwork, and seeded Malta event/ticket data through the existing event,
+  ticket type, and inventory tables.
+- Added a live Jewels 2026 landing-page countdown and aligned the seeded Malta event
+  start time to 1:00 PM on October 31, 2026.
+- Added the Jewels 2026 two-day event schedule to the public landing page.
+- Added a Jewels 2026 hero Buy Ticket CTA that scrolls visitors to the ticket card.
+- Updated the Jewels 2026 public menu to match the standard event nav labels and open the
+  public booking route.
+- Updated the Jewels 2026 public header title to a two-line conference lockup.
+- Guarded closed event booking routes so disabled events cannot render the shared public
+  reservation form.
+- Opened Jewels 2026 public booking, linked the landing page CTAs to newbooking, and made
+  the shared booking screen and booking emails use Jewels-specific event details.
+- Replaced the Jewels 2026 hero artwork image with the supplied floral background asset
+  and layered the theme title, date strip, countdown, and booking CTA over it.
+- Replaced the CSS-rendered Jewels 2026 hero title with the supplied transparent
+  Becoming title artwork for an exact match to the event collateral.
+- Refined the Jewels 2026 hero details so the date/location floats over the artwork and
+  the countdown starts directly with the time blocks.
+- Rethemed the Jewels 2026 public booking form with cream, red, blush, and tan surfaces
+  instead of the Grand Feast dark-blue booking palette.
+- Added Jewels-specific bank transfer details for the public booking form and booking
+  payment emails while keeping Grand Feast bank details unchanged.
+- Added Jewels-specific support email identity for public booking help text and Jewels
+  transactional email templates/sender overrides.
+- Standardized the public Jewels event display name to `JEWELS CONFERENCE 2026` and
+  sorted event listings by date within each year.
+- Extended the Jewels public theme across shared booking status, legal/FAQ, and shop
+  pages without changing Grand Feast 2026 page styling.
 - Tightened the public booking country/city selectors so typed values must be chosen from
   the dropdown list before the details step can continue.
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { grandFeastPaymentDetails } from '$lib/domain/paymentDetails';
+	import { getEventDisplayTitle, getEventDisplayTitlePlain } from '$lib/domain/eventDisplay';
+	import { getPaymentDetailsForEvent } from '$lib/domain/paymentDetails';
 	import { computeTicketPricing, isEarlyBirdDiscountActive } from '$lib/domain/ticketType';
 	import { publicRoutes } from '$lib/navigation/adminRoutes';
 	import type { BookingTicketOption, ServerData } from './+page.server';
@@ -52,6 +53,11 @@
 		searchKey: normalizeTypeaheadValue(name)
 	}));
 	$: publicNav = publicRoutes($page.params.event_id);
+	$: paymentDetails = getPaymentDetailsForEvent(data.event.event_id);
+	$: eventDisplayTitle = getBookingDisplayTitle(data.event);
+	$: eventDateDisplay = getBookingDateDisplay(data.event);
+	$: eventVenueLines = getBookingVenueLines(data.event);
+	$: eventSummary = getBookingEventSummary(data.event);
 
 	const ticketOptions: BookingTicketOption[] = data.ticketOptions;
 
@@ -390,28 +396,74 @@
 			cancelNonRefundableConfirmation();
 		}
 	}
+
+	function getBookingDisplayTitle(event: ServerData['event']) {
+		if (event.event_id === 'jewels2026') {
+			return getEventDisplayTitle(event.event_id, event.title);
+		}
+
+		return 'Grand Feast Europe 2026';
+	}
+
+	function getBookingEventSummary(event: ServerData['event']) {
+		if (event.event_id === 'jewels2026') {
+			return `${getEventDisplayTitlePlain(event.event_id, event.title)} • ${event.country} • ${getBookingDateDisplay(event)}`;
+		}
+
+		return 'Grand Feast Europe 2026 • Dublin • October 3, 2026';
+	}
+
+	function getBookingDateDisplay(event: ServerData['event']) {
+		if (event.event_id === 'jewels2026') return 'October 31 - November 1, 2026';
+
+		return new Intl.DateTimeFormat('en-US', {
+			month: 'long',
+			day: 'numeric',
+			year: 'numeric',
+			timeZone: event.timezone
+		}).format(new Date(event.datetime));
+	}
+
+	function getBookingVenueLines(event: ServerData['event']) {
+		if (event.event_id !== 'jewels2026') {
+			return ["St. Helen's Hotel"];
+		}
+
+		const venue = event.venue.trim();
+		const country = event.country.trim();
+		if (!country || venue.toLowerCase().includes(country.toLowerCase())) {
+			return [venue];
+		}
+
+		return [venue, country];
+	}
 </script>
 
 <svelte:window on:keydown={handleModalKeydown} />
 
-<section class="px-4 py-12">
+<section class="public-booking-page px-4 py-12">
 	<div class="mx-auto max-w-6xl">
 		<hgroup class="mb-8 space-y-3 text-center">
 			<p class="conference-kicker">Ticket Reservation</p>
 			<h1 class="conference-section-title text-4xl sm:text-5xl">Reserve Your Seat</h1>
 
 			<h2
-				class="mx-auto max-w-xl text-xl font-black leading-tight tracking-normal text-[#f3c15f] sm:text-2xl"
+				class="booking-event-summary mx-auto max-w-xl text-xl font-black leading-tight tracking-normal text-[#f3c15f] sm:text-2xl"
 			>
-				Grand Feast Europe 2026 • Dublin • October 3, 2026
+				{eventSummary}
 			</h2>
 		</hgroup>
 
-		<div class="mb-8 grid gap-3 sm:grid-cols-4">
+		<div class="booking-step-list mb-8 grid gap-3 sm:grid-cols-4">
 			{#each steps as step, index}
 				<button
 					type="button"
-					class={`border px-4 py-3 text-left font-black transition ${
+					data-step-state={currentStep === index + 1
+						? 'active'
+						: index + 1 < currentStep
+							? 'complete'
+							: 'upcoming'}
+					class={`booking-step-button border px-4 py-3 text-left font-black transition ${
 						currentStep === index + 1
 							? 'border-[#f3c15f] bg-[#d99a32]/20 text-white'
 							: index + 1 < currentStep
@@ -420,7 +472,7 @@
 					}`}
 					on:click={() => goToStep(index + 1)}
 				>
-					<span class="text-sm text-[#f3c15f]">{index + 1}</span>
+					<span class="booking-step-number text-sm text-[#f3c15f]">{index + 1}</span>
 					<span class="ml-2">{step}</span>
 				</button>
 			{/each}
@@ -768,27 +820,33 @@
 								</p>
 								<div class="mt-4 grid gap-3 border-l-4 border-[#f3c15f] pl-4 text-[#fff3df]">
 									<div>
-										<p class="conference-kicker text-[#fff3df]/60">Account name</p>
-										<p class="mt-1 font-black">{grandFeastPaymentDetails.accountName}</p>
+										<p class="conference-kicker text-[#fff3df]/60">
+											{paymentDetails.accountNameLabel}
+										</p>
+										<p class="mt-1 font-black">{paymentDetails.accountName}</p>
 									</div>
 									<div>
-										<p class="conference-kicker text-[#fff3df]/60">Bank name</p>
-										<p class="mt-1 font-black">{grandFeastPaymentDetails.bankName}</p>
+										<p class="conference-kicker text-[#fff3df]/60">
+											{paymentDetails.bankNameLabel}
+										</p>
+										<p class="mt-1 font-black">{paymentDetails.bankName}</p>
 									</div>
 									<div>
-										<p class="conference-kicker text-[#fff3df]/60">IBAN</p>
+										<p class="conference-kicker text-[#fff3df]/60">{paymentDetails.ibanLabel}</p>
 										<p
 											class="overflow-wrap-anywhere mt-1 font-mono text-base font-black text-[#f3c15f] sm:text-lg sm:tracking-wide"
 										>
-											{grandFeastPaymentDetails.iban}
+											{paymentDetails.iban}
 										</p>
 									</div>
 									<div>
-										<p class="conference-kicker text-[#fff3df]/60">BIC/SWIFT</p>
+										<p class="conference-kicker text-[#fff3df]/60">
+											{paymentDetails.bicSwiftLabel}
+										</p>
 										<p
 											class="overflow-wrap-anywhere mt-1 font-mono text-base font-black text-[#f3c15f] sm:text-lg sm:tracking-wide"
 										>
-											{grandFeastPaymentDetails.bicSwift}
+											{paymentDetails.bicSwift}
 										</p>
 									</div>
 									<p class="text-sm text-[#fff3df]/70">
@@ -892,10 +950,12 @@
 
 			<aside class="conference-panel h-fit p-5 lg:sticky lg:top-6">
 				<p class="conference-kicker">Your Booking</p>
-				<h3 class="mt-2 text-2xl font-black text-white">Grand Feast Europe 2026</h3>
+				<h3 class="mt-2 whitespace-pre-line text-2xl font-black text-white">{eventDisplayTitle}</h3>
 				<p class="mt-2 text-sm text-[#fff3df]/70">
-					St. Helen's Hotel<br />
-					October 3, 2026
+					{#each eventVenueLines as venueLine}
+						{venueLine}<br />
+					{/each}
+					{eventDateDisplay}
 				</p>
 
 				<div class="mt-6 space-y-4 border-t border-white/10 pt-5 text-sm">

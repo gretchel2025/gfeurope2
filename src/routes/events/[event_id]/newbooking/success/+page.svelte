@@ -1,20 +1,24 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { HelpCircle, MailQuestion } from 'lucide-svelte';
+	import { getCommunicationDetailsForEvent } from '$lib/domain/eventCommunication';
 	import { publicRoutes } from '$lib/navigation/adminRoutes';
 
 	let showEmailHelp = false;
 	let showBookingHelp = false;
 
 	$: publicNav = publicRoutes($page.params.event_id);
+	$: communicationDetails = getCommunicationDetailsForEvent($page.params.event_id);
 </script>
 
 <section class="public-status-page">
-	<article class="conference-panel w-full max-w-lg p-6 text-center sm:p-8">
+	<article class="conference-panel public-status-card w-full max-w-lg p-6 text-center sm:p-8">
 		<hgroup class="mb-6">
 			<p class="conference-kicker">Reservation received</p>
-			<h1 class="mt-3 text-3xl font-black text-white sm:text-4xl">Successfully Booked</h1>
-			<h2 class="mt-3 text-lg text-[#fff3df]/75 sm:text-xl">
+			<h1 class="public-status-title mt-3 text-3xl font-black text-white sm:text-4xl">
+				Successfully Booked
+			</h1>
+			<h2 class="public-status-copy mt-3 text-lg text-[#fff3df]/75 sm:text-xl">
 				Your reservation and proof of payment were received. Please check your email for
 				confirmation.
 			</h2>
@@ -41,18 +45,28 @@
 		</div>
 
 		{#if showEmailHelp}
-			<p class="mb-4 bg-[#fff3df] px-4 py-3 text-[#061922]">Check your spam or junk folder.</p>
+			<p class="public-status-help mb-4 bg-[#fff3df] px-4 py-3 text-[#061922]">
+				Check your spam or junk folder.
+			</p>
 		{/if}
 
 		{#if showBookingHelp}
-			<p class="mb-4 bg-[#fff3df] px-4 py-3 text-[#061922]">
-				Send us an email at <strong>help@grandfeast.eu</strong>.
+			<p class="public-status-help mb-4 bg-[#fff3df] px-4 py-3 text-[#061922]">
+				Send us an email at
+				<a
+					href={`mailto:${communicationDetails.email}`}
+					class="font-black underline underline-offset-4"
+				>
+					{communicationDetails.email}.
+				</a>
 			</p>
 		{/if}
 
 		<div class="mt-6 flex flex-wrap justify-center gap-4 text-sm font-semibold">
-			<a href={publicNav.newBooking} class="text-[#f3c15f] hover:underline">Book Another</a>
-			<a href={publicNav.home} class="text-[#f3c15f] hover:underline">Home</a>
+			<a href={publicNav.newBooking} class="public-status-link text-[#f3c15f] hover:underline">
+				Book Another
+			</a>
+			<a href={publicNav.home} class="public-status-link text-[#f3c15f] hover:underline">Home</a>
 		</div>
 	</article>
 </section>

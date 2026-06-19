@@ -214,6 +214,14 @@ body {
 	z-index: 1;
 }
 
+.public-site-shell .public-nav-link {
+	color: rgba(255, 243, 223, 0.8);
+}
+
+.public-site-shell .public-nav-link:hover {
+	color: #ffffff;
+}
+
 .events-index-shell {
 	background:
 		radial-gradient(circle at 12% 8%, rgba(15, 23, 42, 0.06), transparent 24rem),
@@ -362,6 +370,109 @@ body {
 .events-index-link-label-disabled {
 	color: #94a3b8;
 	cursor: not-allowed;
+}
+
+.jewels-public-shell {
+	--jewels-cream: #fff8f1;
+	--jewels-paper: #fff4eb;
+	--jewels-blush: #f0d4cf;
+	--jewels-tan: #d2c0a8;
+	--jewels-red: #bd302f;
+	--jewels-red-deep: #8f282c;
+	--jewels-ink: #342722;
+	--jewels-moss: #728462;
+	background:
+		linear-gradient(90deg, rgba(189, 48, 47, 0.04), transparent 34%, rgba(240, 212, 207, 0.16)),
+		linear-gradient(180deg, #fff8f1 0%, #f8e8e0 38%, #fff7ef 100%);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell::before {
+	background:
+		linear-gradient(135deg, rgba(114, 132, 98, 0.08) 0 1px, transparent 1px 42px),
+		linear-gradient(45deg, rgba(189, 48, 47, 0.045) 0 1px, transparent 1px 54px);
+	mix-blend-mode: normal;
+	opacity: 1;
+}
+
+.jewels-public-shell > header > div {
+	border-color: rgba(189, 48, 47, 0.16);
+	border-radius: 0.5rem;
+	background: rgba(255, 248, 241, 0.9);
+	box-shadow: 0 18px 50px rgba(96, 54, 42, 0.08);
+}
+
+.jewels-public-shell header h1 {
+	color: var(--jewels-ink);
+	font-family: Georgia, 'Times New Roman', serif;
+	font-weight: 800;
+	white-space: pre-line;
+}
+
+.jewels-public-shell .conference-kicker {
+	color: var(--jewels-red);
+	letter-spacing: 0;
+}
+
+.jewels-public-shell .public-nav-link {
+	color: var(--jewels-red);
+	font-size: 0.72rem;
+	font-weight: 900;
+	letter-spacing: 0;
+	text-transform: uppercase;
+}
+
+.jewels-public-shell .public-nav-link:hover {
+	color: var(--jewels-red-deep);
+}
+
+.jewels-public-shell .conference-button,
+.jewels-public-shell .conference-button-secondary {
+	border-radius: 0.4rem;
+}
+
+.jewels-public-shell .conference-button {
+	background: var(--jewels-red);
+	color: var(--jewels-cream);
+	box-shadow: 0 14px 32px rgba(189, 48, 47, 0.18);
+}
+
+.jewels-public-shell .conference-button:hover:not(:disabled):not([aria-disabled='true']) {
+	background: var(--jewels-red-deep);
+	box-shadow: 0 18px 38px rgba(189, 48, 47, 0.24);
+}
+
+.jewels-public-shell .conference-button-secondary {
+	border-color: rgba(189, 48, 47, 0.28);
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .conference-button-secondary:hover:not(:disabled):not([aria-disabled='true']) {
+	border-color: var(--jewels-red);
+	background: rgba(189, 48, 47, 0.06);
+	color: var(--jewels-red-deep);
+}
+
+.jewels-public-shell footer {
+	border-color: rgba(189, 48, 47, 0.16);
+	background: rgba(255, 248, 241, 0.92);
+}
+
+.jewels-public-shell footer p {
+	color: #766057;
+}
+
+.jewels-public-shell footer p:nth-of-type(2) {
+	color: var(--jewels-ink);
+	white-space: pre-line;
+}
+
+.jewels-public-shell footer a {
+	color: #766057;
+}
+
+.jewels-public-shell footer a:hover {
+	color: var(--jewels-red);
 }
 
 .conference-kicker {
@@ -565,6 +676,338 @@ body {
 .public-form-card select:focus {
 	border-color: var(--gf-gold);
 	outline: 3px solid rgba(217, 154, 50, 0.26);
+}
+
+.jewels-public-shell .public-booking-page {
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-booking-page hgroup {
+	border: 1px solid rgba(189, 48, 47, 0.12);
+	border-radius: 0.5rem;
+	background: rgba(255, 248, 241, 0.72);
+	box-shadow: 0 20px 52px rgba(96, 54, 42, 0.08);
+	padding: 1.75rem;
+}
+
+.jewels-public-shell .public-booking-page .conference-section-title,
+.jewels-public-shell .public-booking-page .text-white {
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-booking-page .booking-event-summary,
+.jewels-public-shell .public-booking-page [class*='text-[#f3c15f]'] {
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .public-booking-page [class*='text-[#fff3df]'] {
+	color: #746056;
+}
+
+.jewels-public-shell .public-booking-page .booking-step-button {
+	border-color: rgba(189, 48, 47, 0.14);
+	border-radius: 0.4rem;
+	background: rgba(255, 248, 241, 0.78);
+	color: #746056;
+	box-shadow: 0 12px 28px rgba(96, 54, 42, 0.06);
+}
+
+.jewels-public-shell .public-booking-page .booking-step-button[data-step-state='active'] {
+	border-color: rgba(189, 48, 47, 0.44);
+	background: rgba(240, 212, 207, 0.72);
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .public-booking-page .booking-step-button[data-step-state='complete'] {
+	border-color: rgba(114, 132, 98, 0.34);
+	background: rgba(114, 132, 98, 0.1);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-booking-page .booking-step-number {
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .public-booking-page .conference-panel {
+	border-color: rgba(189, 48, 47, 0.16);
+	border-radius: 0.5rem;
+	background:
+		linear-gradient(135deg, rgba(255, 248, 241, 0.94), rgba(255, 244, 235, 0.82)),
+		var(--jewels-cream);
+	box-shadow: 0 24px 64px rgba(96, 54, 42, 0.1);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-booking-page .conference-panel::before {
+	background: linear-gradient(180deg, var(--jewels-red), var(--jewels-blush), var(--jewels-tan));
+}
+
+.jewels-public-shell .public-booking-page .conference-card {
+	border-color: rgba(189, 48, 47, 0.14);
+	border-radius: 0.45rem;
+	background:
+		linear-gradient(145deg, rgba(255, 248, 241, 0.82), rgba(240, 212, 207, 0.42)),
+		var(--jewels-paper);
+	box-shadow: 0 18px 42px rgba(96, 54, 42, 0.08);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-booking-page label.conference-card:has(input[type='radio']:checked) {
+	border-color: rgba(189, 48, 47, 0.56);
+	box-shadow:
+		0 0 0 2px rgba(189, 48, 47, 0.16),
+		0 18px 42px rgba(96, 54, 42, 0.1);
+}
+
+.jewels-public-shell .public-booking-page .conference-card:hover {
+	border-color: rgba(189, 48, 47, 0.36);
+}
+
+.jewels-public-shell .public-booking-page .conference-button {
+	background: var(--jewels-red);
+	color: var(--jewels-cream);
+	box-shadow: 0 14px 30px rgba(189, 48, 47, 0.18);
+}
+
+.jewels-public-shell
+	.public-booking-page
+	.conference-button:hover:not(:disabled):not([aria-disabled='true']) {
+	background: var(--jewels-red-deep);
+	box-shadow: 0 18px 36px rgba(189, 48, 47, 0.24);
+}
+
+.jewels-public-shell .public-booking-page .conference-button-secondary {
+	border-color: rgba(189, 48, 47, 0.26);
+	background: rgba(255, 248, 241, 0.56);
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell
+	.public-booking-page
+	.conference-button-secondary:hover:not(:disabled):not([aria-disabled='true']) {
+	border-color: var(--jewels-red);
+	background: rgba(189, 48, 47, 0.07);
+	color: var(--jewels-red-deep);
+}
+
+.jewels-public-shell .public-booking-page .public-form-card input,
+.jewels-public-shell .public-booking-page .public-form-card select {
+	border-color: rgba(189, 48, 47, 0.18);
+	background: rgba(255, 248, 241, 0.96);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-booking-page .public-form-card input:focus,
+.jewels-public-shell .public-booking-page .public-form-card select:focus {
+	border-color: var(--jewels-red);
+	outline: 3px solid rgba(189, 48, 47, 0.16);
+}
+
+.jewels-public-shell .public-booking-page [role='listbox'] {
+	border-color: rgba(189, 48, 47, 0.22);
+	background: var(--jewels-paper);
+	box-shadow: 0 18px 44px rgba(96, 54, 42, 0.16);
+}
+
+.jewels-public-shell .public-booking-page [role='option'] {
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-booking-page [role='option']:hover,
+.jewels-public-shell .public-booking-page [role='option']:focus {
+	background: var(--jewels-blush);
+	color: var(--jewels-red-deep);
+}
+
+.jewels-public-shell .public-booking-page [class*='border-white/10'] {
+	border-color: rgba(189, 48, 47, 0.14);
+}
+
+.jewels-public-shell .public-booking-page [class*='border-[#f3c15f]'] {
+	border-color: rgba(189, 48, 47, 0.28);
+}
+
+.jewels-public-shell .public-booking-page [class*='bg-[#d99a32]']:not(.booking-step-button) {
+	background: var(--jewels-red);
+	color: var(--jewels-cream);
+}
+
+.jewels-public-shell .public-booking-page [class*='bg-[#d99a32]/15'] {
+	background: rgba(240, 212, 207, 0.48);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-booking-page [class*='bg-[#d64b55]/15'] {
+	background: rgba(189, 48, 47, 0.08);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-booking-page a[href$='/jewels2026'] {
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .public-booking-page a[href$='/jewels2026']:hover {
+	color: var(--jewels-red-deep);
+}
+
+.jewels-public-shell .public-legal-page > div > div a,
+.jewels-public-shell .public-shop-page a {
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .public-legal-page > div > div a:hover,
+.jewels-public-shell .public-shop-page a:hover {
+	color: var(--jewels-red-deep);
+}
+
+.jewels-public-shell .public-legal-page .conference-panel,
+.jewels-public-shell .public-shop-page .conference-panel,
+.jewels-public-shell .public-shop-page .conference-card,
+.jewels-public-shell .public-shop-page article,
+.jewels-public-shell .public-shop-page section.sticky,
+.jewels-public-shell .public-status-page .conference-panel {
+	border-color: rgba(189, 48, 47, 0.16);
+	border-radius: 0.5rem;
+	background:
+		linear-gradient(145deg, rgba(255, 248, 241, 0.96), rgba(255, 244, 235, 0.88)),
+		var(--jewels-cream);
+	box-shadow: 0 24px 64px rgba(96, 54, 42, 0.1);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-legal-page .conference-panel::before,
+.jewels-public-shell .public-shop-page .conference-panel::before,
+.jewels-public-shell .public-status-page .conference-panel::before {
+	background: linear-gradient(180deg, var(--jewels-red), var(--jewels-blush), var(--jewels-tan));
+}
+
+.jewels-public-shell .public-legal-page .conference-section-title,
+.jewels-public-shell .public-shop-page .text-white,
+.jewels-public-shell .public-shop-page h1,
+.jewels-public-shell .public-shop-page h2,
+.jewels-public-shell .public-shop-page h3,
+.jewels-public-shell .public-status-page .text-white {
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-legal-page [class*='text-[#f3c15f]'],
+.jewels-public-shell .public-shop-page [class*='text-[#f3c15f]'],
+.jewels-public-shell .public-status-page [class*='text-[#f3c15f]'] {
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .public-legal-page [class*='text-[#fff3df]'],
+.jewels-public-shell .public-shop-page [class*='text-[#fff3df]'],
+.jewels-public-shell .public-status-page [class*='text-[#fff3df]'] {
+	color: #746056;
+}
+
+.jewels-public-shell .public-legal-page .legal-copy,
+.jewels-public-shell .public-legal-page .legal-copy p,
+.jewels-public-shell .public-legal-page .legal-copy ul,
+.jewels-public-shell .public-legal-page .legal-copy li,
+.jewels-public-shell .public-legal-page .legal-copy strong {
+	color: #746056;
+}
+
+.jewels-public-shell .public-legal-page .legal-copy h3,
+.jewels-public-shell .public-legal-page .legal-copy strong {
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-legal-page .legal-copy h2,
+.jewels-public-shell .public-legal-page .legal-copy h4,
+.jewels-public-shell .public-legal-page .legal-copy a,
+.jewels-public-shell .public-legal-page .legal-copy li::marker {
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .public-legal-page .legal-copy a:hover {
+	color: var(--jewels-red-deep);
+}
+
+.jewels-public-shell .public-shop-page [class*='border-white/'],
+.jewels-public-shell .public-shop-page [class*='divide-white/'] {
+	border-color: rgba(189, 48, 47, 0.14);
+}
+
+.jewels-public-shell .public-shop-page [class*='bg-[#021821]'],
+.jewels-public-shell .public-shop-page [class*='bg-[#052a3a]'],
+.jewels-public-shell .public-shop-page [class*='bg-white/8'] {
+	background: rgba(255, 248, 241, 0.88);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-shop-page [class*='bg-[#f4fbff]'] {
+	background: rgba(255, 244, 235, 0.84);
+}
+
+.jewels-public-shell .public-shop-page input,
+.jewels-public-shell .public-shop-page select {
+	border-color: rgba(189, 48, 47, 0.18);
+	background: rgba(255, 248, 241, 0.96);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-shop-page input:focus,
+.jewels-public-shell .public-shop-page select:focus {
+	border-color: var(--jewels-red);
+	outline: 3px solid rgba(189, 48, 47, 0.16);
+}
+
+.jewels-public-shell .public-shop-page [class*='text-[#ffd6d6]'] {
+	color: var(--jewels-red-deep);
+}
+
+.jewels-public-shell .public-status-page {
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-status-card {
+	border-color: rgba(189, 48, 47, 0.16);
+	border-radius: 0.5rem;
+	background:
+		linear-gradient(145deg, rgba(255, 248, 241, 0.96), rgba(255, 244, 235, 0.9)),
+		var(--jewels-cream);
+	box-shadow: 0 24px 64px rgba(96, 54, 42, 0.12);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-status-card::before {
+	background: linear-gradient(180deg, var(--jewels-red), var(--jewels-blush), var(--jewels-tan));
+}
+
+.jewels-public-shell .public-status-title {
+	color: var(--jewels-ink);
+	font-family: Georgia, 'Times New Roman', serif;
+	letter-spacing: 0;
+}
+
+.jewels-public-shell .public-status-copy {
+	color: #746056;
+}
+
+.jewels-public-shell .public-status-help {
+	border: 1px solid rgba(189, 48, 47, 0.18);
+	border-radius: 0.45rem;
+	background: rgba(240, 212, 207, 0.42);
+	color: var(--jewels-ink);
+}
+
+.jewels-public-shell .public-status-help a {
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .public-status-help a:hover {
+	color: var(--jewels-red-deep);
+}
+
+.jewels-public-shell .public-status-link {
+	color: var(--jewels-red);
+}
+
+.jewels-public-shell .public-status-link:hover {
+	color: var(--jewels-red-deep);
 }
 
 .public-status-page {

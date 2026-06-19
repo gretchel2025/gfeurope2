@@ -53,7 +53,11 @@ describe('NotificationService audit events', () => {
 
 		await service.sendBookingConfirmation(booking);
 
-		const message = send.mock.calls[0][0].message;
+		const email = send.mock.calls[0][0];
+		const message = email.message;
+		expect(email.from).toBeUndefined();
+		expect(email.replyTo).toBeUndefined();
+		expect(email.subject).toBe('We received your Grand Feast booking BREF001');
 		expect(message).toContain('Account name');
 		expect(message).toContain('Light Of Jesus Family Ireland CLG');
 		expect(message).toContain('Bank name');
@@ -64,6 +68,69 @@ describe('NotificationService audit events', () => {
 		expect(message).toContain('BOFIIE2DXXX');
 		expect(message).toContain('ada@example.com');
 		expectEventSchedule(message);
+		expect(message).not.toContain('jewelseuropesupport@grandfeast.eu');
+		expect(message).not.toContain('BE85001896796806');
+	});
+
+	it('uses Jewels event details in booking confirmation emails', async () => {
+		const booking: Booking = {
+			event_id: 'jewels2026',
+			reference_no: 'JWL001',
+			name: 'Miriam Santiago',
+			email: 'miriam@example.com',
+			city: 'Valletta, Malta',
+			ticket_type: TicketType.STANDARD,
+			book_date: '2026-06-19T00:00:00.000Z',
+			payment_status: BookingPaymentStatus.UNPAID,
+			amount_total: 25,
+			guests: ['Miriam Santiago'],
+			ticket_ids: [],
+			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN
+		};
+		const bookingRepository = {} as unknown as BookingRepository;
+		const ticketRepository = {} as unknown as TicketRepository;
+		const send = vi.fn(async (message: EmailMessage) => {
+			void message;
+			return { status: 'SENT' as const };
+		});
+		const emailSender = { send } satisfies EmailSender;
+		const auditEventService = {
+			record: vi.fn()
+		} as unknown as AuditEventService;
+		const service = new NotificationService(
+			bookingRepository,
+			ticketRepository,
+			emailSender,
+			auditEventService
+		);
+
+		await service.sendBookingConfirmation(booking);
+
+		const email = send.mock.calls[0][0];
+		expect(email.from).toBe('Jewels Europe <jewelseuropesupport@grandfeast.eu>');
+		expect(email.replyTo).toBe('Jewels Europe <jewelseuropesupport@grandfeast.eu>');
+		expect(email.subject).toBe('We received your JEWELS CONFERENCE 2026 booking JWL001');
+		expect(email.message).toContain('JEWELS CONFERENCE 2026');
+		expect(email.message).toContain('Malta');
+		expect(email.message).toContain('Lapsi Street, Malta');
+		expect(email.message).toContain('Day 1 - 6:00 PM Anticipated Mass');
+		expect(email.message).toContain('JEWELS Europe Team');
+		expect(email.message).toContain('Recipient');
+		expect(email.message).toContain('THE FEAST BRUSSELS (LIGHT OF JESUS FAMILY)');
+		expect(email.message).toContain('Bank Details');
+		expect(email.message).toContain('BE85001896796806');
+		expect(email.message).toContain('BIC');
+		expect(email.message).toContain('GEBABEBB');
+		expect(email.message).toContain('Bank Name');
+		expect(email.message).toContain('BNP PARIBAS');
+		expect(email.message).toContain('jewelseuropesupport@grandfeast.eu');
+		expect(email.message).not.toContain('welcome you to Dublin');
+		expect(email.message).not.toContain("St. Helen's Hotel");
+		expect(email.message).not.toContain('Light Of Jesus Family Ireland CLG');
+		expect(email.message).not.toContain('Bank of Ireland');
+		expect(email.message).not.toContain('Europe and UK');
+		expect(email.message).not.toContain('help@grandfeast.eu');
 	});
 
 	it('records booking.tickets_email_sent after the ticket email sends', async () => {
@@ -266,6 +333,63 @@ describe('NotificationService audit events', () => {
 				})
 			})
 		);
+	});
+
+	it('uses Jewels bank transfer details in payment reminder emails', async () => {
+		const booking: Booking = {
+			event_id: 'jewels2026',
+			reference_no: 'JWL002',
+			name: 'Miriam Santiago',
+			email: 'miriam@example.com',
+			city: 'Valletta, Malta',
+			ticket_type: TicketType.STANDARD,
+			book_date: '2026-06-19T00:00:00.000Z',
+			payment_status: BookingPaymentStatus.UNPAID,
+			amount_total: 25,
+			guests: ['Miriam Santiago'],
+			ticket_ids: [],
+			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN
+		};
+		const bookingRepository = {
+			findByReferenceNo: vi.fn(async () => booking)
+		} as unknown as BookingRepository;
+		const ticketRepository = {} as unknown as TicketRepository;
+		const send = vi.fn(async (message: EmailMessage) => {
+			void message;
+			return { status: 'SENT' as const };
+		});
+		const emailSender = { send } satisfies EmailSender;
+		const auditEventService = {
+			record: vi.fn()
+		} as unknown as AuditEventService;
+		const service = new NotificationService(
+			bookingRepository,
+			ticketRepository,
+			emailSender,
+			auditEventService
+		);
+
+		await service.sendPaymentReminder('JWL002');
+
+		const email = send.mock.calls[0][0];
+		const message = email.message;
+		expect(email.from).toBe('Jewels Europe <jewelseuropesupport@grandfeast.eu>');
+		expect(email.replyTo).toBe('Jewels Europe <jewelseuropesupport@grandfeast.eu>');
+		expect(message).toContain('Recipient');
+		expect(message).toContain('THE FEAST BRUSSELS (LIGHT OF JESUS FAMILY)');
+		expect(message).toContain('Bank Details');
+		expect(message).toContain('BE85001896796806');
+		expect(message).toContain('BIC');
+		expect(message).toContain('GEBABEBB');
+		expect(message).toContain('Bank Name');
+		expect(message).toContain('BNP PARIBAS');
+		expect(message).toContain('jewelseuropesupport@grandfeast.eu');
+		expect(message).not.toContain('Light Of Jesus Family Ireland CLG');
+		expect(message).not.toContain('Bank of Ireland');
+		expect(message).not.toContain('help@grandfeast.eu');
+		expect(message).toContain('miriam@example.com');
+		expect(emailSender.send).toHaveBeenCalledOnce();
 	});
 
 	it('does not record a payment reminder when email sending is skipped', async () => {

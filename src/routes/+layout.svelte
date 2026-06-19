@@ -3,7 +3,12 @@
 	import { page } from '$app/stores';
 	import { signOutCurrentUser as signOutAuth } from '$lib/infrastructure/auth/authClient';
 	import { adminIndexRoute, adminRoutes, publicRoutes } from '$lib/navigation/adminRoutes';
-	import { getPublicEventPage } from '$lib/publicEvents';
+	import {
+		getPublicEventPage,
+		type PublicEventNavLink,
+		type PublicEventNavTarget,
+		type PublicEventPageConfig
+	} from '$lib/publicEvents';
 	import '../app.css';
 
 	type AdminThemeEvent = {
@@ -43,6 +48,35 @@
 		].join('; ');
 	}
 
+	function getDefaultPublicNavLinks(eventPage: PublicEventPageConfig): PublicEventNavLink[] {
+		return [
+			{ label: 'Home', target: 'home' },
+			{
+				label: eventPage.status === 'archived' ? 'Message' : 'Speakers',
+				target: eventPage.status === 'archived' ? 'message' : 'speakers'
+			},
+			{ label: 'Details', target: 'details' },
+			{ label: 'Shop', target: 'shop' },
+			{
+				label: eventPage.showBuyTickets ? 'Buy Tickets' : 'Tickets',
+				target: eventPage.showBuyTickets ? 'newBooking' : 'tickets',
+				variant: eventPage.showBuyTickets ? 'button' : 'link'
+			}
+		];
+	}
+
+	function getPublicNavLinks(eventPage: PublicEventPageConfig | null): PublicEventNavLink[] {
+		if (!eventPage) return [];
+		return eventPage.navLinks ?? getDefaultPublicNavLinks(eventPage);
+	}
+
+	function getPublicNavHref(target: PublicEventNavTarget, routes: ReturnType<typeof publicRoutes>) {
+		if (target === 'home') return routes.home;
+		if (target === 'shop') return routes.shop;
+		if (target === 'newBooking') return routes.newBooking;
+		return `${routes.home}#${target}`;
+	}
+
 	async function signOutCurrentUser() {
 		await signOutAuth($page.data.supabaseAuth);
 		await goto('/signin');
@@ -60,10 +94,16 @@
 		$page.url.pathname === '/signin';
 	$: isEventsIndex = $page.url.pathname === '/events';
 	$: publicHomeHref = isEventsIndex ? '/events' : publicNav.home;
+	$: publicShellVariant = activePublicEventPage?.shellVariant ?? 'grand-feast';
+	$: publicHeaderKicker = activePublicEventPage
+		? activePublicEventPage.headerKicker
+		: 'Grand Feast';
 	$: publicHeaderTitle = activePublicEventPage?.headerTitle ?? 'Grand Feast Europe';
+	$: publicEventNavLinks = getPublicNavLinks(activePublicEventPage);
 	$: publicFooterKicker = activePublicEventPage?.footerKicker ?? 'Events archive';
 	$: publicFooterTitle = activePublicEventPage?.footerTitle ?? 'Grand Feast Europe';
 	$: publicFooterYear = activePublicEventPage?.footerCopyrightYear ?? new Date().getUTCFullYear();
+	$: publicFooterCopyrightName = activePublicEventPage?.footerCopyrightName ?? 'Grand Feast Europe';
 	$: organizerHref = $page.params.event_id
 		? adminRoutes($page.params.event_id).home
 		: adminIndexRoute;
@@ -139,14 +179,20 @@
 		<slot />
 	</div>
 {:else}
-	<div class="public-site-shell" class:events-index-shell={isEventsIndex}>
+	<div
+		class="public-site-shell"
+		class:events-index-shell={isEventsIndex}
+		class:jewels-public-shell={publicShellVariant === 'jewels'}
+	>
 		<header class="public-content px-4 py-5 md:px-8">
 			<div
 				class="mx-auto flex max-w-6xl flex-col gap-4 rounded-xl border border-white/10 bg-[#021821]/80 px-4 py-4 shadow-xl backdrop-blur md:flex-row md:items-center md:justify-between md:px-5"
 			>
 				<div class="flex min-w-0 items-center justify-between gap-3">
 					<a href={publicHomeHref} on:click={closeMenu} class="group min-w-0 pr-2">
-						<p class="conference-kicker">Grand Feast</p>
+						{#if publicHeaderKicker}
+							<p class="conference-kicker">{publicHeaderKicker}</p>
+						{/if}
 						<h1
 							class="max-w-52 text-2xl font-black leading-tight tracking-normal text-white sm:max-w-none"
 						>
@@ -167,54 +213,28 @@
 
 				<nav id="site-nav" class:hidden={!isMenuOpen} class="md:block">
 					<ul class="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
-						<li>
-							<a
-								href={publicHomeHref}
-								class="font-semibold text-[#fff3df]/80 transition hover:text-white"
-								on:click={closeMenu}>Home</a
-							>
-						</li>
 						{#if activePublicEventPage}
+							{#each publicEventNavLinks as navLink}
+								<li>
+									<a
+										href={getPublicNavHref(navLink.target, publicNav)}
+										class={navLink.variant === 'button'
+											? 'conference-button px-4 py-2 text-sm'
+											: 'public-nav-link font-semibold transition'}
+										on:click={closeMenu}>{navLink.label}</a
+									>
+								</li>
+							{/each}
+						{:else}
 							<li>
 								<a
-									href={`${publicNav.home}#${activePublicEventPage.status === 'archived' ? 'message' : 'speakers'}`}
-									class="font-semibold text-[#fff3df]/80 transition hover:text-white"
+									href={publicHomeHref}
+									class="public-nav-link font-semibold transition"
 									on:click={closeMenu}
 								>
-									{activePublicEventPage.status === 'archived' ? 'Message' : 'Speakers'}
+									Home
 								</a>
 							</li>
-							<li>
-								<a
-									href={`${publicNav.home}#details`}
-									class="font-semibold text-[#fff3df]/80 transition hover:text-white"
-									on:click={closeMenu}>Details</a
-								>
-							</li>
-							<li>
-								<a
-									href={publicNav.shop}
-									class="font-semibold text-[#fff3df]/80 transition hover:text-white"
-									on:click={closeMenu}>Shop</a
-								>
-							</li>
-							{#if activePublicEventPage.showBuyTickets}
-								<li>
-									<a
-										href={publicNav.newBooking}
-										class="conference-button px-4 py-2 text-sm"
-										on:click={closeMenu}>Buy Tickets</a
-									>
-								</li>
-							{:else}
-								<li>
-									<a
-										href={`${publicNav.home}#tickets`}
-										class="font-semibold text-[#fff3df]/80 transition hover:text-white"
-										on:click={closeMenu}>Tickets</a
-									>
-								</li>
-							{/if}
 						{/if}
 					</ul>
 				</nav>
@@ -232,7 +252,8 @@
 						<p class="conference-kicker">{publicFooterKicker}</p>
 						<p class="mt-2 text-lg font-black text-white">{publicFooterTitle}</p>
 						<p class="mt-1 text-sm text-[#fff3df]/70">
-							© {publicFooterYear} Grand Feast Europe.
+							© {publicFooterYear}
+							{publicFooterCopyrightName}.
 						</p>
 					</div>
 					<div class="flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">

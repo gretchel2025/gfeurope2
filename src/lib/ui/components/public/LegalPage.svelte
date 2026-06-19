@@ -13,7 +13,7 @@
 	$: publicNav = publicRoutes($page.params.event_id ?? $page.data.defaultEventId);
 </script>
 
-<section class="px-4 py-10 sm:py-14">
+<section class="public-legal-page px-4 py-10 sm:py-14">
 	<div class="mx-auto flex max-w-5xl flex-col gap-6">
 		<div class="flex flex-wrap items-center justify-between gap-3 text-sm">
 			<a

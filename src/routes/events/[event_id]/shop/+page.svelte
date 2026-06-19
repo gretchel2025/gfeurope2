@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import type {
 		MerchReservationActionData,
 		MerchReservationFormErrors,
@@ -11,6 +12,9 @@
 	let validationErrors: MerchReservationFormErrors = {};
 
 	$: validationErrors = { ...(form?.errors ?? {}) };
+	$: isJewelsEvent = $page.params.event_id === 'jewels2026';
+	$: shopKicker = isJewelsEvent ? 'JEWELS Europe Shop' : 'Grand Feast Shop';
+	$: shopPlaceholderLabel = isJewelsEvent ? 'JEWELS' : 'Grand Feast';
 
 	function formatMoney(value: number, currency = 'EUR') {
 		return new Intl.NumberFormat('en-IE', {
@@ -270,9 +274,9 @@
 	</script>
 </svelte:head>
 
-<section class="px-4 pb-16 pt-10">
+<section class="public-shop-page px-4 pb-16 pt-10">
 	<div class="mx-auto max-w-6xl">
-		<p class="conference-kicker">Grand Feast Shop</p>
+		<p class="conference-kicker">{shopKicker}</p>
 		<h1 class="mt-3 max-w-3xl text-4xl font-black uppercase leading-tight text-white sm:text-6xl">
 			Event Merchandise
 		</h1>
@@ -283,7 +287,13 @@
 </section>
 
 {#if data.categories.length > 0}
-	<form method="POST" action="?/reserve" class="px-4 pb-24" novalidate data-merch-reservation-form>
+	<form
+		method="POST"
+		action="?/reserve"
+		class="public-shop-page px-4 pb-24"
+		novalidate
+		data-merch-reservation-form
+	>
 		<div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
 			<div class="space-y-12">
 				{#each data.categories as category}
@@ -314,7 +324,7 @@
 										<div
 											class="flex aspect-[4/3] items-center justify-center bg-[#052a3a] text-sm font-bold uppercase tracking-[0.18em] text-[#fff3df]/55"
 										>
-											Grand Feast
+											{shopPlaceholderLabel}
 										</div>
 									{/if}
 
@@ -510,7 +520,7 @@
 		</div>
 	</form>
 {:else}
-	<section class="px-4 pb-24">
+	<section class="public-shop-page px-4 pb-24">
 		<div class="conference-panel mx-auto max-w-3xl p-8 text-center">
 			<h2 class="text-3xl font-black text-white">Shop Coming Soon</h2>
 			<p class="mt-3 text-[#fff3df]/76">Merchandise will appear here once it is available.</p>

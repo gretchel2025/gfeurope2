@@ -15,7 +15,7 @@
 	}
 </script>
 
-<section class="px-4 py-16">
+<section class="public-shop-page px-4 py-16">
 	<div class="conference-panel mx-auto max-w-3xl p-8">
 		<p class="conference-kicker">Merchandise Reserved</p>
 		<h1 class="mt-3 text-4xl font-black text-white">Thank you, {data.reservation.customer_name}</h1>

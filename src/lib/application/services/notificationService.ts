@@ -22,25 +22,64 @@ import {
 	type AuditActor
 } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
+import { jewelsEventDisplayTitle, jewelsEventDisplayTitlePlain } from '$lib/domain/eventDisplay';
+import {
+	getCommunicationDetailsForEvent,
+	type EventCommunicationDetails
+} from '$lib/domain/eventCommunication';
 import type { MerchReservation } from '$lib/domain/merchandise';
-import { grandFeastPaymentDetails } from '$lib/domain/paymentDetails';
+import { getPaymentDetailsForEvent, type PaymentDetails } from '$lib/domain/paymentDetails';
 import { BookingConfirmationEmailStatus, formatTicketTypeLabel } from '$lib/domain/shared/enums';
 import type { Ticket } from '$lib/domain/ticket';
 
-const supportEmail = 'help@grandfeast.eu';
+type EmailEventDetails = {
+	name: string;
+	formalName: string;
+	subjectBrand: string;
+	hostLocation: string;
+	date: string;
+	time: string[];
+	venue: string;
+	address: string[];
+	teamName: string;
+};
 
-const eventDetails = {
-	name: 'Grand Feast Europe 2026',
-	formalName: 'Grand Feast Europe 2026 in Dublin',
-	date: 'October 3, 2026',
-	time: [
-		'12:00 PM Registration',
-		'1:00 PM Holy Mass',
-		'2:00 PM Event Proper',
-		'4:30 PM End of Program'
-	],
-	venue: "St. Helen's Hotel",
-	address: ['Stillorgan Road, Blackrock, Ireland', 'Dublin A94 V6W3']
+const eventDetailsById: Record<string, EmailEventDetails> = {
+	gfeu2026: {
+		name: 'Grand Feast Europe 2026',
+		formalName: 'Grand Feast Europe 2026 in Dublin',
+		subjectBrand: 'Grand Feast',
+		hostLocation: 'Dublin',
+		date: 'October 3, 2026',
+		time: [
+			'12:00 PM Registration',
+			'1:00 PM Holy Mass',
+			'2:00 PM Event Proper',
+			'4:30 PM End of Program'
+		],
+		venue: "St. Helen's Hotel",
+		address: ['Stillorgan Road, Blackrock, Ireland', 'Dublin A94 V6W3'],
+		teamName: 'Grand Feast Europe Team'
+	},
+	jewels2026: {
+		name: jewelsEventDisplayTitlePlain,
+		formalName: jewelsEventDisplayTitle,
+		subjectBrand: 'JEWELS CONFERENCE 2026',
+		hostLocation: 'Malta',
+		date: 'October 31 to November 1, 2026',
+		time: [
+			'Day 1 - 12:00 PM Registration',
+			'Day 1 - 1:00 PM Event Proper',
+			'Day 1 - 5:00 PM End of Day 1',
+			'Day 1 - 6:00 PM Anticipated Mass',
+			'Day 2 - 8:00 AM Breakfast and Morning Socials',
+			'Day 2 - 9:00 AM Event Proper',
+			'Day 2 - 12:00 PM End of Day 2'
+		],
+		venue: "St Julian's, Lapsi Street, Malta",
+		address: ["St Julian's, Lapsi Street, Malta"],
+		teamName: 'JEWELS Europe Team'
+	}
 };
 
 /** Sends the user-facing emails associated with bookings and tickets. */
@@ -54,19 +93,27 @@ export class NotificationService {
 
 	/** Sends the initial reservation email after payment proof has been submitted. */
 	async sendBookingConfirmation(booking: Booking): Promise<EmailSendResult> {
+		const eventDetails = getEmailEventDetails(booking.event_id);
+		const communicationDetails = getCommunicationDetailsForEvent(booking.event_id);
+
 		return await this.emailSender.send({
 			to: booking.email,
-			subject: `We received your Grand Feast booking ${booking.reference_no}`,
-			message: buildReservationEmail(booking)
+			subject: `We received your ${eventDetails.subjectBrand} booking ${booking.reference_no}`,
+			message: buildReservationEmail(booking, eventDetails, communicationDetails),
+			...emailSenderOverrideForEvent(booking.event_id, communicationDetails)
 		});
 	}
 
 	/** Sends the public merchandise reservation confirmation email. */
 	async sendMerchReservationConfirmation(reservation: MerchReservation): Promise<EmailSendResult> {
+		const eventDetails = getEmailEventDetails(reservation.event_id);
+		const communicationDetails = getCommunicationDetailsForEvent(reservation.event_id);
+
 		return await this.emailSender.send({
 			to: reservation.email,
-			subject: `Your Grand Feast merchandise reservation ${reservation.reservation_id}`,
-			message: buildMerchReservationEmail(reservation)
+			subject: `Your ${eventDetails.subjectBrand} merchandise reservation ${reservation.reservation_id}`,
+			message: buildMerchReservationEmail(reservation, eventDetails, communicationDetails),
+			...emailSenderOverrideForEvent(reservation.event_id, communicationDetails)
 		});
 	}
 
@@ -82,11 +129,14 @@ export class NotificationService {
 
 		requireDeliverableBookingEmail(booking);
 		const tickets = await this.loadTickets(booking);
+		const eventDetails = getEmailEventDetails(booking.event_id);
+		const communicationDetails = getCommunicationDetailsForEvent(booking.event_id);
 
 		const emailResult = await this.emailSender.send({
 			to: booking.email,
-			subject: `Your Grand Feast eTickets ${booking.reference_no}`,
-			message: buildTicketsEmail(booking, tickets)
+			subject: `Your ${eventDetails.subjectBrand} eTickets ${booking.reference_no}`,
+			message: buildTicketsEmail(booking, tickets, eventDetails, communicationDetails),
+			...emailSenderOverrideForEvent(booking.event_id, communicationDetails)
 		});
 		requireAcceptedEmail(emailResult);
 		await this.auditEventService.record({
@@ -136,10 +186,13 @@ export class NotificationService {
 		}
 
 		requireDeliverableBookingEmail(booking);
+		const eventDetails = getEmailEventDetails(booking.event_id);
+		const communicationDetails = getCommunicationDetailsForEvent(booking.event_id);
 		const emailResult = await this.emailSender.send({
 			to: booking.email,
-			subject: `Payment reminder for your Grand Feast booking ${booking.reference_no}`,
-			message: buildPaymentReminderEmail(booking)
+			subject: `Payment reminder for your ${eventDetails.subjectBrand} booking ${booking.reference_no}`,
+			message: buildPaymentReminderEmail(booking, eventDetails, communicationDetails),
+			...emailSenderOverrideForEvent(booking.event_id, communicationDetails)
 		});
 		requireAcceptedEmail(emailResult);
 		await this.auditEventService.record({
@@ -198,17 +251,47 @@ function requireAcceptedEmail(result: EmailSendResult): void {
 	}
 }
 
-function buildReservationEmail(booking: Booking): string {
-	const ticketTypeLabel = formatTicketTypeLabel(booking.ticket_type);
+function getEmailEventDetails(eventId: string): EmailEventDetails {
+	return eventDetailsById[eventId] ?? eventDetailsById.gfeu2026;
+}
 
-	return buildEmailShell({
-		preheader: `Your booking ${booking.reference_no} was received and is awaiting payment verification.`,
-		eyebrow: 'Booking Received',
-		title: 'Thank you for your reservation',
-		body: `
+function emailSenderOverrideForEvent(
+	eventId: string,
+	communicationDetails: EventCommunicationDetails
+) {
+	if (eventId !== 'jewels2026') {
+		return {};
+	}
+
+	return {
+		from: communicationDetails.sender,
+		replyTo: communicationDetails.sender
+	};
+}
+
+function supportEmailLink(communicationDetails: EventCommunicationDetails): string {
+	const email = escapeHtml(communicationDetails.email);
+	const mailto = escapeAttribute(communicationDetails.email);
+	return `<a href="mailto:${mailto}" style="color:#005b72;font-weight:700;">${email}</a>`;
+}
+
+function buildReservationEmail(
+	booking: Booking,
+	eventDetails: EmailEventDetails,
+	communicationDetails: EventCommunicationDetails
+): string {
+	const ticketTypeLabel = formatTicketTypeLabel(booking.ticket_type);
+	const supportLink = supportEmailLink(communicationDetails);
+
+	return buildEmailShell(
+		{
+			preheader: `Your booking ${booking.reference_no} was received and is awaiting payment verification.`,
+			eyebrow: 'Booking Received',
+			title: 'Thank you for your reservation',
+			body: `
 			${paragraph(`Dear ${escapeHtml(booking.name)},`)}
 			${paragraph(
-				`We received your reservation and proof of payment for ${eventDetails.name}. We are excited to welcome you to Dublin.`
+				`We received your reservation and proof of payment for ${eventDetails.name}. We are excited to welcome you to ${eventDetails.hostLocation}.`
 			)}
 			${callout(`
 				<strong>Payment verification can take up to 48 hours.</strong><br>
@@ -222,25 +305,32 @@ function buildReservationEmail(booking: Booking): string {
 				['Total amount', formatAmount(booking.amount_total)]
 			])}
 			${sectionTitle('Bank Transfer Details')}
-			${paymentDetailsTable(booking.email)}
+			${paymentDetailsTable(getPaymentDetailsForEvent(booking.event_id), booking.email)}
 			${guestList(booking.guests)}
-			${eventDetailsBlock()}
-			${paragraph(
-				`If you need help with your booking, please contact us at <a href="mailto:${supportEmail}" style="color:#005b72;font-weight:700;">${supportEmail}</a>.`
-			)}
-			${paragraph('Best regards,<br><strong>Grand Feast Europe Team</strong>')}
+			${eventDetailsBlock(eventDetails)}
+			${paragraph(`If you need help with your booking, please contact us at ${supportLink}.`)}
+			${paragraph(`Best regards,<br><strong>${escapeHtml(eventDetails.teamName)}</strong>`)}
 		`
-	});
+		},
+		eventDetails,
+		communicationDetails
+	);
 }
 
-function buildTicketsEmail(booking: Booking, tickets: Ticket[]): string {
+function buildTicketsEmail(
+	booking: Booking,
+	tickets: Ticket[],
+	eventDetails: EmailEventDetails,
+	communicationDetails: EventCommunicationDetails
+): string {
 	const ticketTypeLabel = formatTicketTypeLabel(booking.ticket_type);
 
-	return buildEmailShell({
-		preheader: `Your eTickets for ${eventDetails.name} are ready.`,
-		eyebrow: 'Your eTickets',
-		title: 'Your Grand Feast eTickets are ready',
-		body: `
+	return buildEmailShell(
+		{
+			preheader: `Your eTickets for ${eventDetails.name} are ready.`,
+			eyebrow: 'Your eTickets',
+			title: `Your ${eventDetails.subjectBrand} eTickets are ready`,
+			body: `
 			${paragraph(`Dear ${escapeHtml(booking.name)},`)}
 			${paragraph(
 				`Here are your eTickets for ${eventDetails.formalName}. Please bring your eTicket with the QR code, as you will need it for entry at the venue. Having your eTicket ready for scanning will make check-in quick and easy.`
@@ -259,21 +349,30 @@ function buildTicketsEmail(booking: Booking, tickets: Ticket[]): string {
 				['Payment status', booking.payment_status]
 			])}
 			${guestList(booking.guests)}
-			${eventDetailsBlock()}
+			${eventDetailsBlock(eventDetails)}
 			${paragraph('We hope you have a great time at the event!')}
-			${paragraph('Have a blessed day!<br><strong>Grand Feast Europe Team</strong>')}
+			${paragraph(`Have a blessed day!<br><strong>${escapeHtml(eventDetails.teamName)}</strong>`)}
 		`
-	});
+		},
+		eventDetails,
+		communicationDetails
+	);
 }
 
-function buildPaymentReminderEmail(booking: Booking): string {
+function buildPaymentReminderEmail(
+	booking: Booking,
+	eventDetails: EmailEventDetails,
+	communicationDetails: EventCommunicationDetails
+): string {
 	const ticketTypeLabel = formatTicketTypeLabel(booking.ticket_type);
+	const supportLink = supportEmailLink(communicationDetails);
 
-	return buildEmailShell({
-		preheader: `Your booking ${booking.reference_no} is still awaiting payment verification.`,
-		eyebrow: 'Payment Reminder',
-		title: 'Your booking is waiting',
-		body: `
+	return buildEmailShell(
+		{
+			preheader: `Your booking ${booking.reference_no} is still awaiting payment verification.`,
+			eyebrow: 'Payment Reminder',
+			title: 'Your booking is waiting',
+			body: `
 			${paragraph(`Dear ${escapeHtml(booking.name)},`)}
 			${paragraph(
 				`This is a gentle reminder that your ${eventDetails.name} reservation is still marked as unpaid. If you have already made your transfer, please allow up to 48 hours for payment verification.`
@@ -287,21 +386,29 @@ function buildPaymentReminderEmail(booking: Booking): string {
 				['Status', booking.payment_status]
 			])}
 			${sectionTitle('Bank Transfer Details')}
-			${paymentDetailsTable(booking.email)}
-			${paragraph(
-				`If you need help with your booking, please contact us at <a href="mailto:${supportEmail}" style="color:#005b72;font-weight:700;">${supportEmail}</a>.`
-			)}
-			${paragraph('Best regards,<br><strong>Grand Feast Europe Team</strong>')}
+			${paymentDetailsTable(getPaymentDetailsForEvent(booking.event_id), booking.email)}
+			${paragraph(`If you need help with your booking, please contact us at ${supportLink}.`)}
+			${paragraph(`Best regards,<br><strong>${escapeHtml(eventDetails.teamName)}</strong>`)}
 		`
-	});
+		},
+		eventDetails,
+		communicationDetails
+	);
 }
 
-function buildMerchReservationEmail(reservation: MerchReservation): string {
-	return buildEmailShell({
-		preheader: `Your merchandise reservation ${reservation.reservation_id} was received.`,
-		eyebrow: 'Merchandise Reserved',
-		title: 'Your merch reservation is confirmed',
-		body: `
+function buildMerchReservationEmail(
+	reservation: MerchReservation,
+	eventDetails: EmailEventDetails,
+	communicationDetails: EventCommunicationDetails
+): string {
+	const supportLink = supportEmailLink(communicationDetails);
+
+	return buildEmailShell(
+		{
+			preheader: `Your merchandise reservation ${reservation.reservation_id} was received.`,
+			eyebrow: 'Merchandise Reserved',
+			title: 'Your merch reservation is confirmed',
+			body: `
 			${paragraph(`Dear ${escapeHtml(reservation.customer_name)},`)}
 			${paragraph(
 				`We received your merchandise reservation for ${eventDetails.name}. Your reserved items will be paid for and collected on the day of the event.`
@@ -320,13 +427,14 @@ function buildMerchReservationEmail(reservation: MerchReservation): string {
 			])}
 			${sectionTitle('Reserved Items')}
 			${merchItemsTable(reservation)}
-			${eventDetailsBlock()}
-			${paragraph(
-				`If you need help with your reservation, please contact us at <a href="mailto:${supportEmail}" style="color:#005b72;font-weight:700;">${supportEmail}</a>.`
-			)}
-			${paragraph('Best regards,<br><strong>Grand Feast Europe Team</strong>')}
+			${eventDetailsBlock(eventDetails)}
+			${paragraph(`If you need help with your reservation, please contact us at ${supportLink}.`)}
+			${paragraph(`Best regards,<br><strong>${escapeHtml(eventDetails.teamName)}</strong>`)}
 		`
-	});
+		},
+		eventDetails,
+		communicationDetails
+	);
 }
 
 function merchItemsTable(reservation: MerchReservation): string {
@@ -349,22 +457,29 @@ function merchItemsTable(reservation: MerchReservation): string {
 	return detailTable(rows);
 }
 
-function paymentDetailsTable(transferReference: string): string {
+function paymentDetailsTable(paymentDetails: PaymentDetails, transferReference: string): string {
 	return detailTable([
-		['Account name', grandFeastPaymentDetails.accountName],
-		['Bank name', grandFeastPaymentDetails.bankName],
-		['IBAN', grandFeastPaymentDetails.iban],
-		['BIC/SWIFT', grandFeastPaymentDetails.bicSwift],
+		[paymentDetails.accountNameLabel, paymentDetails.accountName],
+		[paymentDetails.bankNameLabel, paymentDetails.bankName],
+		[paymentDetails.ibanLabel, paymentDetails.iban],
+		[paymentDetails.bicSwiftLabel, paymentDetails.bicSwift],
 		['Transfer reference', transferReference]
 	]);
 }
 
-function buildEmailShell(input: {
-	preheader: string;
-	eyebrow: string;
-	title: string;
-	body: string;
-}): string {
+function buildEmailShell(
+	input: {
+		preheader: string;
+		eyebrow: string;
+		title: string;
+		body: string;
+	},
+	eventDetails: EmailEventDetails,
+	communicationDetails: EventCommunicationDetails
+): string {
+	const footerSupportEmail = escapeHtml(communicationDetails.email);
+	const footerSupportMailto = escapeAttribute(communicationDetails.email);
+
 	return `
 		<!doctype html>
 		<html lang="en">
@@ -402,8 +517,8 @@ function buildEmailShell(input: {
 								<tr>
 									<td style="padding:22px 28px;background:#052a3a;color:#fff3df;">
 										<p style="margin:0;font-size:13px;line-height:1.6;">
-											<strong>Grand Feast Europe Team</strong><br>
-											Need help? <a href="mailto:${supportEmail}" style="color:#f3c15f;font-weight:700;">${supportEmail}</a>
+											<strong>${escapeHtml(eventDetails.teamName)}</strong><br>
+											Need help? <a href="mailto:${footerSupportMailto}" style="color:#f3c15f;font-weight:700;">${footerSupportEmail}</a>
 										</p>
 									</td>
 								</tr>
@@ -446,7 +561,7 @@ function ticketCard(ticket: Ticket, index: number): string {
 	`;
 }
 
-function eventDetailsBlock(): string {
+function eventDetailsBlock(eventDetails: EmailEventDetails): string {
 	return `
 		${sectionTitle('Event Details')}
 		${detailTable([
@@ -522,7 +637,7 @@ function formatAmount(amount: number): string {
 }
 
 function allowLineBreaks(value: string): string {
-	return escapeHtml(value).replaceAll('&lt;br&gt;', '<br>');
+	return escapeHtml(value).replaceAll('&lt;br&gt;', '<br>').replaceAll('\n', '<br>');
 }
 
 function escapeAttribute(value: string): string {

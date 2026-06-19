@@ -40,15 +40,18 @@ export class ResendEmailSender implements EmailSender {
 			return { status: 'SKIPPED' };
 		}
 
-		if (!emailFrom) {
+		const from = message.from ?? emailFrom;
+		const replyTo = message.replyTo ?? (emailReplyTo || from);
+
+		if (!from) {
 			throw new AppError('email svc: EMAIL_FROM is not configured', 500, 'EMAIL_ERROR');
 		}
 
 		const response = await withTimeout(
 			this.createClient(resendApiKey).emails.send({
-				from: emailFrom,
+				from,
 				to: message.to,
-				replyTo: emailReplyTo || emailFrom,
+				replyTo,
 				subject: message.subject,
 				html: message.message,
 				tags: [{ name: 'category', value: 'transactional' }]

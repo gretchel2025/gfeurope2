@@ -1,17 +1,38 @@
 import type { Event } from '$lib/domain/event';
+import { jewelsEventDisplayTitle } from '$lib/domain/eventDisplay';
 
-export type PublicEventPageId = 'gfeu2025' | 'gfeu2026';
+export type PublicEventPageId = 'gfeu2025' | 'gfeu2026' | 'jewels2026';
 export type PublicEventStatus = 'active' | 'archived';
+export type PublicEventShellVariant = 'grand-feast' | 'jewels';
+export type PublicEventNavTarget =
+	| 'home'
+	| 'speakers'
+	| 'message'
+	| 'theme'
+	| 'details'
+	| 'shop'
+	| 'tickets'
+	| 'newBooking';
+
+export type PublicEventNavLink = {
+	label: string;
+	target: PublicEventNavTarget;
+	variant?: 'link' | 'button';
+};
 
 export type PublicEventPageConfig = {
 	eventId: PublicEventPageId;
 	status: PublicEventStatus;
 	component: PublicEventPageId;
+	shellVariant?: PublicEventShellVariant;
+	headerKicker?: string;
 	headerTitle: string;
 	footerKicker: string;
 	footerTitle: string;
 	footerCopyrightYear: number;
+	footerCopyrightName?: string;
 	showBuyTickets: boolean;
+	navLinks?: PublicEventNavLink[];
 };
 
 export type EventYearGroup = {
@@ -20,10 +41,29 @@ export type EventYearGroup = {
 };
 
 const publicEventPages: Record<PublicEventPageId, PublicEventPageConfig> = {
+	jewels2026: {
+		eventId: 'jewels2026',
+		status: 'active',
+		component: 'jewels2026',
+		shellVariant: 'jewels',
+		headerTitle: jewelsEventDisplayTitle,
+		footerKicker: 'Becoming in Malta',
+		footerTitle: jewelsEventDisplayTitle,
+		footerCopyrightYear: 2026,
+		footerCopyrightName: 'JEWELS Europe',
+		showBuyTickets: true,
+		navLinks: [
+			{ label: 'Home', target: 'home' },
+			{ label: 'Speakers', target: 'speakers' },
+			{ label: 'Details', target: 'details' },
+			{ label: 'Buy Tickets', target: 'newBooking', variant: 'button' }
+		]
+	},
 	gfeu2026: {
 		eventId: 'gfeu2026',
 		status: 'active',
 		component: 'gfeu2026',
+		headerKicker: 'Grand Feast',
 		headerTitle: 'Europe 2026',
 		footerKicker: 'Together in Dublin',
 		footerTitle: 'Grand Feast Europe 2026',
@@ -34,6 +74,7 @@ const publicEventPages: Record<PublicEventPageId, PublicEventPageConfig> = {
 		eventId: 'gfeu2025',
 		status: 'archived',
 		component: 'gfeu2025',
+		headerKicker: 'Grand Feast',
 		headerTitle: 'Europe 2025',
 		footerKicker: 'Called To More in Oslo',
 		footerTitle: 'Grand Feast Europe 2025',
@@ -64,7 +105,7 @@ export function groupEventsByYear(events: Event[]): EventYearGroup[] {
 		.map(([year, yearEvents]) => ({
 			year,
 			events: yearEvents.sort(
-				(a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
+				(a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
 			)
 		}))
 		.sort((a, b) => b.year - a.year);

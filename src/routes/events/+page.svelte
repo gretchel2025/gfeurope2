@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { publicRoutes } from '$lib/navigation/adminRoutes';
+	import { getEventDisplayTitle } from '$lib/domain/eventDisplay';
 	import { getPublicEventPage } from '$lib/publicEvents';
 	import type { ServerData } from './+page.server';
 
@@ -46,7 +47,9 @@
 								>
 									<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 										<div>
-											<p class="text-xl font-black text-slate-950">{event.title}</p>
+											<p class="whitespace-pre-line text-xl font-black text-slate-950">
+												{getEventDisplayTitle(event.event_id, event.title)}
+											</p>
 											<p class="mt-1 text-sm font-semibold text-slate-500">
 												{event.country} • {formatDate(event.datetime)}
 											</p>
@@ -66,7 +69,9 @@
 								>
 									<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 										<div>
-											<p class="text-xl font-black text-slate-950">{event.title}</p>
+											<p class="whitespace-pre-line text-xl font-black text-slate-950">
+												{getEventDisplayTitle(event.event_id, event.title)}
+											</p>
 											<p class="mt-1 text-sm font-semibold text-slate-500">
 												{event.country} • {formatDate(event.datetime)}
 											</p>

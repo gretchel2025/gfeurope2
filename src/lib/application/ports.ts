@@ -33,6 +33,8 @@ export type EmailMessage = {
 	to: string;
 	subject: string;
 	message: string;
+	from?: string;
+	replyTo?: string;
 };
 
 export type EmailSendResult = {
