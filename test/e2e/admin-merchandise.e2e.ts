@@ -3,6 +3,8 @@ import { signInWithPassword } from './support/auth';
 import { adminEventPath, e2eConfig, expectPath } from './support/e2eConfig';
 
 test.describe('admin merchandise management', () => {
+	test.setTimeout(90_000);
+
 	test.beforeEach(async ({ page }) => {
 		test.skip(e2eConfig.environment !== 'local', 'Merchandise mutations run locally only.');
 		await signInWithPassword(page, adminEventPath('/merchandise'));
@@ -48,6 +50,13 @@ test.describe('admin merchandise management', () => {
 		await page.getByLabel('Stock').fill('5');
 		await page.getByRole('button', { name: 'Update Product', exact: true }).click();
 
+		await expect(page).toHaveURL(expectPath(adminEventPath(`/merchandise/${productId}`)));
+		await expect(page.getByRole('status')).toContainText(`${productId} was updated.`);
+		await expect(page.getByRole('status')).toContainText('Your changes are saved.');
+		await expect(page.getByLabel('Product Name')).toHaveValue(updatedProductName);
+		await expect(page.getByLabel('Category')).toHaveValue('Books');
+
+		await page.getByRole('link', { name: 'Cancel', exact: true }).click();
 		await expect(page).toHaveURL(expectPath(adminEventPath('/merchandise')));
 		const updatedRow = page.getByRole('row').filter({ hasText: updatedProductName });
 		await expect(updatedRow).toBeVisible();

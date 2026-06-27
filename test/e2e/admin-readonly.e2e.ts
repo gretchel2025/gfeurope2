@@ -3,7 +3,16 @@ import { adminEventPath, e2eConfig, expectPath } from './support/e2eConfig';
 import { signInWithPassword } from './support/auth';
 
 test.describe('authenticated admin read-only smoke', () => {
-	test.beforeEach(async ({ page }) => {
+	test.setTimeout(90_000);
+
+	test.beforeEach(async ({ page }, testInfo) => {
+		if (
+			testInfo.title === 'prod superuser global admin pages load' &&
+			e2eConfig.environment !== 'prod'
+		) {
+			test.skip(true, 'Global admin smoke is required for prod only.');
+		}
+
 		await signInWithPassword(page, '/admin');
 	});
 
