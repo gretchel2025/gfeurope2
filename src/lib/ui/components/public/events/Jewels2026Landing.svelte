@@ -18,6 +18,9 @@
 	const scriptureReference = 'Romans 12:2 NIV';
 	const scriptureText =
 		"Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God's will is - his good, pleasing and perfect will.";
+	const socialPreviewDescription =
+		'JEWELS Europe gathers in Malta for Becoming, JEWELS CONFERENCE 2026.';
+	const socialPreviewImagePath = '/events/jewels2026/social-preview.jpg';
 	const conferenceStories = [
 		{
 			paragraphs: [
@@ -64,6 +67,8 @@
 
 	$: publicNav = publicRoutes($page.params.event_id);
 	$: bookingHref = `${publicNav.newBooking}?ticket_type=STANDARD`;
+	$: eventUrl = `${$page.url.origin}${publicNav.home}`;
+	$: socialPreviewImageUrl = `${$page.url.origin}${socialPreviewImagePath}`;
 	$: conferenceTicket = ticketTypes.find((ticket) => ticket.ticket_type_id === 'STANDARD');
 	$: ticketPrice = formatTicketPrice(conferenceTicket);
 	$: activeConferenceStory = conferenceStories[activeStoryIndex];
@@ -135,10 +140,22 @@
 
 <svelte:head>
 	<title>{conferenceName} | JEWELS Europe</title>
-	<meta
-		name="description"
-		content="JEWELS Europe gathers in Malta for Becoming, JEWELS CONFERENCE 2026."
-	/>
+	<meta name="description" content={socialPreviewDescription} />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content={eventUrl} />
+	<meta property="og:title" content={`${conferenceName} | JEWELS Europe`} />
+	<meta property="og:description" content={socialPreviewDescription} />
+	<meta property="og:image" content={socialPreviewImageUrl} />
+	<meta property="og:image:secure_url" content={socialPreviewImageUrl} />
+	<meta property="og:image:type" content="image/jpeg" />
+	<meta property="og:image:width" content="1280" />
+	<meta property="og:image:height" content="640" />
+	<meta property="og:image:alt" content="JEWELS Conference 2026 Becoming event artwork" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content={`${conferenceName} | JEWELS Europe`} />
+	<meta name="twitter:description" content={socialPreviewDescription} />
+	<meta name="twitter:image" content={socialPreviewImageUrl} />
+	<meta name="twitter:image:alt" content="JEWELS Conference 2026 Becoming event artwork" />
 </svelte:head>
 
 <section class="jewels-page" aria-labelledby="jewels-hero-title">

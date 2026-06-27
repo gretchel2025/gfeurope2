@@ -11,6 +11,8 @@ test sends, site availability checks, or command-only housekeeping.
   success notice after saving.
 - Refined Jewels 2026 public page responsiveness, hero artwork placement, event details
   alignment, and added a proofread attendee stories carousel.
+- Added an explicit Jewels 2026 social preview image and Open Graph/Twitter metadata so
+  shared event links render the event artwork instead of falling back to the favicon.
 
 ## 2026-06-19
 
