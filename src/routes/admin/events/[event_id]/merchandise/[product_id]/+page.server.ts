@@ -12,6 +12,7 @@ import { merchProductImageStorage } from '$lib/server/http/services';
 export type ServerData = {
 	eventId: string;
 	product: MerchProduct;
+	productWasUpdated: boolean;
 };
 
 export const load: PageServerLoad = withKitErrors(async (event): Promise<ServerData> => {
@@ -26,7 +27,8 @@ export const load: PageServerLoad = withKitErrors(async (event): Promise<ServerD
 
 	return {
 		eventId,
-		product
+		product,
+		productWasUpdated: event.url.searchParams.get('updated') === 'true'
 	};
 });
 
@@ -66,6 +68,7 @@ export const actions: Actions = {
 			await adminRequestAuditActor(event)
 		);
 
-		throw redirect(303, adminRoutes(eventId).merchandise);
+		const params = new URLSearchParams({ updated: 'true' });
+		throw redirect(303, `${adminRoutes(eventId).merchandiseProduct(input.product_id)}?${params}`);
 	})
 };

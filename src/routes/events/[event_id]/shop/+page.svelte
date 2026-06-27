@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { ChevronLeft, ChevronRight } from 'lucide-svelte';
 	import type {
 		MerchReservationActionData,
 		MerchReservationFormErrors,
@@ -213,6 +214,55 @@
 				return false;
 			}
 
+			function readGalleryImages(gallery) {
+				try {
+					var parsed = JSON.parse(gallery.dataset.merchGalleryImages || '[]');
+					return Array.isArray(parsed)
+						? parsed.filter(function (url) {
+								return typeof url === 'string' && url.length > 0;
+							})
+						: [];
+				} catch {
+					return [];
+				}
+			}
+
+			function showGalleryImage(gallery, direction) {
+				var images = readGalleryImages(gallery);
+				if (images.length < 2) return;
+
+				var currentIndex = Number(gallery.dataset.merchGalleryIndex || '0');
+				var nextIndex = (currentIndex + direction + images.length) % images.length;
+				var productName = gallery.dataset.merchGalleryProductName || 'Product';
+				var image = gallery.querySelector('[data-merch-gallery-image]');
+				var counter = gallery.querySelector('[data-merch-gallery-counter]');
+
+				gallery.dataset.merchGalleryIndex = String(nextIndex);
+
+				if (image instanceof HTMLImageElement) {
+					image.src = images[nextIndex];
+					image.alt = productName + ' photo ' + (nextIndex + 1);
+				}
+
+				if (counter instanceof HTMLElement) {
+					counter.textContent = nextIndex + 1 + ' / ' + images.length;
+				}
+			}
+
+			document.addEventListener('click', function (event) {
+				var control =
+					event.target instanceof Element
+						? event.target.closest('[data-merch-gallery-prev], [data-merch-gallery-next]')
+						: null;
+				if (!(control instanceof HTMLElement)) return;
+
+				var gallery = control.closest('[data-merch-gallery]');
+				if (!(gallery instanceof HTMLElement)) return;
+
+				event.preventDefault();
+				showGalleryImage(gallery, control.hasAttribute('data-merch-gallery-next') ? 1 : -1);
+			});
+
 			document.addEventListener(
 				'click',
 				function (event) {
@@ -310,15 +360,50 @@
 								<article
 									class="overflow-hidden rounded-lg border border-white/12 bg-white/8 shadow-xl backdrop-blur"
 								>
-									{#if product.image_urls[0]}
+									{#if product.image_urls.length > 0}
 										<div
-											class="flex aspect-[4/3] w-full items-center justify-center bg-[#f4fbff] p-4"
+											class="relative flex aspect-[4/3] w-full items-center justify-center bg-[#f4fbff] p-4"
+											data-merch-gallery
+											data-merch-gallery-index="0"
+											data-merch-gallery-images={JSON.stringify(product.image_urls)}
+											data-merch-gallery-product-name={product.name}
 										>
 											<img
 												src={product.image_urls[0]}
-												alt={product.name}
+												alt={product.image_urls.length === 1
+													? product.name
+													: `${product.name} photo 1`}
 												class="h-full w-full object-contain"
+												data-merch-gallery-image
 											/>
+
+											{#if product.image_urls.length > 1}
+												<button
+													type="button"
+													class="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-900/10 bg-white/92 text-slate-950 shadow-md transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#f3c15f]"
+													aria-label={`Previous photo for ${product.name}`}
+													data-merch-gallery-prev
+												>
+													<ChevronLeft size={20} strokeWidth={2.5} aria-hidden="true" />
+												</button>
+
+												<button
+													type="button"
+													class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-900/10 bg-white/92 text-slate-950 shadow-md transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#f3c15f]"
+													aria-label={`Next photo for ${product.name}`}
+													data-merch-gallery-next
+												>
+													<ChevronRight size={20} strokeWidth={2.5} aria-hidden="true" />
+												</button>
+
+												<p
+													class="absolute bottom-3 right-3 rounded-full bg-slate-950/72 px-2.5 py-1 text-xs font-black text-white"
+													aria-live="polite"
+													data-merch-gallery-counter
+												>
+													1 / {product.image_urls.length}
+												</p>
+											{/if}
 										</div>
 									{:else}
 										<div

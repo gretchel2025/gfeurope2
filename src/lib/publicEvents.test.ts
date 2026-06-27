@@ -29,7 +29,7 @@ describe('public event registry', () => {
 		expect(getPublicEventPage('jewels2026')).toEqual(
 			expect.objectContaining({
 				component: 'jewels2026',
-				headerTitle: 'JEWELS CONFERENCE 2026',
+				headerTitle: 'Europe and UK\nJEWELS Conference 2026',
 				showBuyTickets: true,
 				status: 'active'
 			})

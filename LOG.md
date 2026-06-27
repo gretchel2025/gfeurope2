@@ -3,6 +3,15 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-06-27
+
+- Added a public shop image carousel so merchandise products with multiple photos can be
+  browsed one image at a time.
+- Kept admin merchandise updates on the product edit page and added an inline product-ID
+  success notice after saving.
+- Refined Jewels 2026 public page responsiveness, hero artwork placement, event details
+  alignment, and added a proofread attendee stories carousel.
+
 ## 2026-06-19
 
 - Added the Jewels 2026 public event registry, landing-page implementation, static

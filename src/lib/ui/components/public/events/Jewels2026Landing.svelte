@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { ChevronLeft, ChevronRight } from 'lucide-svelte';
 	import { jewelsEventDisplayTitlePlain } from '$lib/domain/eventDisplay';
 	import type { TicketTypeConfig } from '$lib/domain/ticketType';
 	import { publicRoutes } from '$lib/navigation/adminRoutes';
@@ -17,6 +18,25 @@
 	const scriptureReference = 'Romans 12:2 NIV';
 	const scriptureText =
 		"Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God's will is - his good, pleasing and perfect will.";
+	const conferenceStories = [
+		{
+			paragraphs: [
+				'Everything was organized well overall. Any improvements would just be small refinements to enhance the flow of the event. The content was insightful, and the worship was powerful.',
+				'Super blessed! Ang dami kong realizations and reminders. Thank you for creating a space where women can feel empowered, loved, and spiritually recharged. There was such a sense of sisterhood. It felt refreshing to be surrounded by women who uplift, inspire, and encourage each other.',
+				'Thank you, thank you, thank you, JEWELS Europe!'
+			]
+		},
+		{
+			paragraphs: [
+				'It was my first time attending, and I enjoyed being surrounded by VIPs (very inspiring persons) with knowledge and wisdom. It nourished and recharged my spiritual life, which cannot be moved or shaken. Thank you so much. ❤️❤️❤️ God bless us always!'
+			]
+		},
+		{
+			paragraphs: [
+				"Thank you so much, JEWELS Europe. ❤️ I'm so glad that I got invited to this event. I felt really seen and really close to God. I enjoyed all the talks and meeting nice new people."
+			]
+		}
+	];
 	const scheduleDays = [
 		{
 			day: 'Day 1 - Saturday',
@@ -34,16 +54,19 @@
 			items: [
 				{ time: '8:00 AM', title: 'Breakfast and Morning Socials' },
 				{ time: '9:00 AM', title: 'Conference Resumes' },
-				{ time: '12:00 PM', title: 'Conference Closing' }
+				{ time: '12:00 PM', title: 'Conference Ends' }
 			]
 		}
 	];
 	let now = Date.now();
+	let activeStoryIndex = 0;
+	let storiesRoot: HTMLElement | undefined;
 
 	$: publicNav = publicRoutes($page.params.event_id);
 	$: bookingHref = `${publicNav.newBooking}?ticket_type=STANDARD`;
 	$: conferenceTicket = ticketTypes.find((ticket) => ticket.ticket_type_id === 'STANDARD');
 	$: ticketPrice = formatTicketPrice(conferenceTicket);
+	$: activeConferenceStory = conferenceStories[activeStoryIndex];
 	$: timeRemaining = Math.max(eventStart.getTime() - now, 0);
 	$: countdownDays = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
 	$: countdownHours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
@@ -54,8 +77,12 @@
 		const interval = window.setInterval(() => {
 			now = Date.now();
 		}, 1000);
+		const cleanupStoryControls = bindStoryControls();
 
-		return () => window.clearInterval(interval);
+		return () => {
+			window.clearInterval(interval);
+			cleanupStoryControls();
+		};
 	});
 
 	function formatTicketPrice(ticket?: TicketTypeConfig) {
@@ -66,6 +93,43 @@
 
 	function formatCountdown(value: number) {
 		return value.toString().padStart(2, '0');
+	}
+
+	function showPreviousStory() {
+		activeStoryIndex = (activeStoryIndex - 1 + conferenceStories.length) % conferenceStories.length;
+	}
+
+	function showNextStory() {
+		activeStoryIndex = (activeStoryIndex + 1) % conferenceStories.length;
+	}
+
+	function bindStoryControls() {
+		if (!storiesRoot) return () => {};
+
+		const previousButton = storiesRoot.querySelector<HTMLButtonElement>(
+			'[data-story-action="previous"]'
+		);
+		const nextButton = storiesRoot.querySelector<HTMLButtonElement>('[data-story-action="next"]');
+		const dotButtons = Array.from(
+			storiesRoot.querySelectorAll<HTMLButtonElement>('[data-story-index]')
+		);
+		const cleanupDotButtons = dotButtons.map((button) => {
+			const storyIndex = Number.parseInt(button.dataset.storyIndex ?? '0', 10);
+			const handleClick = () => {
+				activeStoryIndex = storyIndex;
+			};
+			button.addEventListener('click', handleClick);
+			return () => button.removeEventListener('click', handleClick);
+		});
+
+		previousButton?.addEventListener('click', showPreviousStory);
+		nextButton?.addEventListener('click', showNextStory);
+
+		return () => {
+			previousButton?.removeEventListener('click', showPreviousStory);
+			nextButton?.removeEventListener('click', showNextStory);
+			cleanupDotButtons.forEach((cleanupDotButton) => cleanupDotButton());
+		};
 	}
 </script>
 
@@ -209,6 +273,61 @@
 				</a>
 			</article>
 		</section>
+
+		<section
+			class="conference-stories-section"
+			aria-labelledby="conference-stories-title"
+			bind:this={storiesRoot}
+		>
+			<article class="stories-card">
+				<div class="stories-heading">
+					<p class="jewels-eyebrow">From last year's conference</p>
+					<h2 id="conference-stories-title">JEWELS Conference Stories</h2>
+				</div>
+
+				<div class="stories-carousel" aria-live="polite">
+					<blockquote class="story-quote">
+						{#each activeConferenceStory.paragraphs as paragraph, index}
+							<p>
+								{#if index === 0}"{/if}{paragraph}{#if index === activeConferenceStory.paragraphs.length - 1}"{/if}
+							</p>
+						{/each}
+					</blockquote>
+
+					<div class="stories-controls" aria-label="JEWELS Conference Stories controls">
+						<button
+							type="button"
+							class="story-arrow"
+							aria-label="Previous story"
+							data-story-action="previous"
+						>
+							<ChevronLeft size={20} strokeWidth={2.5} aria-hidden="true" />
+						</button>
+						<div class="story-dots" aria-label="Choose feedback">
+							{#each conferenceStories as story, index}
+								<button
+									type="button"
+									class:active={activeStoryIndex === index}
+									aria-label={`Show feedback ${index + 1} (${story.paragraphs.length} ${
+										story.paragraphs.length === 1 ? 'paragraph' : 'paragraphs'
+									})`}
+									aria-current={activeStoryIndex === index ? 'true' : undefined}
+									data-story-index={index}
+								></button>
+							{/each}
+						</div>
+						<button
+							type="button"
+							class="story-arrow"
+							aria-label="Next story"
+							data-story-action="next"
+						>
+							<ChevronRight size={20} strokeWidth={2.5} aria-hidden="true" />
+						</button>
+					</div>
+				</div>
+			</article>
+		</section>
 	</div>
 </section>
 
@@ -237,6 +356,7 @@
 	.scripture-card,
 	.art-card,
 	.story-card,
+	.stories-card,
 	.jewels-ticket-card,
 	.fact-grid article {
 		border: 1px solid rgba(189, 48, 47, 0.12);
@@ -266,14 +386,16 @@
 		font-weight: 800;
 		letter-spacing: 0;
 		margin: 0;
+		overflow-wrap: break-word;
+		text-wrap: balance;
 	}
 
 	h1 {
 		color: #bd302f;
-		font-size: 2.85rem;
-		line-height: 0.94;
+		font-size: clamp(2rem, 8.5vw, 2.85rem);
+		line-height: 0.98;
 		margin-top: 1rem;
-		max-width: 16rem;
+		max-width: min(100%, 20rem);
 	}
 
 	.scripture-card p:last-child,
@@ -287,10 +409,7 @@
 	}
 
 	.art-card {
-		background:
-			linear-gradient(180deg, rgba(210, 192, 168, 0.3), rgba(210, 192, 168, 0.84)),
-			linear-gradient(90deg, rgba(210, 192, 168, 0.86), rgba(210, 192, 168, 0.2)),
-			url('/events/jewels2026/bg.png') center top / cover no-repeat;
+		background: url('/events/jewels2026/bg.png') center top / cover no-repeat;
 		display: flex;
 		flex-direction: column;
 		gap: 1.25rem;
@@ -301,7 +420,11 @@
 	}
 
 	.hero-brand {
-		margin-top: clamp(3.25rem, 15vw, 8rem);
+		align-self: center;
+		display: flex;
+		justify-content: center;
+		margin-inline: auto;
+		margin-top: clamp(5.5rem, 18vw, 9rem);
 		max-width: 52rem;
 		width: 100%;
 	}
@@ -310,6 +433,8 @@
 		display: block;
 		filter: drop-shadow(0 12px 34px rgba(71, 50, 42, 0.22));
 		height: auto;
+		margin-inline: auto;
+		max-width: 100%;
 		width: min(100%, 52rem);
 	}
 
@@ -332,9 +457,11 @@
 		flex-direction: column;
 		gap: 0.35rem;
 		justify-content: center;
+		justify-self: end;
 		max-width: min(100%, 31rem);
 		padding: 0.85rem 1rem;
 		text-align: right;
+		width: min(100%, 31rem);
 	}
 
 	.event-strip p {
@@ -374,7 +501,7 @@
 	.countdown-grid strong {
 		color: #bd302f;
 		font-family: Georgia, 'Times New Roman', serif;
-		font-size: 1.85rem;
+		font-size: clamp(1.55rem, 6.8vw, 1.85rem);
 		font-weight: 800;
 		line-height: 0.95;
 	}
@@ -439,10 +566,10 @@
 
 	.story-card h2 {
 		color: #9f2f2e;
-		font-size: 2.8rem;
-		line-height: 0.98;
+		font-size: clamp(2rem, 8.4vw, 2.8rem);
+		line-height: 1.02;
 		margin-top: 1rem;
-		max-width: 42rem;
+		max-width: min(100%, 42rem);
 	}
 
 	.story-copy {
@@ -463,6 +590,101 @@
 		margin-top: 1.05rem;
 	}
 
+	.conference-stories-section {
+		margin-top: 1.5rem;
+	}
+
+	.stories-card {
+		background: rgba(255, 248, 241, 0.92);
+		padding: 2rem;
+	}
+
+	.stories-heading h2 {
+		color: #9f2f2e;
+		font-size: clamp(2rem, 8vw, 3rem);
+		line-height: 1;
+		margin-top: 0.85rem;
+		max-width: min(100%, 36rem);
+	}
+
+	.stories-carousel {
+		display: grid;
+		gap: 1.5rem;
+		margin-top: 1.5rem;
+	}
+
+	.story-quote {
+		margin: 0;
+		max-width: 60rem;
+	}
+
+	.story-quote p {
+		color: #746056;
+		font-family: Montserrat, Arial, sans-serif;
+		font-size: clamp(1rem, 2.5vw, 1.15rem);
+		font-style: italic;
+		font-weight: 600;
+		line-height: 1.75;
+		margin: 0;
+	}
+
+	.story-quote p + p {
+		margin-top: 1rem;
+	}
+
+	.stories-controls {
+		align-items: center;
+		display: flex;
+		gap: 0.85rem;
+		justify-content: space-between;
+	}
+
+	.story-arrow {
+		align-items: center;
+		background: #bd302f;
+		border: 1px solid rgba(159, 47, 46, 0.2);
+		border-radius: 999px;
+		color: #fff8f1;
+		display: inline-flex;
+		flex: 0 0 auto;
+		height: 2.75rem;
+		justify-content: center;
+		padding: 0;
+		width: 2.75rem;
+	}
+
+	.story-arrow:hover {
+		background: #9f2f2e;
+	}
+
+	.story-arrow:focus-visible,
+	.story-dots button:focus-visible {
+		outline: 3px solid rgba(189, 48, 47, 0.28);
+		outline-offset: 3px;
+	}
+
+	.story-dots {
+		align-items: center;
+		display: flex;
+		flex: 1 1 auto;
+		gap: 0.55rem;
+		justify-content: center;
+	}
+
+	.story-dots button {
+		background: rgba(189, 48, 47, 0.24);
+		border: 0;
+		border-radius: 999px;
+		height: 0.7rem;
+		padding: 0;
+		width: 0.7rem;
+	}
+
+	.story-dots button.active {
+		background: #bd302f;
+		width: 1.8rem;
+	}
+
 	.jewels-ticket-card {
 		background: rgba(255, 248, 241, 0.9);
 		display: flex;
@@ -471,15 +693,15 @@
 	}
 
 	.jewels-ticket-card h2 {
-		font-size: 2.4rem;
-		line-height: 0.98;
+		font-size: clamp(1.85rem, 7vw, 2.4rem);
+		line-height: 1;
 		margin-top: 1rem;
 	}
 
 	.ticket-price {
 		color: #bd302f;
 		font-family: Georgia, 'Times New Roman', serif;
-		font-size: 4.3rem;
+		font-size: clamp(3rem, 14vw, 4.3rem);
 		font-weight: 800;
 		line-height: 1;
 		margin: 1.6rem 0 0;
@@ -549,7 +771,7 @@
 	}
 
 	.fact-grid h3 {
-		font-size: 1.65rem;
+		font-size: clamp(1.35rem, 5.6vw, 1.65rem);
 		line-height: 1.08;
 		margin-top: 0.85rem;
 	}
@@ -583,10 +805,11 @@
 	.schedule-day h4 {
 		color: #9f2f2e;
 		font-family: Georgia, 'Times New Roman', serif;
-		font-size: 1.35rem;
+		font-size: clamp(1.15rem, 4.8vw, 1.35rem);
 		font-weight: 800;
 		line-height: 1;
 		margin: 0;
+		overflow-wrap: break-word;
 	}
 
 	.schedule-day span {
@@ -661,6 +884,12 @@
 		text-underline-offset: 0.2em;
 	}
 
+	@media (min-width: 40rem) {
+		.hero-brand img {
+			width: min(86%, 46rem);
+		}
+	}
+
 	@media (min-width: 48rem) {
 		.jewels-page {
 			padding: 2rem 2rem 7rem;
@@ -669,6 +898,7 @@
 		.scripture-card,
 		.art-card,
 		.story-card,
+		.stories-card,
 		.jewels-ticket-card {
 			padding: 2.25rem;
 		}
@@ -705,6 +935,21 @@
 			margin-top: 2.4rem;
 		}
 
+		.conference-stories-section {
+			margin-top: 2.4rem;
+		}
+
+		.stories-card {
+			align-items: start;
+			column-gap: 2rem;
+			display: grid;
+			grid-template-columns: minmax(15rem, 0.52fr) minmax(0, 1fr);
+		}
+
+		.stories-carousel {
+			margin-top: 0;
+		}
+
 		.fact-grid {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
@@ -732,7 +977,7 @@
 		}
 
 		.story-card h2 {
-			font-size: 3.25rem;
+			font-size: clamp(2.8rem, 4.5vw, 3.25rem);
 		}
 	}
 
@@ -740,34 +985,18 @@
 		.scripture-card,
 		.art-card,
 		.story-card,
+		.stories-card,
 		.jewels-ticket-card,
 		.fact-grid article {
 			padding: 1.35rem;
-		}
-
-		h1 {
-			font-size: 2.35rem;
-			max-width: 14rem;
 		}
 
 		.scripture-card p:last-child {
 			font-size: 1.12rem;
 		}
 
-		.story-card h2 {
-			font-size: 2.25rem;
-		}
-
 		.hero-brand {
-			margin-top: 3rem;
-		}
-
-		.jewels-ticket-card h2 {
-			font-size: 2rem;
-		}
-
-		.ticket-price {
-			font-size: 3.4rem;
+			margin-top: clamp(8.25rem, 34vw, 9.5rem);
 		}
 	}
 </style>

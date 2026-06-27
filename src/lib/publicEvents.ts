@@ -46,7 +46,7 @@ const publicEventPages: Record<PublicEventPageId, PublicEventPageConfig> = {
 		status: 'active',
 		component: 'jewels2026',
 		shellVariant: 'jewels',
-		headerTitle: jewelsEventDisplayTitle,
+		headerTitle: 'Europe and UK\nJEWELS Conference 2026',
 		footerKicker: 'Becoming in Malta',
 		footerTitle: jewelsEventDisplayTitle,
 		footerCopyrightYear: 2026,
