@@ -17,6 +17,8 @@ test sends, site availability checks, or command-only housekeeping.
   scrapers receive explicit Open Graph image metadata.
 - Routed Jewels 2026 social scrapers through a Netlify Edge Function so production
   prerendering cannot strip the event Open Graph image metadata.
+- Updated the Jewels 2026 public venue map and Google Maps link to the St. Julian's
+  Parish Church location.
 
 ## 2026-06-19
 

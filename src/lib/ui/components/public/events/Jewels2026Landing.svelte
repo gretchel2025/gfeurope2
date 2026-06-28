@@ -11,9 +11,9 @@
 	const eventDate = '31 Oct - 1 Nov, 2026';
 	const eventStart = new Date('2026-10-31T13:00:00+01:00');
 	const eventLocation = "St Julian's, Lapsi Street, Malta";
-	const googleMapsQuery = encodeURIComponent(eventLocation);
-	const googleMapsEmbedUrl = `https://www.google.com/maps?q=${googleMapsQuery}&output=embed`;
-	const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${googleMapsQuery}`;
+	const googleMapsEmbedUrl =
+		'https://www.google.com/maps?q=35.9178579%2C14.4896743&z=17&output=embed';
+	const googleMapsUrl = 'https://maps.app.goo.gl/tDayz58TrWn9efDb8';
 	const conferenceName = jewelsEventDisplayTitlePlain;
 	const scriptureReference = 'Romans 12:2 NIV';
 	const scriptureText =
@@ -280,7 +280,7 @@
 				<div class="location-map-frame">
 					<iframe
 						src={googleMapsEmbedUrl}
-						title="Map of St Julian's, Lapsi Street, Malta"
+						title="Map of St. Julian's Parish Church, Malta"
 						loading="lazy"
 						referrerpolicy="no-referrer-when-downgrade"
 					></iframe>
