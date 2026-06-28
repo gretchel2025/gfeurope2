@@ -13,6 +13,8 @@ test sends, site availability checks, or command-only housekeeping.
   alignment, and added a proofread attendee stories carousel.
 - Added an explicit Jewels 2026 social preview image and Open Graph/Twitter metadata so
   shared event links render the event artwork instead of falling back to the favicon.
+- Added a crawler-safe Jewels 2026 social preview response so Facebook and messenger
+  scrapers receive explicit Open Graph image metadata.
 
 ## 2026-06-19
 
