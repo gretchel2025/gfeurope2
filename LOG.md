@@ -15,6 +15,8 @@ test sends, site availability checks, or command-only housekeeping.
   shared event links render the event artwork instead of falling back to the favicon.
 - Added a crawler-safe Jewels 2026 social preview response so Facebook and messenger
   scrapers receive explicit Open Graph image metadata.
+- Routed Jewels 2026 social scrapers through a Netlify Edge Function so production
+  prerendering cannot strip the event Open Graph image metadata.
 
 ## 2026-06-19
 
