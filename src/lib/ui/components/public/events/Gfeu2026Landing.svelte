@@ -26,6 +26,48 @@
 	let ticketsSection: HTMLElement;
 	const eventDate = new Date('2026-10-03T12:00:00+01:00');
 	const now = new Date();
+	const grandFeastPlusItinerary = [
+		{
+			time: '7:30',
+			duration: '00:30',
+			activity: "Wait time. Call time 8AM at St. Helen's Hotel."
+		},
+		{
+			time: '8:00',
+			duration: '03:00',
+			activity: 'Travel time by private bus.'
+		},
+		{
+			time: '11:00',
+			duration: '1:30',
+			activity: 'Mass and visit the Basilica of Our Lady of Knock. Light snacks will be provided.'
+		},
+		{
+			time: '12:30',
+			duration: '1:00',
+			activity: 'Travel time by private bus.'
+		},
+		{
+			time: '13:30',
+			duration: '3:00',
+			activity:
+				'Lunch and free time in Lough Key Forest & Activity Park. Lunch is not provided, but there are places to buy food.',
+			link: {
+				href: 'https://loughkey.ie/',
+				label: 'See things to do'
+			}
+		},
+		{
+			time: '16:30',
+			duration: '02:30',
+			activity: 'Travel Time. Private Bus'
+		},
+		{
+			time: '19:00',
+			duration: '',
+			activity: "Back at St. Helen's Hotel."
+		}
+	];
 	const standardTicket = ticketTypes.find((ticket) => ticket.ticket_type_id === 'STANDARD');
 	const grandFeastPlusTicket = ticketTypes.find(
 		(ticket) => ticket.ticket_type_id === 'GRAND_FEAST_PLUS'
@@ -266,6 +308,50 @@
 					>
 						View on Google Maps
 					</a>
+				</div>
+			</div>
+
+			<div class="conference-card mb-8 p-5">
+				<div class="mb-5 flex items-start gap-4">
+					<div class="text-2xl text-[#f3c15f]">🚌</div>
+					<div>
+						<h4 class="text-lg font-black text-[#f3c15f]">GrandFeast Plus Itinerary</h4>
+						<p class="text-white">October 4, Sunday</p>
+						<p class="text-sm text-[#fff3df]/70">For GrandFeast Plus ticket holders</p>
+					</div>
+				</div>
+
+				<div class="space-y-3">
+					{#each grandFeastPlusItinerary as item}
+						<div
+							class="grid gap-2 border-t border-white/10 pt-3 text-[#fff3df]/85 sm:grid-cols-[5rem_5rem_minmax(0,1fr)] sm:gap-4"
+						>
+							<div>
+								<p class="text-xs font-black uppercase text-[#f3c15f]/80">Time</p>
+								<p class="font-black text-white">{item.time}</p>
+							</div>
+							<div>
+								<p class="text-xs font-black uppercase text-[#f3c15f]/80">Duration</p>
+								<p class="font-semibold text-white">{item.duration || 'Arrival'}</p>
+							</div>
+							<div>
+								<p class="text-xs font-black uppercase text-[#f3c15f]/80">Activity</p>
+								<p>
+									{item.activity}
+									{#if item.link}
+										<a
+											href={item.link.href}
+											rel="external nofollow noopener"
+											target="_blank"
+											class="ml-1 font-semibold text-[#f3c15f] underline underline-offset-4 transition hover:text-white"
+										>
+											{item.link.label}
+										</a>
+									{/if}
+								</p>
+							</div>
+						</div>
+					{/each}
 				</div>
 			</div>
 

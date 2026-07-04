@@ -3,6 +3,10 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-07-04
+
+- Added the GrandFeast Plus October 4 itinerary to the GFEU 2026 public event details.
+
 ## 2026-06-27
 
 - Added a public shop image carousel so merchandise products with multiple photos can be
