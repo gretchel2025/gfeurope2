@@ -82,8 +82,15 @@ test.describe('mutating booking canary', () => {
 		await expect(page.getByText(booking.email)).toBeVisible();
 		await expect(page.getByText('UNPAID')).toBeVisible();
 		await expect(page.getByText('Confirmation Email')).toBeVisible();
-		await page.getByRole('link', { name: 'Load proof preview' }).click();
-		await expect(page.getByTestId('payment-proof-pdf-preview')).toBeVisible();
+		const loadProofPreviewLink = page.getByRole('link', { name: 'Load proof preview' });
+		await expect(loadProofPreviewLink).toHaveAttribute('href', /show_payment_proof_image=true/);
+		await Promise.all([
+			page.waitForURL(/show_payment_proof_image=true/, { timeout: 15_000 }),
+			loadProofPreviewLink.click()
+		]);
+		await expect(page.getByTestId('payment-proof-pdf-preview')).toBeVisible({
+			timeout: 15_000
+		});
 		const proofLink = page.getByRole('link', { name: 'Open proof in new tab' });
 		await expect(proofLink).toBeVisible();
 		await expect(proofLink).toHaveAttribute('href', /\/payment-proof$/);
