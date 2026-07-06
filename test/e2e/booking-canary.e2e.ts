@@ -52,7 +52,7 @@ test.describe('mutating booking canary', () => {
 		await page.getByLabel('Country*').fill('Ireland');
 		await page.getByRole('option', { name: 'Ireland' }).click();
 		await page.getByLabel('City*').fill('Dublin');
-		await page.getByRole('option', { name: 'Dublin' }).click();
+		await page.getByRole('option', { name: 'Dublin', exact: true }).click();
 		await page.getByRole('button', { name: 'Continue' }).click();
 
 		await page.getByLabel('Guest 1').fill(booking.name);
