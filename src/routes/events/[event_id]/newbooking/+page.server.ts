@@ -9,6 +9,7 @@ import { getEventContext } from '$lib/server/http/eventContext';
 import { publicRequestAuditActor } from '$lib/server/http/auditActor';
 import { parseCreateBookingForm, parsePaymentProofFile } from '$lib/server/http/forms';
 import { kitAction, withKitErrors } from '$lib/server/http/handlers';
+import { getCountryOptions, type CountryOption } from '$lib/server/http/locationOptions';
 import {
 	createEventServices,
 	paymentProofStorage,
@@ -23,6 +24,7 @@ export type BookingTicketOption = TicketTypeConfig & {
 export type ServerData = {
 	event: Event;
 	ticketOptions: BookingTicketOption[];
+	countryOptions: CountryOption[];
 };
 
 export const load: PageServerLoad = withKitErrors(async (requestEvent): Promise<ServerData> => {
@@ -54,7 +56,8 @@ export const load: PageServerLoad = withKitErrors(async (requestEvent): Promise<
 
 	return {
 		event,
-		ticketOptions
+		ticketOptions,
+		countryOptions: getCountryOptions()
 	};
 });
 

@@ -10,48 +10,19 @@
 
 	type CountryOption = {
 		name: string;
+		isoCode: string;
+		searchKey: string;
+	};
+	type CityOption = {
+		label: string;
+		value: string;
 		searchKey: string;
 	};
 
 	const MAX_TYPEAHEAD_OPTIONS = 40;
 	const steps = ['Ticket', 'Details', 'Guests', 'Review'];
 	const now = new Date();
-	const countrySuggestions = [
-		'Ireland',
-		'United Kingdom',
-		'Germany',
-		'Norway',
-		'France',
-		'Netherlands',
-		'Belgium',
-		'Spain',
-		'Italy',
-		'Sweden',
-		'Denmark',
-		'Finland',
-		'Portugal',
-		'Poland',
-		'Switzerland',
-		'Austria',
-		'Czech Republic',
-		'United States',
-		'Canada'
-	];
-	const citySuggestionsByCountry = new Map<string, string[]>([
-		['ireland', ['Dublin', 'Cork', 'Galway', 'Limerick', 'Waterford']],
-		['united kingdom', ['London', 'Birmingham', 'Manchester', 'Leeds', 'Glasgow', 'Cardiff']],
-		['germany', ['Berlin', 'Hamburg', 'Munich', 'Cologne', 'Frankfurt']],
-		['norway', ['Oslo', 'Bergen', 'Trondheim', 'Stavanger']],
-		['france', ['Paris', 'Lyon', 'Marseille', 'Toulouse']],
-		['netherlands', ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht']],
-		['belgium', ['Brussels', 'Antwerp', 'Ghent', 'Bruges']],
-		['spain', ['Madrid', 'Barcelona', 'Valencia', 'Seville']],
-		['italy', ['Rome', 'Milan', 'Naples', 'Turin']]
-	]);
-	const countries: CountryOption[] = countrySuggestions.map((name) => ({
-		name,
-		searchKey: normalizeTypeaheadValue(name)
-	}));
+	const countries: CountryOption[] = data.countryOptions;
 	$: publicNav = publicRoutes($page.params.event_id);
 	$: paymentDetails = getPaymentDetailsForEvent(data.event.event_id);
 	$: eventDisplayTitle = getBookingDisplayTitle(data.event);
@@ -71,6 +42,9 @@
 	let email = '';
 	let countrySearch = '';
 	let citySearch = '';
+	let cityOptions: CityOption[] = [];
+	let cityOptionsQueryKey = '';
+	let cityOptionsRequestToken = 0;
 	let selectedCountry = '';
 	let selectedCity = '';
 	let countryFieldTouched = false;
@@ -103,7 +77,17 @@
 	$: bookingLocation =
 		selectedCityName && countryName ? `${selectedCityName}, ${countryName}` : selectedCityName;
 	$: filteredCountries = filterCountryOptions(countrySearch, countries);
-	$: filteredCities = filterCityOptions(citySearch, countryName);
+	$: filteredCities = filterCityOptions(citySearch, cityOptions);
+	$: {
+		const queryKey = `${countryName}\n${citySearch}`;
+		if (!countryName) {
+			cityOptions = [];
+			cityOptionsQueryKey = '';
+		} else if (queryKey !== cityOptionsQueryKey) {
+			cityOptionsQueryKey = queryKey;
+			void loadCityOptions(countryName, citySearch);
+		}
+	}
 	$: emailValidationMessage = getEmailValidationMessage(email, detailsStepSubmitted);
 	$: countryValidationMessage = getCountryValidationMessage(
 		countrySearch,
@@ -158,14 +142,8 @@
 			.slice(0, MAX_TYPEAHEAD_OPTIONS);
 	}
 
-	function filterCityOptions(search: string, country: string) {
+	function filterCityOptions(search: string, cityOptions: CityOption[]) {
 		const normalizedSearch = normalizeTypeaheadValue(search);
-		const cityOptions =
-			citySuggestionsByCountry.get(normalizeTypeaheadValue(country))?.map((city) => ({
-				label: city,
-				value: city,
-				searchKey: normalizeTypeaheadValue(city)
-			})) ?? [];
 		const options = normalizedSearch
 			? cityOptions.filter((city) => city.searchKey.includes(normalizedSearch))
 			: cityOptions;
@@ -190,6 +168,30 @@
 		return value.trim().toLowerCase();
 	}
 
+	async function loadCityOptions(country: string, search: string) {
+		const requestToken = ++cityOptionsRequestToken;
+		const params = new URLSearchParams({
+			country,
+			search
+		});
+
+		try {
+			const response = await fetch(`${publicNav.newBooking}/location-options?${params}`);
+			if (requestToken !== cityOptionsRequestToken) return;
+			if (!response.ok) {
+				cityOptions = [];
+				return;
+			}
+
+			const payload = (await response.json()) as { cities?: CityOption[] };
+			cityOptions = payload.cities ?? [];
+		} catch {
+			if (requestToken === cityOptionsRequestToken) {
+				cityOptions = [];
+			}
+		}
+	}
+
 	function getAvailableTicketType(value: string) {
 		const option = ticketOptions.find((candidate) => candidate.ticket_type_id === value);
 		if (!option || option.available < 1) return '';
@@ -202,6 +204,7 @@
 			selectedCountry = '';
 			selectedCity = '';
 			citySearch = '';
+			cityOptions = [];
 		}
 		showCountryOptions = true;
 		showCityOptions = false;
@@ -219,6 +222,7 @@
 		if (normalizeTypeaheadValue(selectedCountry) !== normalizeTypeaheadValue(name)) {
 			citySearch = '';
 			selectedCity = '';
+			cityOptions = [];
 		}
 		countrySearch = name;
 		selectedCountry = name;
