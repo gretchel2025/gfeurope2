@@ -9,6 +9,11 @@
 import { ValidationError } from '$lib/application/errors';
 import type { CreateBookingInput } from '$lib/domain/booking';
 import {
+	allowedPaymentProofTypes,
+	maxPaymentProofSizeBytes,
+	maxPaymentProofSizeLabel
+} from '$lib/domain/paymentProof';
+import {
 	isMerchProductCategory,
 	merchProductCategories,
 	type CreateMerchProductInput,
@@ -16,8 +21,6 @@ import {
 	type UpdateMerchProductInput
 } from '$lib/domain/merchandise';
 
-const allowedPaymentProofTypes = new Set(['application/pdf', 'image/png', 'image/jpeg']);
-const maxPaymentProofSizeBytes = 10 * 1024 * 1024;
 const allowedProductImageTypes = new Set(['image/png', 'image/jpeg', 'image/webp']);
 const maxProductImageSizeBytes = 5 * 1024 * 1024;
 const maxProductImages = 5;
@@ -225,7 +228,7 @@ export function parsePaymentProofFile(formData: FormData): File {
 	}
 
 	if (value.size > maxPaymentProofSizeBytes) {
-		throw new ValidationError('payment_proof must be 10 MB or smaller');
+		throw new ValidationError(`payment_proof must be ${maxPaymentProofSizeLabel} or smaller`);
 	}
 
 	if (!allowedPaymentProofTypes.has(value.type)) {

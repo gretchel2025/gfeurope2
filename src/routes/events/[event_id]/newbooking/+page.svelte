@@ -2,6 +2,11 @@
 	import { page } from '$app/stores';
 	import { getEventDisplayTitle, getEventDisplayTitlePlain } from '$lib/domain/eventDisplay';
 	import { getPaymentDetailsForEvent } from '$lib/domain/paymentDetails';
+	import {
+		allowedPaymentProofTypes,
+		maxPaymentProofSizeBytes,
+		maxPaymentProofSizeLabel
+	} from '$lib/domain/paymentProof';
 	import { computeTicketPricing, isEarlyBirdDiscountActive } from '$lib/domain/ticketType';
 	import { publicRoutes } from '$lib/navigation/adminRoutes';
 	import type { BookingTicketOption, ServerData } from './+page.server';
@@ -346,14 +351,14 @@
 			return;
 		}
 
-		if (!['application/pdf', 'image/png', 'image/jpeg'].includes(file.type)) {
+		if (!allowedPaymentProofTypes.has(file.type)) {
 			paymentProofError = 'Upload a PDF, PNG, JPG, or JPEG proof of payment.';
 			input.value = '';
 			return;
 		}
 
-		if (file.size > 10 * 1024 * 1024) {
-			paymentProofError = 'Proof of payment must be 10 MB or smaller.';
+		if (file.size > maxPaymentProofSizeBytes) {
+			paymentProofError = `Proof of payment must be ${maxPaymentProofSizeLabel} or smaller.`;
 			input.value = '';
 			return;
 		}
@@ -872,7 +877,7 @@
 										on:change={handlePaymentProofChange}
 									/>
 									<p class="text-sm text-[#fff3df]/65">
-										Accepted files: PDF, PNG, JPG, JPEG. Maximum 10 MB.
+										Accepted files: PDF, PNG, JPG, JPEG. Maximum {maxPaymentProofSizeLabel}.
 									</p>
 									{#if paymentProofFileName}
 										<p class="text-sm font-bold text-[#f3c15f]">

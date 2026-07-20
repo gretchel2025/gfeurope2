@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { ValidationError } from '$lib/application/errors';
+import { maxPaymentProofSizeBytes, maxPaymentProofSizeLabel } from '$lib/domain/paymentProof';
 import {
 	parseCreateMerchProductForm,
 	parseCreateMerchReservationForm,
-	parseMerchProductImageFiles
+	parseMerchProductImageFiles,
+	parsePaymentProofFile
 } from '$lib/server/http/forms';
 
 function imageFile(name: string, type = 'image/png'): File {
@@ -81,6 +83,32 @@ describe('merchandise form parsing', () => {
 				}
 			]
 		});
+	});
+});
+
+describe('payment proof form parsing', () => {
+	it('accepts payment proof files at the configured upload limit', () => {
+		const formData = new FormData();
+		const file = new File([new Uint8Array(maxPaymentProofSizeBytes)], 'proof.pdf', {
+			type: 'application/pdf'
+		});
+		formData.append('payment_proof', file);
+
+		expect(parsePaymentProofFile(formData)).toBe(file);
+	});
+
+	it('rejects payment proof files over the configured upload limit', () => {
+		const formData = new FormData();
+		formData.append(
+			'payment_proof',
+			new File([new Uint8Array(maxPaymentProofSizeBytes + 1)], 'proof.pdf', {
+				type: 'application/pdf'
+			})
+		);
+
+		expect(() => parsePaymentProofFile(formData)).toThrow(
+			`payment_proof must be ${maxPaymentProofSizeLabel} or smaller`
+		);
 	});
 });
 

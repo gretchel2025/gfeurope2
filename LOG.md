@@ -3,6 +3,11 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-07-20
+
+- Reduced public booking proof-of-payment upload validation to 4 MB so oversized files
+  are rejected before hitting Netlify's function payload limit.
+
 ## 2026-07-06
 
 - Replaced the public booking country/city typeahead allowlist with Europe/UK options
