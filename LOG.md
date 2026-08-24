@@ -5,6 +5,8 @@ test sends, site availability checks, or command-only housekeeping.
 
 ## 2026-08-24
 
+- Restored the paused `77 Labs Test` Supabase project so the live-dev Netlify functions
+  can bootstrap against the configured development database again.
 - Updated the GFEU 2026 public message signature title to `Feast Builder`.
 
 ## 2026-07-20
