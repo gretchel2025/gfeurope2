@@ -254,7 +254,7 @@
 				<div class="pt-6 text-sm text-[#fff3df]/70">
 					<p>With open arms,</p>
 					<p class="font-semibold text-white">Bro Lando Patolilic</p>
-					<p>Feast Europe and UK District Builder</p>
+					<p>Feast Builder</p>
 				</div>
 			</div>
 		</div>

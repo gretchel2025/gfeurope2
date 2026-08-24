@@ -3,6 +3,10 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-08-24
+
+- Updated the GFEU 2026 public message signature title to `Feast Builder`.
+
 ## 2026-07-20
 
 - Reduced public booking proof-of-payment upload validation to 4 MB so oversized files
