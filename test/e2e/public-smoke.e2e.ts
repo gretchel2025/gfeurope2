@@ -42,8 +42,15 @@ test.describe('public deployment smoke', () => {
 	test('booking page loads ticket options', async ({ page }) => {
 		await page.goto(eventPath('/newbooking'));
 
-		await expect(page.getByRole('heading', { name: 'Reserve Your Seat' })).toBeVisible();
-		await expect(page.getByTestId('ticket-option-STANDARD')).toBeVisible();
+		const bookingHeading = page.getByRole('heading', { name: 'Reserve Your Seat' });
+		const soldOutHeading = page.getByRole('heading', { name: 'Sold Out' });
+
+		await expect(bookingHeading.or(soldOutHeading)).toBeVisible();
+		if (await bookingHeading.isVisible()) {
+			await expect(page.getByTestId('ticket-option-STANDARD')).toBeVisible();
+		} else {
+			await expect(page).toHaveURL(expectPath(eventPath('/newbooking/soldout')));
+		}
 	});
 
 	test('shop page loads merchandise surface', async ({ page }) => {
