@@ -3,6 +3,13 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-09-03
+
+- Set the production `gfeu2026` GrandFeast Plus ticket counter available count to `0`,
+  making public booking redirect to the sold-out page.
+- Added DB-backed sold-out tags to the GFEU 2026 public ticket cards when a ticket
+  counter has `available=0`.
+
 ## 2026-08-24
 
 - Restored the paused `77 Labs Test` Supabase project so the live-dev Netlify functions

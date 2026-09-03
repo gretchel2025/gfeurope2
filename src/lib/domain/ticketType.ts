@@ -25,6 +25,10 @@ export type TicketTypeConfig = {
 	is_active: boolean;
 };
 
+export type PublicTicketTypeConfig = TicketTypeConfig & {
+	available: number;
+};
+
 export type TicketPricing = {
 	unitPrice: number;
 	subtotalAmount: number;

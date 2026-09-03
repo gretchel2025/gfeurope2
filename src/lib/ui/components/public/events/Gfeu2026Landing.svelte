@@ -3,10 +3,10 @@
 	import CountdownTimer from '$lib/ui/components/public/CountdownTimer.svelte';
 	import type { MerchProduct } from '$lib/domain/merchandise';
 	import { computeTicketPricing, isEarlyBirdDiscountActive } from '$lib/domain/ticketType';
-	import type { TicketTypeConfig } from '$lib/domain/ticketType';
+	import type { PublicTicketTypeConfig } from '$lib/domain/ticketType';
 	import { publicRoutes } from '$lib/navigation/adminRoutes';
 
-	export let ticketTypes: TicketTypeConfig[];
+	export let ticketTypes: PublicTicketTypeConfig[];
 	export let merchProducts: MerchProduct[] = [];
 
 	$: publicNav = publicRoutes($page.params.event_id);
@@ -72,6 +72,13 @@
 	const grandFeastPlusTicket = ticketTypes.find(
 		(ticket) => ticket.ticket_type_id === 'GRAND_FEAST_PLUS'
 	);
+	const standardSoldOut = isSoldOut(standardTicket);
+	const grandFeastPlusSoldOut = isSoldOut(grandFeastPlusTicket);
+	const reservableTickets = [standardTicket, grandFeastPlusTicket].filter(
+		(ticket): ticket is PublicTicketTypeConfig => Boolean(ticket)
+	);
+	const allReservableTicketsSoldOut =
+		reservableTickets.length > 0 && reservableTickets.every(isSoldOut);
 	const standardPricing = standardTicket ? computeTicketPricing(standardTicket, 1, now) : null;
 	const grandFeastPlusPricing = grandFeastPlusTicket
 		? computeTicketPricing(grandFeastPlusTicket, 1, now)
@@ -97,6 +104,10 @@
 
 	function scrollToTickets() {
 		ticketsSection?.scrollIntoView({ behavior: 'smooth' });
+	}
+
+	function isSoldOut(ticket?: PublicTicketTypeConfig) {
+		return Boolean(ticket && ticket.available <= 0);
 	}
 
 	function formatMoney(value: number, currency = 'EUR') {
@@ -153,7 +164,7 @@
 					on:click={scrollToTickets}
 					class="conference-button w-full px-8 py-4 text-sm sm:w-auto"
 				>
-					Buy Ticket
+					{allReservableTicketsSoldOut ? 'Tickets Sold Out' : 'Buy Ticket'}
 				</button>
 				<a href="#details" class="conference-button-secondary w-full px-8 py-4 text-sm sm:w-auto">
 					Event Details
@@ -379,9 +390,16 @@
 		</h2>
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
 			<div
-				class="ticket-card p-6 flex flex-col transition-transform duration-300 ease-in-out hover:-translate-y-1"
+				class={`ticket-card flex flex-col p-6 transition-transform duration-300 ease-in-out ${
+					standardSoldOut ? 'ticket-card-sold-out' : 'hover:-translate-y-1'
+				}`}
 			>
-				<h3 class="text-2xl font-bold mb-2 text-white">{standardTicket?.label ?? 'Standard'}</h3>
+				<div class="mb-2 flex flex-wrap items-start justify-between gap-3">
+					<h3 class="text-2xl font-bold text-white">{standardTicket?.label ?? 'Standard'}</h3>
+					{#if standardSoldOut}
+						<span class="ticket-sold-out-badge">Sold Out</span>
+					{/if}
+				</div>
 
 				{#if earlyBirdActive && standardTicket && standardPricing}
 					<div class="conference-pill mb-2 px-2 py-1">
@@ -418,20 +436,37 @@
 					</li>
 				</ul>
 
-				<a
-					href={`${publicNav.newBooking}?ticket_type=STANDARD`}
-					data-sveltekit-reload
-					class="conference-button px-5 py-3 text-sm"
-				>
-					Select
-				</a>
+				{#if standardSoldOut}
+					<button
+						type="button"
+						class="conference-button ticket-button-disabled px-5 py-3 text-sm"
+						disabled
+					>
+						Sold Out
+					</button>
+				{:else}
+					<a
+						href={`${publicNav.newBooking}?ticket_type=STANDARD`}
+						data-sveltekit-reload
+						class="conference-button px-5 py-3 text-sm"
+					>
+						Select
+					</a>
+				{/if}
 			</div>
 
 			<div
-				class="ticket-card p-6 flex flex-col relative border-[#d99a32]/70 shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-1 md:-mt-4"
+				class={`ticket-card relative flex flex-col border-[#d99a32]/70 p-6 shadow-lg transition-transform duration-300 ease-in-out md:-mt-4 ${
+					grandFeastPlusSoldOut ? 'ticket-card-sold-out' : 'hover:-translate-y-1'
+				}`}
 			>
-				<div class="conference-pill mb-4 w-fit px-3 py-1">PLUS EXPERIENCE</div>
-				<h3 class="text-2xl font-bold mb-2 text-white">
+				<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+					<div class="conference-pill w-fit px-3 py-1">PLUS EXPERIENCE</div>
+					{#if grandFeastPlusSoldOut}
+						<span class="ticket-sold-out-badge">Sold Out</span>
+					{/if}
+				</div>
+				<h3 class="mb-2 text-2xl font-bold text-white">
 					{grandFeastPlusTicket?.label ?? 'GrandFeast Plus'}
 				</h3>
 
@@ -477,13 +512,23 @@
 						experience
 					</li>
 				</ul>
-				<a
-					href={`${publicNav.newBooking}?ticket_type=GRAND_FEAST_PLUS`}
-					data-sveltekit-reload
-					class="conference-button px-5 py-3 text-sm"
-				>
-					Select
-				</a>
+				{#if grandFeastPlusSoldOut}
+					<button
+						type="button"
+						class="conference-button ticket-button-disabled px-5 py-3 text-sm"
+						disabled
+					>
+						Sold Out
+					</button>
+				{:else}
+					<a
+						href={`${publicNav.newBooking}?ticket_type=GRAND_FEAST_PLUS`}
+						data-sveltekit-reload
+						class="conference-button px-5 py-3 text-sm"
+					>
+						Select
+					</a>
+				{/if}
 			</div>
 			<div
 				class="ticket-card p-6 flex flex-col transition-transform duration-300 ease-in-out hover:-translate-y-1"
@@ -543,6 +588,33 @@
 {/if}
 
 <style>
+	.ticket-card-sold-out {
+		border-color: rgba(214, 75, 85, 0.66);
+	}
+
+	.ticket-sold-out-badge {
+		align-items: center;
+		background: rgba(214, 75, 85, 0.18);
+		border: 1px solid rgba(214, 75, 85, 0.72);
+		border-radius: 0.5rem;
+		color: #ffd9dc;
+		display: inline-flex;
+		font-size: 0.78rem;
+		font-weight: 900;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		padding: 0.42rem 0.65rem;
+		text-transform: uppercase;
+	}
+
+	.ticket-button-disabled {
+		background: rgba(255, 243, 223, 0.14);
+		border: 1px solid rgba(255, 243, 223, 0.18);
+		box-shadow: none;
+		color: rgba(255, 243, 223, 0.66);
+		cursor: not-allowed;
+	}
+
 	.merch-carousel-stage {
 		position: relative;
 		margin: 2rem auto 0;
