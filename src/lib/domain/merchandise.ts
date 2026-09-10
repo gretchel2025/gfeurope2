@@ -1,4 +1,11 @@
-export const merchProductCategories = ['T-Shirts', 'Books', 'Cards', 'Bags', 'Sweatshirt'] as const;
+export const merchProductCategories = [
+	'T-Shirts',
+	'Books',
+	'Cards',
+	'Bags',
+	'Sweatshirt',
+	'Others'
+] as const;
 
 export type MerchProductCategory = (typeof merchProductCategories)[number];
 

@@ -3,6 +3,12 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-09-10
+
+- Granted a production Google Auth user event-scoped admin access to `gfeu2026` without
+  creating a matching live-dev user or granting global roles.
+- Added `Others` as an admin-selectable merchandise product category.
+
 ## 2026-09-03
 
 - Set the production `gfeu2026` GrandFeast Plus ticket counter available count to `0`,

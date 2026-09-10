@@ -26,6 +26,15 @@ describe('merchandise form parsing', () => {
 		expect(parseCreateMerchProductForm(formData)).not.toHaveProperty('product_id');
 	});
 
+	it('accepts others as a product category', () => {
+		const formData = productFormData();
+		formData.set('category', 'Others');
+
+		expect(parseCreateMerchProductForm(formData)).toMatchObject({
+			category: 'Others'
+		});
+	});
+
 	it('rejects unsupported product categories', () => {
 		const formData = productFormData();
 		formData.set('category', 'Drinkware');
