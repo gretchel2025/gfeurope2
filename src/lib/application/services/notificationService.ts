@@ -66,15 +66,15 @@ const eventDetailsById: Record<string, EmailEventDetails> = {
 		formalName: jewelsEventDisplayTitle,
 		subjectBrand: 'JEWELS CONFERENCE 2026',
 		hostLocation: 'Malta',
-		date: 'October 31 to November 1, 2026',
+		date: 'October 31, 2026',
 		time: [
-			'Day 1 - 12:00 PM Registration',
-			'Day 1 - 1:00 PM Event Proper',
-			'Day 1 - 5:00 PM End of Day 1',
-			'Day 1 - 6:00 PM Anticipated Mass',
-			'Day 2 - 8:00 AM Breakfast and Morning Socials',
-			'Day 2 - 9:00 AM Event Proper',
-			'Day 2 - 12:00 PM End of Day 2'
+			'9:00 AM Registration Opens',
+			'9:30 AM Breakfast and Morning Socials',
+			'10:00 AM Conference Begins',
+			'1:00 PM Lunch Break',
+			'2:00 PM Conference Resumes',
+			'6:00 PM Holy Mass',
+			'7:00 PM End of Conference'
 		],
 		venue: "St Julian's, Lapsi Street, Malta",
 		address: ["St Julian's, Lapsi Street, Malta"],

@@ -423,7 +423,7 @@
 	}
 
 	function getBookingDateDisplay(event: ServerData['event']) {
-		if (event.event_id === 'jewels2026') return 'October 31 - November 1, 2026';
+		if (event.event_id === 'jewels2026') return 'October 31, 2026';
 
 		return new Intl.DateTimeFormat('en-US', {
 			month: 'long',

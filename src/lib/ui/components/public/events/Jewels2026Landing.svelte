@@ -8,8 +8,8 @@
 
 	export let ticketTypes: TicketTypeConfig[] = [];
 
-	const eventDate = '31 Oct - 1 Nov, 2026';
-	const eventStart = new Date('2026-10-31T13:00:00+01:00');
+	const eventDate = 'October 31, 2026';
+	const eventStart = new Date('2026-10-31T09:00:00+01:00');
 	const eventLocation = "St Julian's, Lapsi Street, Malta";
 	const googleMapsEmbedUrl =
 		'https://www.google.com/maps?q=35.9178579%2C14.4896743&z=17&output=embed';
@@ -42,22 +42,16 @@
 	];
 	const scheduleDays = [
 		{
-			day: 'Day 1 - Saturday',
-			date: 'Oct 31, 2026',
+			day: 'Saturday',
+			date: 'October 31, 2026',
 			items: [
-				{ time: '12:00 PM', title: 'Registration Opens' },
-				{ time: '1:00 PM', title: 'Conference Begins' },
-				{ time: '5:00 PM', title: 'Day 1 Wrap-Up' },
-				{ time: '6:00 PM', title: 'Anticipated Mass' }
-			]
-		},
-		{
-			day: 'Day 2 - Sunday',
-			date: 'Nov 1, 2026',
-			items: [
-				{ time: '8:00 AM', title: 'Breakfast and Morning Socials' },
-				{ time: '9:00 AM', title: 'Conference Resumes' },
-				{ time: '12:00 PM', title: 'Conference Ends' }
+				{ time: '9:00 AM', title: 'Registration Opens' },
+				{ time: '9:30 AM', title: 'Breakfast and Morning Socials' },
+				{ time: '10:00 AM', title: 'Conference Begins' },
+				{ time: '1:00 PM', title: 'Lunch Break' },
+				{ time: '2:00 PM', title: 'Conference Resumes' },
+				{ time: '6:00 PM', title: 'Holy Mass' },
+				{ time: '7:00 PM', title: 'End of Conference' }
 			]
 		}
 	];
@@ -253,7 +247,7 @@
 		<section id="details" class="fact-grid" aria-label="Event quick facts">
 			<article class="schedule-card">
 				<p class="jewels-eyebrow">Conference Schedule</p>
-				<h3>October 31 - November 1, 2026</h3>
+				<h3>Saturday, October 31, 2026</h3>
 				<div class="schedule-days">
 					{#each scheduleDays as scheduleDay}
 						<section class="schedule-day" aria-label={`${scheduleDay.day} schedule`}>

@@ -10,6 +10,11 @@ import { NotificationService } from '$lib/application/services/notificationServi
 import { AuditAction, AuditEntityType } from '$lib/domain/auditEvent';
 import type { Booking } from '$lib/domain/booking';
 import {
+	MerchReservationEmailStatus,
+	MerchReservationStatus,
+	type MerchReservation
+} from '$lib/domain/merchandise';
+import {
 	BookingConfirmationEmailStatus,
 	BookingPaymentStatus,
 	TicketStatus,
@@ -114,7 +119,7 @@ describe('NotificationService audit events', () => {
 		expect(email.message).toContain('JEWELS CONFERENCE 2026');
 		expect(email.message).toContain('Malta');
 		expect(email.message).toContain('Lapsi Street, Malta');
-		expect(email.message).toContain('Day 1 - 6:00 PM Anticipated Mass');
+		expectJewelsEventSchedule(email.message);
 		expect(email.message).toContain('JEWELS Europe Team');
 		expect(email.message).toContain('Recipient');
 		expect(email.message).toContain('THE FEAST BRUSSELS (LIGHT OF JESUS FAMILY)');
@@ -131,6 +136,117 @@ describe('NotificationService audit events', () => {
 		expect(email.message).not.toContain('Bank of Ireland');
 		expect(email.message).not.toContain('Europe and UK');
 		expect(email.message).not.toContain('help@grandfeast.eu');
+	});
+
+	it('uses Jewels event schedule in ticket emails', async () => {
+		const booking: Booking = {
+			event_id: 'jewels2026',
+			reference_no: 'JWL003',
+			name: 'Miriam Santiago',
+			email: 'miriam@example.com',
+			city: 'Valletta, Malta',
+			ticket_type: TicketType.STANDARD,
+			book_date: '2026-06-19T00:00:00.000Z',
+			payment_status: BookingPaymentStatus.PAID,
+			amount_total: 25,
+			guests: ['Miriam Santiago'],
+			ticket_ids: ['JWL-TICKET-1'],
+			tickets_sent_to_client: false,
+			booking_confirmation_email_status: BookingConfirmationEmailStatus.UNKNOWN
+		};
+		const ticket: Ticket = {
+			ticket_id: 'JWL-TICKET-1',
+			name: 'Miriam Santiago',
+			ticket_type: TicketType.STANDARD,
+			description: '',
+			status: TicketStatus.CREATED,
+			is_paid: true,
+			booking_reference_no: 'JWL003',
+			checkin_qr_code_image_url: 'https://example.com/jewels-qr.png'
+		};
+		const bookingRepository = {
+			findByReferenceNo: vi.fn(async () => booking),
+			markTicketsSentToClient: vi.fn()
+		} as unknown as BookingRepository;
+		const ticketRepository = {
+			findByTicketId: vi.fn(async () => ticket)
+		} as unknown as TicketRepository;
+		const send = vi.fn(async (message: EmailMessage) => {
+			void message;
+			return { status: 'SENT' as const };
+		});
+		const emailSender = { send } satisfies EmailSender;
+		const auditEventService = {
+			record: vi.fn()
+		} as unknown as AuditEventService;
+		const service = new NotificationService(
+			bookingRepository,
+			ticketRepository,
+			emailSender,
+			auditEventService
+		);
+
+		await service.sendTicketsEmail('JWL003');
+
+		const email = send.mock.calls[0][0];
+		expect(email.from).toBe('Jewels Europe <jewelseuropesupport@grandfeast.eu>');
+		expect(email.replyTo).toBe('Jewels Europe <jewelseuropesupport@grandfeast.eu>');
+		expect(email.subject).toBe('Your JEWELS CONFERENCE 2026 eTickets JWL003');
+		expectJewelsEventSchedule(email.message);
+		expect(email.message).toContain('JWL-TICKET-1');
+		expect(email.message).toContain('JEWELS Europe Team');
+	});
+
+	it('uses Jewels event schedule in merchandise reservation emails', async () => {
+		const reservation: MerchReservation = {
+			event_id: 'jewels2026',
+			reservation_id: 'MR-JWL001',
+			customer_name: 'Miriam Santiago',
+			email: 'miriam@example.com',
+			mobile: '+356 1234 5678',
+			reserved_at: '2026-06-19T00:00:00.000Z',
+			status: MerchReservationStatus.Reserved,
+			amount_total: 20,
+			currency: 'EUR',
+			confirmation_email_status: MerchReservationEmailStatus.Unknown,
+			items: [
+				{
+					event_id: 'jewels2026',
+					reservation_id: 'MR-JWL001',
+					product_id: 'MP-JWL001',
+					product_name: 'Jewels Tote Bag',
+					quantity: 1,
+					unit_price: 20,
+					currency: 'EUR'
+				}
+			]
+		};
+		const bookingRepository = {} as unknown as BookingRepository;
+		const ticketRepository = {} as unknown as TicketRepository;
+		const send = vi.fn(async (message: EmailMessage) => {
+			void message;
+			return { status: 'SENT' as const };
+		});
+		const emailSender = { send } satisfies EmailSender;
+		const auditEventService = {
+			record: vi.fn()
+		} as unknown as AuditEventService;
+		const service = new NotificationService(
+			bookingRepository,
+			ticketRepository,
+			emailSender,
+			auditEventService
+		);
+
+		await service.sendMerchReservationConfirmation(reservation);
+
+		const email = send.mock.calls[0][0];
+		expect(email.from).toBe('Jewels Europe <jewelseuropesupport@grandfeast.eu>');
+		expect(email.replyTo).toBe('Jewels Europe <jewelseuropesupport@grandfeast.eu>');
+		expect(email.subject).toBe('Your JEWELS CONFERENCE 2026 merchandise reservation MR-JWL001');
+		expectJewelsEventSchedule(email.message);
+		expect(email.message).toContain('Jewels Tote Bag');
+		expect(email.message).toContain('JEWELS Europe Team');
 	});
 
 	it('records booking.tickets_email_sent after the ticket email sends', async () => {
@@ -483,4 +599,18 @@ function expectEventSchedule(message: string) {
 	expect(message).toContain('4:30 PM End of Program');
 	expect(message).not.toContain('12:30 PM Holy Mass');
 	expect(message).not.toContain('1:30 PM Event Proper');
+}
+
+function expectJewelsEventSchedule(message: string) {
+	expect(message).toContain('October 31, 2026');
+	expect(message).toContain('9:00 AM Registration Opens');
+	expect(message).toContain('9:30 AM Breakfast and Morning Socials');
+	expect(message).toContain('10:00 AM Conference Begins');
+	expect(message).toContain('1:00 PM Lunch Break');
+	expect(message).toContain('2:00 PM Conference Resumes');
+	expect(message).toContain('6:00 PM Holy Mass');
+	expect(message).toContain('7:00 PM End of Conference');
+	expect(message).not.toContain('November 1');
+	expect(message).not.toContain('Day 2');
+	expect(message).not.toContain('Anticipated Mass');
 }

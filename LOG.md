@@ -3,8 +3,19 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-09-21
+
+- Updated the Jewels 2026 date references and schedule to a single-day October 31, 2026
+  event, with registration opening at 9:00 AM.
+
 ## 2026-09-10
 
+- Removed one no-role production Auth user after confirming the account had no app or
+  event access grants.
+- Granted one production Auth user event-scoped admin access to `jewels2026` without
+  granting global roles.
+- Granted five production Auth users event-scoped admin access to `gfeu2026` without
+  creating matching live-dev users or granting global roles.
 - Granted a production Google Auth user event-scoped admin access to `gfeu2026` without
   creating a matching live-dev user or granting global roles.
 - Added `Others` as an admin-selectable merchandise product category.
