@@ -9,7 +9,7 @@
 	export let ticketTypes: TicketTypeConfig[] = [];
 
 	const eventDate = 'October 31, 2026';
-	const eventStart = new Date('2026-10-31T09:00:00+01:00');
+	const eventStart = new Date('2026-10-31T10:00:00+01:00');
 	const eventLocation = "St Julian's, Lapsi Street, Malta";
 	const googleMapsEmbedUrl =
 		'https://www.google.com/maps?q=35.9178579%2C14.4896743&z=17&output=embed';
@@ -45,13 +45,20 @@
 			day: 'Saturday',
 			date: 'October 31, 2026',
 			items: [
-				{ time: '9:00 AM', title: 'Registration Opens' },
-				{ time: '9:30 AM', title: 'Breakfast and Morning Socials' },
-				{ time: '10:00 AM', title: 'Conference Begins' },
-				{ time: '1:00 PM', title: 'Lunch Break' },
-				{ time: '2:00 PM', title: 'Conference Resumes' },
-				{ time: '6:00 PM', title: 'Holy Mass' },
-				{ time: '7:00 PM', title: 'End of Conference' }
+				{ time: '10:00 AM', title: 'Registration Opens' },
+				{ time: '10:30 AM', title: 'Morning Socials' },
+				{ time: '11:00 AM', title: 'Conference Begins' },
+				{ time: '11:30 AM', title: 'Talk 1: Rooted in Faith' },
+				{
+					time: '12:30 PM',
+					title: "Talk 2: Mary's Yes: Lesson in Surrender, Trust, and Obedience"
+				},
+				{ time: '1:15 PM', title: 'Lunch' },
+				{ time: '2:30 PM', title: 'Stories of Becoming' },
+				{ time: '3:45 PM', title: 'Girl Talk and Afternoon Tea' },
+				{ time: '4:20 PM', title: 'Talk 3: Bloom with Purpose' },
+				{ time: '5:40 PM', title: 'Conference Ends' },
+				{ time: '6:00 PM', title: 'Anticipated Mass' }
 			]
 		}
 	];

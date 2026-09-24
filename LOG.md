@@ -3,6 +3,14 @@
 Concise record of meaningful project changes. Do not log routine verification,
 test sends, site availability checks, or command-only housekeeping.
 
+## 2026-09-24
+
+- Added buyer email to the generated ticket-list XLSX export for event admin reports.
+- Revised the Jewels 2026 public and email program schedule to open registration at
+  10:00 AM and list the Anticipated Mass at 6:00 PM.
+- Added the detailed Jewels 2026 talk, lunch, stories, and afternoon tea segments to the
+  public and email program schedule.
+
 ## 2026-09-21
 
 - Updated the Jewels 2026 date references and schedule to a single-day October 31, 2026

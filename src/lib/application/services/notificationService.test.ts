@@ -603,14 +603,26 @@ function expectEventSchedule(message: string) {
 
 function expectJewelsEventSchedule(message: string) {
 	expect(message).toContain('October 31, 2026');
-	expect(message).toContain('9:00 AM Registration Opens');
-	expect(message).toContain('9:30 AM Breakfast and Morning Socials');
-	expect(message).toContain('10:00 AM Conference Begins');
-	expect(message).toContain('1:00 PM Lunch Break');
-	expect(message).toContain('2:00 PM Conference Resumes');
-	expect(message).toContain('6:00 PM Holy Mass');
-	expect(message).toContain('7:00 PM End of Conference');
+	expect(message).toContain('10:00 AM Registration Opens');
+	expect(message).toContain('10:30 AM Morning Socials');
+	expect(message).toContain('11:00 AM Conference Begins');
+	expect(message).toContain('11:30 AM Talk 1: Rooted in Faith');
+	expect(message).toContain(
+		'12:30 PM Talk 2: Mary&#039;s Yes: Lesson in Surrender, Trust, and Obedience'
+	);
+	expect(message).toContain('1:15 PM Lunch');
+	expect(message).toContain('2:30 PM Stories of Becoming');
+	expect(message).toContain('3:45 PM Girl Talk and Afternoon Tea');
+	expect(message).toContain('4:20 PM Talk 3: Bloom with Purpose');
+	expect(message).toContain('5:40 PM Conference Ends');
+	expect(message).toContain('6:00 PM Anticipated Mass');
+	expect(message).not.toContain('6:00 PM - 7:00 PM Anticipated Mass');
 	expect(message).not.toContain('November 1');
 	expect(message).not.toContain('Day 2');
-	expect(message).not.toContain('Anticipated Mass');
+	expect(message).not.toContain('9:00 AM Registration Opens');
+	expect(message).not.toContain('9:30 AM Breakfast and Morning Socials');
+	expect(message).not.toContain('1:00 PM Lunch Break');
+	expect(message).not.toContain('2:00 PM Conference Resumes');
+	expect(message).not.toContain('6:00 PM Holy Mass');
+	expect(message).not.toContain('7:00 PM End of Conference');
 }

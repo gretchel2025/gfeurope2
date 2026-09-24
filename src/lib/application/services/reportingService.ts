@@ -37,6 +37,7 @@ export type GeneratedTicketReportRow = {
 	rowNumber: number;
 	ticketId: string;
 	guestName: string;
+	buyerEmail: string;
 	ticketType: string;
 	status: string;
 	paid: 'Yes' | 'No';
@@ -184,6 +185,7 @@ export function getGeneratedTicketReportRows(
 				rowNumber: 0,
 				ticketId: ticket.ticket_id,
 				guestName: ticket.name,
+				buyerEmail: booking?.email ?? '',
 				ticketType: formatTicketTypeLabel(ticket.ticket_type),
 				status: ticket.status,
 				paid: ticket.is_paid ? 'Yes' : 'No',

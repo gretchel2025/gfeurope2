@@ -85,6 +85,7 @@ export async function createGeneratedTicketsWorkbookBuffer(
 		{ header: '#', key: 'rowNumber', width: 8 },
 		{ header: 'Ticket ID', key: 'ticketId', width: 18 },
 		{ header: 'Guest Name', key: 'guestName', width: 28 },
+		{ header: 'Email', key: 'buyerEmail', width: 32 },
 		{ header: 'Ticket Type', key: 'ticketType', width: 18 },
 		{ header: 'Status', key: 'status', width: 16 },
 		{ header: 'Paid', key: 'paid', width: 10 },

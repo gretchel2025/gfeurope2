@@ -130,8 +130,12 @@ describe('reportingService report rows', () => {
 
 	it('builds generated ticket rows joined to booking city and sorted for registration', () => {
 		const bookings = [
-			makeBooking({ reference_no: 'BREF001', city: 'belrin' }),
-			makeBooking({ reference_no: 'BREF002', city: 'feast brussels' })
+			makeBooking({ reference_no: 'BREF001', city: 'belrin', email: 'ada@example.com' }),
+			makeBooking({
+				reference_no: 'BREF002',
+				city: 'feast brussels',
+				email: 'brussels@example.com'
+			})
 		];
 		const rows = getGeneratedTicketReportRows(
 			[
@@ -161,6 +165,7 @@ describe('reportingService report rows', () => {
 				rowNumber: 1,
 				ticketId: 'T001',
 				guestName: 'Ada Lovelace',
+				buyerEmail: 'ada@example.com',
 				ticketType: 'Standard',
 				status: TicketStatus.CREATED,
 				paid: 'Yes',
@@ -171,6 +176,7 @@ describe('reportingService report rows', () => {
 				rowNumber: 2,
 				ticketId: 'T002',
 				guestName: 'Ada Lovelace',
+				buyerEmail: 'brussels@example.com',
 				ticketType: 'Standard',
 				status: TicketStatus.CREATED,
 				paid: 'Yes',
@@ -181,6 +187,7 @@ describe('reportingService report rows', () => {
 				rowNumber: 3,
 				ticketId: 'T003',
 				guestName: 'Zoe Keating',
+				buyerEmail: 'brussels@example.com',
 				ticketType: 'GrandFeast Plus',
 				status: TicketStatus.CREATED,
 				paid: 'No',

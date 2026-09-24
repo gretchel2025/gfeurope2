@@ -61,6 +61,7 @@ describe('reportWorkbook', () => {
 				rowNumber: 1,
 				ticketId: 'T001',
 				guestName: 'Ada Lovelace',
+				buyerEmail: 'ada@example.com',
 				ticketType: 'Standard',
 				status: 'CREATED',
 				paid: 'Yes',
@@ -73,7 +74,9 @@ describe('reportWorkbook', () => {
 
 		expect(worksheet?.getCell('C1').value).toBe('Guest Name');
 		expect(worksheet?.getCell('C2').value).toBe('Ada Lovelace');
-		expect(worksheet?.getCell('H2').value).toBe('Berlin');
+		expect(worksheet?.getCell('D1').value).toBe('Email');
+		expect(worksheet?.getCell('D2').value).toBe('ada@example.com');
+		expect(worksheet?.getCell('I2').value).toBe('Berlin');
 	});
 
 	it('builds a valid merchandise reservations workbook', async () => {
