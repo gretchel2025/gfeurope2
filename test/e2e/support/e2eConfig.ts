@@ -9,6 +9,8 @@ export type AdminCredentials = {
 };
 
 const fileEnv = loadDotEnvFile(path.resolve(process.cwd(), '.env'));
+const environment = readEnvironment();
+const eventId = readEnv('E2E_EVENT_ID') || readEnv('APP_EVENT_ID') || 'gfeu2026';
 const defaultBaseUrls: Record<E2eEnvironment, string> = {
 	local: 'http://localhost:5173',
 	'live-dev': 'https://dev.grandfeast.eu',
@@ -16,11 +18,12 @@ const defaultBaseUrls: Record<E2eEnvironment, string> = {
 };
 
 export const e2eConfig = {
-	environment: readEnvironment(),
-	baseURL: readEnv('E2E_BASE_URL') || defaultBaseUrls[readEnvironment()],
-	eventId: readEnv('E2E_EVENT_ID') || 'gfeu2026',
+	environment,
+	baseURL: readEnv('E2E_BASE_URL') || defaultBaseUrls[environment],
+	eventId,
+	homeEventId: readEnv('E2E_HOME_EVENT_ID') || readEnv('APP_HOME_EVENT_ID') || 'jewels2026',
 	allowProdMutation: readEnv('E2E_ALLOW_PROD_MUTATION') === 'true',
-	requiresAuthForPublicPages: readEnvironment() === 'live-dev'
+	requiresAuthForPublicPages: environment === 'live-dev'
 };
 
 export function shouldRunMutatingBooking(): boolean {
@@ -56,6 +59,10 @@ export function makeBookingIdentity(): {
 
 export function eventPath(pathname = ''): string {
 	return `/events/${encodeURIComponent(e2eConfig.eventId)}${pathname}`;
+}
+
+export function homeEventPath(pathname = ''): string {
+	return `/events/${encodeURIComponent(e2eConfig.homeEventId)}${pathname}`;
 }
 
 export function adminEventPath(pathname = ''): string {

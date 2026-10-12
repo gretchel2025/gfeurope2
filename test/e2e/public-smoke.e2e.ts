@@ -1,26 +1,27 @@
 import { expect, test } from '@playwright/test';
-import { e2eConfig, eventPath, expectPath } from './support/e2eConfig';
+import type { Page } from '@playwright/test';
+import { e2eConfig, eventPath, expectPath, homeEventPath } from './support/e2eConfig';
 import { signInWithPassword } from './support/auth';
 
 test.describe('public deployment smoke', () => {
 	test.beforeEach(async ({ page }) => {
 		if (e2eConfig.requiresAuthForPublicPages) {
-			await signInWithPassword(page, eventPath());
+			await signInWithPassword(page, homeEventPath());
 		}
 	});
 
 	test('root redirects to the configured event', async ({ page }) => {
 		await page.goto('/');
 
-		await expect(page).toHaveURL(expectPath(eventPath()));
-		await expect(page.getByText(/Grand Feast Europe 2026/i).first()).toBeVisible();
+		await expect(page).toHaveURL(expectPath(homeEventPath()));
+		await expectHomeEventContent(page);
 	});
 
 	test('events index lists registered public events', async ({ page }) => {
 		await page.goto('/events');
 
 		await expect(page.getByRole('heading', { name: 'Grand Feast Europe Events' })).toBeVisible();
-		await expect(page.locator(`a[href="${eventPath()}"]`)).toBeVisible();
+		await expect(page.locator(`a[href="${homeEventPath()}"]`)).toBeVisible();
 		await expect(page.locator('a[href="/events/gfeu2025"]')).toHaveCount(0);
 
 		const archivedEvent = page.locator('.events-index-entry-disabled').filter({
@@ -32,11 +33,10 @@ test.describe('public deployment smoke', () => {
 	});
 
 	test('active public event page loads', async ({ page }) => {
-		await page.goto(eventPath());
+		await page.goto(homeEventPath());
 
-		await expect(page).toHaveURL(expectPath(eventPath()));
-		await expect(page.getByText(/Dublin/i).first()).toBeVisible();
-		await expect(page.getByText(/Grand Feast Europe 2026/i).first()).toBeVisible();
+		await expect(page).toHaveURL(expectPath(homeEventPath()));
+		await expectHomeEventContent(page);
 	});
 
 	test('booking page loads ticket options', async ({ page }) => {
@@ -81,6 +81,17 @@ test.describe('public deployment smoke', () => {
 		).toBeVisible();
 	});
 });
+
+async function expectHomeEventContent(page: Page) {
+	if (e2eConfig.homeEventId === 'jewels2026') {
+		await expect(page.getByText(/JEWELS CONFERENCE 2026/i).first()).toBeVisible();
+		await expect(page.getByText(/Malta/i).first()).toBeVisible();
+		return;
+	}
+
+	await expect(page.getByText(/Grand Feast Europe 2026/i).first()).toBeVisible();
+	await expect(page.getByText(/Dublin/i).first()).toBeVisible();
+}
 
 test('admin routes redirect unauthenticated users to sign in', async ({ page }) => {
 	await page.goto(`/admin/events/${encodeURIComponent(e2eConfig.eventId)}`);
