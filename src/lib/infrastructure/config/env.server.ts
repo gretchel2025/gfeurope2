@@ -23,6 +23,7 @@ export type AppConfig = {
 	supabasePublishableKey: string;
 	supabaseServiceRoleKey: string;
 	appEventId: string;
+	appHomeEventId: string;
 	enableEmailPasswordAuth: boolean;
 	bootstrap: {
 		standardTicketsInitialAvailable: number;
@@ -49,6 +50,7 @@ export const appConfig: AppConfig = {
 	supabasePublishableKey: readEnv('PUBLIC_SUPABASE_PUBLISHABLE_KEY') || '',
 	supabaseServiceRoleKey: readEnv('SUPABASE_SERVICE_ROLE_KEY') || '',
 	appEventId: readEnv('APP_EVENT_ID') || 'gfeu2026',
+	appHomeEventId: readEnv('APP_HOME_EVENT_ID') || readEnv('APP_EVENT_ID') || 'gfeu2026',
 	enableEmailPasswordAuth: parseBoolean(readEnv('ENABLE_EMAIL_PASSWORD_AUTH')),
 	bootstrap: {
 		standardTicketsInitialAvailable: parsePositiveInt(

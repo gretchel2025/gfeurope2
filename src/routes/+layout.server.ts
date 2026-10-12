@@ -6,7 +6,7 @@ export const load: LayoutServerLoad = async (event) => {
 	const session = await getAuthSession(event);
 
 	return {
-		defaultEventId: appConfig.appEventId,
+		defaultEventId: appConfig.appHomeEventId,
 		session: toPublicSession(session),
 		supabaseAuth: {
 			url: appConfig.supabaseUrl,
